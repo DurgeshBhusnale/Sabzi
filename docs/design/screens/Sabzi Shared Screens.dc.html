@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+body{margin:0;background:#E3E8E2;-webkit-font-smoothing:antialiased}
+a{color:#178046}a:hover{color:#12653A}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="--leaf:#24A05E;--primary:#178046;--primaryP:#12653A;--tint:#EAF6EF;--tint2:#CFEBDB;--onP:#FFFFFF;--amber:#F2A93B;--amberT:#FDF2DF;--amberTx:#6B4300;--err:#C93B3B;--errT:#FBEAEA;--warn:#8A5A12;--warnT:#FBF0DC;--info:#2F6FBF;--infoT:#E7F0FA;--bg:#F8FAF7;--surf:#FFFFFF;--surf2:#F1F4F0;--line:#DFE6DE;--tx:#17201A;--tx2:#56625A;--mut:#616B63;--dis:#C5CCC6;--disTx:#FFFFFF;--shadow:0 8px 24px rgba(23,32,26,.16);font-family:Inter,system-ui,sans-serif;color:var(--tx);padding:56px 64px 120px;display:flex;flex-direction:column;gap:72px;min-width:max-content">
+
+<header style="display:flex;flex-direction:column;gap:10px;max-width:760px">
+  <h1 style="margin:0;font:700 48px/1.05 'Plus Jakarta Sans';letter-spacing:-0.03em;color:#17201A">Shared screens · S-01 to S-16</h1>
+  <p style="margin:0;font-size:17px;line-height:26px;color:#56625A">Before the role split, or the same for both roles. Android 360 × 800. Use the theme tweak to view in dark mode.</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-01 Splash · S-02 Welcome</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-01 · Default</span>
+      <div data-screen-label="S-01 Splash" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--leaf);color:#fff;display:flex;flex-direction:column">
+        <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:40</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+          <div style="width:72px;height:72px;background:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><div style="width:24px;height:24px;border-radius:50%;background:var(--leaf)"></div></div>
+          <span style="font:800 40px 'Plus Jakarta Sans';letter-spacing:-0.02em">Sabzi</span>
+        </div>
+        <span style="text-align:center;font:500 12px Inter;padding-bottom:16px;color:#fff">v1.0.0</span>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:#fff"></span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-01 · Slow start (after 3 s)</span>
+      <div style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--leaf);color:#fff;display:flex;flex-direction:column">
+        <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:40</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+          <div style="width:72px;height:72px;background:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><div style="width:24px;height:24px;border-radius:50%;background:var(--leaf)"></div></div>
+          <span style="font:800 40px 'Plus Jakarta Sans';letter-spacing:-0.02em">Sabzi</span>
+          <span style="margin-top:32px;display:flex;align-items:center;gap:10px;font:600 16px Inter"><span style="width:16px;height:16px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></span>Getting fresh things ready…</span>
+        </div>
+        <span style="text-align:center;font:500 12px Inter;padding-bottom:16px">v1.0.0</span>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:#fff"></span></div>
+      </div>
+    </div>
+
+    <sc-for list="{{ slides }}" as="sl" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-02 · Slide {{ sl.n }}</span>
+        <div data-screen-label="S-02 Welcome" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:40</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;justify-content:flex-end;align-items:center;padding:0 4px"><span style="height:48px;padding:0 16px;display:flex;align-items:center;font:600 16px Inter;color:var(--primary)">Skip</span></div>
+          <div style="flex:1;padding:8px 24px 24px;display:flex;flex-direction:column;gap:24px">
+            <sc-if value="{{ sl.is1 }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 200 150" width="100%" height="300" style="flex:none;display:block;border-radius:20px;background:var(--tint)" role="img"><circle cx="100" cy="76" r="62" style="fill:var(--tint2)"></circle><rect x="20" y="44" width="12" height="88" rx="3" fill="#D9C7A8"></rect><rect x="168" y="44" width="12" height="88" rx="3" fill="#D9C7A8"></rect><rect x="16" y="38" width="168" height="10" rx="4" fill="#178046"></rect><g transform="translate(52 66) scale(1.1)"><rect x="0" y="14" width="54" height="30" rx="4" fill="#178046"></rect><rect x="4" y="18" width="46" height="5" rx="2" fill="#24A05E"></rect><rect x="54" y="6" width="36" height="38" rx="8" fill="#F2A93B"></rect><rect x="62" y="12" width="20" height="13" rx="3" fill="#C7D6E8"></rect><rect x="54" y="38" width="38" height="6" rx="2" fill="#17201A"></rect><circle cx="22" cy="48" r="9" fill="#17201A"></circle><circle cx="22" cy="48" r="3.5" fill="#DFE6DE"></circle><circle cx="42" cy="48" r="9" fill="#17201A"></circle><circle cx="42" cy="48" r="3.5" fill="#DFE6DE"></circle><circle cx="80" cy="48" r="9" fill="#17201A"></circle><circle cx="80" cy="48" r="3.5" fill="#DFE6DE"></circle><circle cx="90" cy="32" r="2.5" fill="#FFFFFF"></circle></g><rect x="130" y="40" width="36" height="60" rx="8" fill="#17201A"></rect><rect x="133" y="45" width="30" height="50" rx="4" fill="#FFFFFF"></rect><g transform="translate(139 52) scale(0.5)"><path d="M0 22 C0 8 8 0 17 0 C26 0 34 8 34 22 L34 32 L42 40 L-8 40 L0 32Z" fill="#F2A93B"></path><circle cx="17" cy="46" r="5" fill="#17201A"></circle></g><rect x="124" y="50" width="3" height="8" rx="2" fill="#24A05E"></rect><rect x="171" y="50" width="3" height="8" rx="2" fill="#24A05E"></rect><ellipse cx="100" cy="132" rx="76" ry="6" fill="#DFE6DE"></ellipse></svg></sc-if><sc-if value="{{ sl.is2 }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 200 150" width="100%" height="300" style="flex:none;display:block;border-radius:20px;background:var(--tint)" role="img"><circle cx="100" cy="76" r="62" style="fill:var(--tint2)"></circle><circle cx="60" cy="64" r="7" fill="#C93B3B"></circle><circle cx="73" cy="66" r="6" fill="#E0523E"></circle><path d="M82 70 L94 54 L90 72Z" fill="#F28C38"></path><path d="M94 54 l-3 -8 l6 4 l4 -6 l-2 9Z" fill="#24A05E"></path><circle cx="100" cy="66" r="7" fill="#C93B3B"></circle><circle cx="113" cy="68" r="6" fill="#E0523E"></circle><path d="M122 72 L134 56 L130 74Z" fill="#F28C38"></path><path d="M134 56 l-3 -8 l6 4 l4 -6 l-2 9Z" fill="#24A05E"></path><rect x="46" y="76" width="108" height="50" rx="5" fill="#D9C7A8"></rect><rect x="46" y="76" width="108" height="9" rx="3" fill="#C9B38A"></rect><rect x="51" y="96" width="98" height="4" rx="2" fill="#BFA77F"></rect><rect x="51" y="110" width="98" height="4" rx="2" fill="#BFA77F"></rect><rect x="30" y="28" width="34" height="18" rx="5" fill="#FFFFFF"></rect><rect x="36" y="35" width="22" height="4" rx="2" fill="#C93B3B"></rect><rect x="78" y="18" width="34" height="18" rx="5" fill="#FFFFFF"></rect><rect x="84" y="25" width="22" height="4" rx="2" fill="#178046"></rect><rect x="128" y="30" width="34" height="18" rx="5" fill="#FFFFFF"></rect><rect x="134" y="37" width="22" height="4" rx="2" fill="#F2A93B"></rect><ellipse cx="100" cy="132" rx="76" ry="6" fill="#DFE6DE"></ellipse></svg></sc-if><sc-if value="{{ sl.is3 }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 200 150" width="100%" height="300" style="flex:none;display:block;border-radius:20px;background:var(--tint)" role="img"><circle cx="100" cy="76" r="62" style="fill:var(--tint2)"></circle><rect x="30" y="58" width="50" height="64" rx="8" fill="#FFFFFF"></rect><circle cx="55" cy="76" r="10" fill="#24A05E"></circle><rect x="43" y="90" width="24" height="22" rx="8" fill="#24A05E"></rect><rect x="36" y="106" width="38" height="8" rx="3" fill="#CFEBDB"></rect><rect x="120" y="58" width="50" height="64" rx="8" fill="#FFFFFF"></rect><circle cx="145" cy="76" r="10" fill="#F2A93B"></circle><rect x="133" y="90" width="24" height="22" rx="8" fill="#F2A93B"></rect><rect x="126" y="106" width="38" height="8" rx="3" fill="#CFEBDB"></rect><g transform="translate(55 40) scale(1.5)"><path d="M0 -10 L3 -3 L10 -3 L4.5 2 L6.5 10 L0 5.5 L-6.5 10 L-4.5 2 L-10 -3 L-3 -3Z" fill="#F2A93B"></path></g><g transform="translate(80 34) scale(1.2)"><path d="M0 -10 L3 -3 L10 -3 L4.5 2 L6.5 10 L0 5.5 L-6.5 10 L-4.5 2 L-10 -3 L-3 -3Z" fill="#F2A93B"></path></g><g transform="translate(145 40) scale(1.5)"><path d="M0 -10 L3 -3 L10 -3 L4.5 2 L6.5 10 L0 5.5 L-6.5 10 L-4.5 2 L-10 -3 L-3 -3Z" fill="#F2A93B"></path></g><circle cx="100" cy="100" r="16" fill="#178046"></circle><path d="M92 100 L98 106 L110 92 L113 95 L98 112 L89 103Z" fill="#FFFFFF"></path><ellipse cx="100" cy="132" rx="76" ry="6" fill="#DFE6DE"></ellipse></svg></sc-if>
+            <div style="display:flex;gap:6px"><sc-for list="{{ sl.dots }}" as="d"><span style="height:8px;border-radius:4px;width:{{ d.w }};background:{{ d.c }}"></span></sc-for></div>
+            <h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans';text-wrap:balance">{{ sl.title }}</h2>
+            <p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">{{ sl.body }}</p>
+          </div>
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
+            <div style="height:52px;border-radius:12px;background:var(--primary);color:var(--onP);font:600 16px Inter;display:flex;align-items:center;justify-content:center">{{ sl.cta }}</div>
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;font:600 16px Inter;color:var(--primary)">I already have an account · Log in</div>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-03 Enter phone number</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ phoneStates }}" as="ps" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-03 · {{ ps.label }}</span>
+        <div data-screen-label="S-03 Phone" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:40</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span></div>
+          <div style="flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans'">Your phone number</h2><p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">We'll send a 6-digit code by SMS.</p></div>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px Inter">Mobile number</span>
+              <div style="height:56px;border-radius:8px;display:flex;align-items:center;background:var(--surf);border:{{ ps.border }}"><span style="padding:0 14px;font-size:17px;color:var(--tx2);border-right:1px solid var(--line);height:100%;display:flex;align-items:center">+91</span><span style="padding:0 14px;font-size:18px;font-variant-numeric:tabular-nums;letter-spacing:.02em;color:{{ ps.valC }}">{{ ps.value }}</span></div>
+              <sc-if value="{{ ps.err }}"><span style="font-size:14px;line-height:20px;color:var(--err);display:flex;gap:6px;align-items:flex-start"><i class="ph ph-warning-circle" style="margin-top:2px"></i>{{ ps.err }}</span></sc-if>
+            </label>
+            <span style="font:600 15px Inter;color:var(--primary);min-height:48px;display:flex;align-items:center">Use email instead</span>
+            <span style="margin-top:auto;font-size:13px;line-height:19px;color:var(--tx2)">By continuing you agree to our <span style="color:var(--primary);text-decoration:underline">Terms</span> and <span style="color:var(--primary);text-decoration:underline">Privacy policy</span>.</span>
+            <div style="height:52px;border-radius:12px;font:600 16px Inter;display:flex;align-items:center;justify-content:center;gap:10px;background:{{ ps.btnBg }};color:{{ ps.btnTx }}"><sc-if value="{{ ps.spin }}"><span style="width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></span></sc-if>{{ ps.btn }}</div>
+          </div>
+          <sc-if value="{{ ps.keypad }}">
+            <div style="background:var(--surf2);padding:6px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <sc-for list="{{ keys }}" as="k"><span style="height:46px;border-radius:8px;background:var(--surf);display:flex;align-items:center;justify-content:center;font:500 22px Inter">{{ k }}</span></sc-for>
+            </div>
+          </sc-if>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center;background:{{ ps.gest }}"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-04 Enter OTP</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ otpStates }}" as="os" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-04 · {{ os.label }}</span>
+        <div data-screen-label="S-04 OTP" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:41</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span></div>
+          <div style="flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans'">Enter the code</h2><p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2);display:flex;flex-wrap:wrap;gap:0 8px;align-items:center">Sent to +91 98220 41567 <span style="font-weight:600;color:var(--primary);min-height:32px;display:flex;align-items:center">Edit</span></p></div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ os.boxes }}" as="b"><div style="width:48px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:600 24px Inter;border:{{ b.border }};background:{{ b.bg }};color:{{ b.c }}">{{ b.v }}</div></sc-for>
+            </div>
+            <sc-if value="{{ os.msg }}"><span style="font-size:15px;line-height:22px;display:flex;gap:8px;align-items:flex-start;color:{{ os.msgC }}"><i class="{{ os.msgIcon }}" style="font-size:18px;margin-top:2px"></i>{{ os.msg }}</span></sc-if>
+            <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><span style="font-size:15px;color:var(--tx2)">Didn't get it?</span><span style="font:600 15px Inter;color:{{ os.resendC }}">{{ os.resend }}</span></div>
+            <div style="margin-top:auto;height:52px;border-radius:12px;font:600 16px Inter;display:flex;align-items:center;justify-content:center;gap:10px;background:{{ os.btnBg }};color:{{ os.btnTx }}"><sc-if value="{{ os.spin }}"><span style="width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></span></sc-if>{{ os.btn }}</div>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-05 Email login</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ emailStates }}" as="es" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-05 · {{ es.label }}</span>
+        <div data-screen-label="S-05 Email" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:41</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span></div>
+          <div style="flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans'">{{ es.title }}</h2><p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">{{ es.sub }}</p></div>
+            <sc-if value="{{ es.isEmail }}">
+              <label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px Inter">Email</span>
+                <div style="height:56px;border-radius:8px;display:flex;align-items:center;padding:0 14px;background:var(--surf);font-size:17px;border:{{ es.border }};color:{{ es.valC }}">{{ es.value }}</div>
+                <sc-if value="{{ es.err }}"><span style="font-size:14px;line-height:20px;color:var(--err);display:flex;gap:6px;align-items:flex-start"><i class="ph ph-warning-circle" style="margin-top:2px"></i>{{ es.err }}</span></sc-if>
+              </label>
+            </sc-if>
+            <sc-if value="{{ es.isCode }}">
+              <div style="display:flex;gap:8px"><sc-for list="{{ es.boxes }}" as="b"><div style="width:48px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:600 24px Inter;border:{{ b.border }};background:{{ b.bg }};color:{{ b.c }}">{{ b.v }}</div></sc-for></div>
+              <sc-if value="{{ es.err }}"><span style="font-size:14px;line-height:20px;color:var(--err);display:flex;gap:6px;align-items:flex-start"><i class="ph ph-warning-circle" style="margin-top:2px"></i>{{ es.err }}</span></sc-if>
+            </sc-if>
+            <span style="font:600 15px Inter;color:var(--primary);min-height:48px;display:flex;align-items:center">{{ es.link }}</span>
+            <div style="margin-top:auto;height:52px;border-radius:12px;font:600 16px Inter;display:flex;align-items:center;justify-content:center;background:{{ es.btnBg }};color:{{ es.btnTx }}">{{ es.btn }}</div>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-06 Choose your role · S-07 Your name</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ roleStates }}" as="rs" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-06 · {{ rs.label }}</span>
+        <div data-screen-label="S-06 Role" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:42</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="flex:1;padding:32px 16px 16px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"><h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans'">How will you use Sabzi?</h2><p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">You can't switch later without calling us, so pick the one that fits.</p></div>
+            <div style="border-radius:16px;padding:20px;display:flex;gap:16px;align-items:center;border:{{ rs.bBorder }};background:{{ rs.bBg }}">
+              <span style="width:56px;height:56px;border-radius:14px;background:var(--surf2);display:flex;align-items:center;justify-content:center;flex:none"><i class="ph ph-house-line" style="font-size:30px;color:var(--primary)"></i></span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font:700 18px/24px 'Plus Jakarta Sans'">I buy vegetables</span><span style="font-size:14px;line-height:20px;color:var(--tx2)">Know when your vendor is at the gate</span></div>
+              <i class="{{ rs.bIcon }}" style="font-size:26px;color:var(--primary)"></i>
+            </div>
+            <div style="border-radius:16px;padding:20px;display:flex;gap:16px;align-items:center;border:{{ rs.vBorder }};background:{{ rs.vBg }}">
+              <span style="width:56px;height:56px;border-radius:14px;background:var(--surf2);display:flex;align-items:center;justify-content:center;flex:none"><i class="ph ph-truck" style="font-size:30px;color:var(--primary)"></i></span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="font:700 18px/24px 'Plus Jakarta Sans'">I sell vegetables</span><span style="font-size:14px;line-height:20px;color:var(--tx2)">Tell buyers you've arrived and what you have</span></div>
+              <i class="{{ rs.vIcon }}" style="font-size:26px;color:var(--primary)"></i>
+            </div>
+            <div style="margin-top:auto;height:52px;border-radius:12px;font:600 16px Inter;display:flex;align-items:center;justify-content:center;background:{{ rs.btnBg }};color:{{ rs.btnTx }}">Continue</div>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-07 · Buyer, filled</span>
+      <div data-screen-label="S-07 Name" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+        <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:42</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+        <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span></div>
+        <div style="flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans'">What should vendors call you?</h2><p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">Shown with your reviews and requests.</p></div>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px Inter">Your name</span><div style="height:56px;border-radius:8px;display:flex;align-items:center;padding:0 14px;background:var(--surf);border:2px solid var(--primary);font-size:17px">Priya Kulkarni</div></label>
+          <div style="margin-top:auto;height:52px;border-radius:12px;background:var(--primary);color:var(--onP);font:600 16px Inter;display:flex;align-items:center;justify-content:center">Continue</div>
+        </div>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-07 · Vendor, empty with error</span>
+      <div style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+        <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:42</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+        <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span></div>
+        <div style="flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:700 28px/34px 'Plus Jakarta Sans'">Your name</h2><p style="margin:0;font-size:18px;line-height:26px;color:var(--tx2)">Buyers will see this with your photo.</p></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="width:112px;height:112px;border-radius:50%;border:2px dashed var(--primary);background:var(--tint);display:flex;align-items:center;justify-content:center"><i class="ph ph-camera" style="font-size:36px;color:var(--primary)"></i></div><span style="font:600 16px Inter;color:var(--primary)">Add photo (optional)</span></div>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 16px Inter">Your name</span><div style="height:56px;border-radius:8px;display:flex;align-items:center;padding:0 14px;background:var(--surf);border:2px solid var(--err);font-size:18px;color:var(--mut)">Ramesh Pawar</div><span style="font-size:16px;line-height:22px;color:var(--err);display:flex;gap:6px;align-items:flex-start"><i class="ph ph-warning-circle" style="margin-top:3px"></i>Please enter your name to continue.</span></label>
+          <div style="margin-top:auto;height:56px;border-radius:12px;background:var(--primary);color:var(--onP);font:600 18px Inter;display:flex;align-items:center;justify-content:center">Continue</div>
+        </div>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-08 Notification permission · S-09 Location permission</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ perms }}" as="pm" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">{{ pm.label }}</span>
+        <div data-screen-label="{{ pm.label }}" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter"><span>6:43</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="flex:1;padding:48px 24px 16px;display:flex;flex-direction:column;gap:20px;align-items:center;text-align:center">
+            <div style="width:220px;height:220px;border-radius:50%;background:var(--tint);display:flex;align-items:center;justify-content:center;position:relative"><i class="{{ pm.icon }}" style="font-size:96px;color:var(--leaf)"></i><span style="position:absolute;bottom:10px;font:500 11px ui-monospace,monospace;color:var(--primaryP)">{{ pm.art }}</span></div>
+            <h2 style="margin:12px 0 0;font:700 26px/32px 'Plus Jakarta Sans';text-wrap:balance">{{ pm.title }}</h2>
+            <p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2);max-width:290px">{{ pm.body }}</p>
+          </div>
+          <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
+            <div style="border-radius:12px;background:var(--primary);color:var(--onP);font:600 16px Inter;display:flex;align-items:center;justify-content:center;height:{{ pm.h }}">Allow</div>
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;font:600 16px Inter;color:var(--primary)">Not now</div>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <p style="margin:0;font-size:14px;color:#56625A">After denial: see X-08 and X-09 in System states (next phase).</p>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-10 Profile · S-11 Add and verify email</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ profiles }}" as="pf" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">{{ pf.label }}</span>
+        <div data-screen-label="S-10 Profile" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter;background:var(--surf)"><span>9:12</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 16px;background:var(--surf);border-bottom:1px solid var(--line)"><span style="font:700 20px 'Plus Jakarta Sans'">{{ pf.title }}</span></div>
+          <div style="flex:1;padding:24px 16px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+            <div style="display:flex;gap:16px;align-items:center">
+              <div style="width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 26px 'Plus Jakarta Sans';flex:none;background:{{ pf.avBg }};color:{{ pf.avTx }}">{{ pf.initial }}</div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px"><span style="font:700 22px/28px 'Plus Jakarta Sans'">{{ pf.name }}</span><span style="align-self:flex-start;min-height:26px;padding:4px 10px;box-sizing:border-box;line-height:18px;border-radius:999px;background:var(--tint);color:var(--primaryP);display:flex;align-items:center;gap:6px;font:600 13px Inter"><i class="{{ pf.roleIcon }}"></i>{{ pf.role }}</span></div>
+            </div>
+            <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px">
+              <div style="display:flex;align-items:center;gap:12px;min-height:64px;border-bottom:1px solid var(--line)"><i class="ph ph-phone" style="font-size:22px;color:var(--tx2)"></i><div style="flex:1;display:flex;flex-direction:column"><span style="font-size:13px;color:var(--tx2)">Phone</span><span style="font:500 16px Inter;font-variant-numeric:tabular-nums">+91 ••••• •{{ pf.last4 }}</span></div></div>
+              <div style="display:flex;align-items:center;gap:12px;min-height:64px"><i class="ph ph-envelope-simple" style="font-size:22px;color:var(--tx2)"></i><div style="flex:1;display:flex;flex-direction:column"><span style="font-size:13px;color:var(--tx2)">Email</span><span style="font:500 16px Inter;color:{{ pf.emailC }}">{{ pf.email }}</span></div><span style="font:600 15px Inter;padding:4px 0;color:{{ pf.actC }}">{{ pf.action }}</span></div>
+            </div>
+            <sc-if value="{{ pf.warn }}"><div style="background:var(--warnT);color:var(--warn);border-radius:8px;padding:12px;display:flex;gap:10px;align-items:flex-start;font:500 14px/20px Inter"><i class="ph ph-envelope-simple-open" style="font-size:20px"></i><span style="flex:1">{{ pf.warn }}</span></div></sc-if>
+            <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px">
+              <sc-for list="{{ pf.links }}" as="l"><div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line)"><i class="ph ph-{{ l.i }}" style="font-size:22px;color:var(--tx2)"></i><span style="flex:1;font-size:16px">{{ l.t }}</span><i class="ph ph-caret-right" style="color:var(--tx2)"></i></div></sc-for>
+            </div>
+          </div>
+          <div style="height:64px;flex:none;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surf);border-top:1px solid var(--line)">
+            <sc-for list="{{ pf.tabs }}" as="tb"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:{{ tb.c }}"><span style="width:56px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:{{ tb.bg }}"><i class="{{ tb.i }}" style="font-size:22px"></i></span><span style="font:600 12px Inter">{{ tb.t }}</span></div></sc-for>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--surf)"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+
+    <sc-for list="{{ emailVerify }}" as="ev" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-11 · {{ ev.label }}</span>
+        <div data-screen-label="S-11 Email" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter;background:var(--surf)"><span>9:13</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px;gap:4px;background:var(--surf);border-bottom:1px solid var(--line)"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span><span style="font:700 18px 'Plus Jakarta Sans'">{{ ev.title }}</span></div>
+          <div style="flex:1;padding:24px 16px 16px;display:flex;flex-direction:column;gap:20px">
+            <p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">{{ ev.sub }}</p>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px Inter">Email</span><div style="height:56px;border-radius:8px;display:flex;align-items:center;padding:0 14px;font-size:17px;background:var(--surf);border:{{ ev.eBorder }}">priya.kulkarni@gmail.com</div></label>
+            <sc-if value="{{ ev.code }}">
+              <div style="display:flex;flex-direction:column;gap:6px"><span style="font:500 14px Inter">6-digit code</span><div style="display:flex;gap:8px"><sc-for list="{{ ev.boxes }}" as="b"><div style="width:48px;height:56px;border-radius:8px;display:flex;align-items:center;justify-content:center;font:600 24px Inter;border:{{ b.border }};background:{{ b.bg }};color:{{ b.c }}">{{ b.v }}</div></sc-for></div>
+              <sc-if value="{{ ev.err }}"><span style="font-size:14px;line-height:20px;color:var(--err);display:flex;gap:6px;align-items:flex-start"><i class="ph ph-warning-circle" style="margin-top:2px"></i>{{ ev.err }}</span></sc-if></div>
+            </sc-if>
+            <div style="margin-top:auto;height:52px;border-radius:12px;background:var(--primary);color:var(--onP);font:600 16px Inter;display:flex;align-items:center;justify-content:center">{{ ev.btn }}</div>
+          </div>
+          <sc-if value="{{ ev.snack }}"><div style="position:absolute;left:12px;right:12px;bottom:132px;background:#17201A;color:#ECF2ED;border-radius:12px;padding:0 16px;min-height:56px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.25)"><i class="ph-fill ph-check-circle" style="color:#45C57F;font-size:22px"></i><span style="font:500 16px Inter">Email verified</span></div></sc-if>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-12 Settings · S-13 Notification settings · S-15 Log out</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-12 · Default</span>
+      <div data-screen-label="S-12 Settings" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative">
+        <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter;background:var(--surf)"><span>9:14</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+        <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px;gap:4px;background:var(--surf);border-bottom:1px solid var(--line)"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span><span style="font:700 18px 'Plus Jakarta Sans'">Settings</span></div>
+        <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+          <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px">
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line)"><i class="ph ph-bell" style="font-size:22px;color:var(--tx2)"></i><span style="flex:1;font-size:16px">Notifications</span><i class="ph ph-caret-right" style="color:var(--tx2)"></i></div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line)"><i class="ph ph-translate" style="font-size:22px;color:var(--tx2)"></i><span style="flex:1;font-size:16px">Language</span><span style="font-size:15px;color:var(--tx2)">English</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:14px 0"><div style="display:flex;align-items:center;gap:12px"><i class="ph ph-moon" style="font-size:22px;color:var(--tx2)"></i><span style="font-size:16px">Dark mode</span></div><div style="display:flex;background:var(--surf2);border-radius:10px;padding:4px;gap:4px"><span style="flex:1;height:40px;border-radius:8px;background:var(--surf);display:flex;align-items:center;justify-content:center;font:600 14px Inter;box-shadow:0 1px 2px rgba(0,0,0,.08)">System</span><span style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;font:500 14px Inter;color:var(--tx2)">Light</span><span style="flex:1;height:40px;display:flex;align-items:center;justify-content:center;font:500 14px Inter;color:var(--tx2)">Dark</span></div></div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px">
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line)"><i class="ph ph-lifebuoy" style="font-size:22px;color:var(--tx2)"></i><span style="flex:1;font-size:16px">Help and contact</span><i class="ph ph-caret-right" style="color:var(--tx2)"></i></div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line)"><i class="ph ph-shield-check" style="font-size:22px;color:var(--tx2)"></i><span style="flex:1;font-size:16px">Privacy policy</span><i class="ph ph-arrow-square-out" style="color:var(--tx2)"></i></div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px"><i class="ph ph-file-text" style="font-size:22px;color:var(--tx2)"></i><span style="flex:1;font-size:16px">Terms</span><i class="ph ph-arrow-square-out" style="color:var(--tx2)"></i></div>
+          </div>
+          <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px">
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--line)"><i class="ph ph-sign-out" style="font-size:22px;color:var(--tx)"></i><span style="flex:1;font:600 16px Inter">Log out</span></div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px"><i class="ph ph-trash" style="font-size:22px;color:var(--err)"></i><span style="flex:1;font:600 16px Inter;color:var(--err)">Delete account</span></div>
+          </div>
+          <span style="text-align:center;font-size:13px;color:var(--mut)">Sabzi v1.0.0 (102)</span>
+        </div>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-12 · Language sheet</span>
+      <div style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative">
+        <div style="height:24px;flex:none;background:var(--surf)"></div>
+        <div style="height:56px;flex:none;background:var(--surf);border-bottom:1px solid var(--line)"></div>
+        <div style="position:absolute;inset:0;background:rgba(10,14,12,.5)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--surf);border-radius:20px 20px 0 0;padding:8px 16px 64px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)">
+          <span style="width:36px;height:4px;border-radius:2px;background:var(--line);align-self:center"></span>
+          <span style="font:700 20px 'Plus Jakarta Sans'">Language</span>
+          <div style="min-height:56px;border:2px solid var(--primary);background:var(--tint);border-radius:8px;display:flex;align-items:center;padding:0 14px;gap:12px;font:600 16px Inter"><i class="ph-fill ph-radio-button" style="font-size:22px;color:var(--primary)"></i>English</div>
+          <div style="min-height:56px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;padding:0 14px;gap:12px;font:500 16px Inter;color:var(--mut)"><i class="ph ph-circle" style="font-size:22px"></i><span style="flex:1">मराठी · Marathi</span><span style="font-size:13px">Coming soon</span></div>
+          <div style="min-height:56px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;padding:0 14px;gap:12px;font:500 16px Inter;color:var(--mut)"><i class="ph ph-circle" style="font-size:22px"></i><span style="flex:1">हिन्दी · Hindi</span><span style="font-size:13px">Coming soon</span></div>
+        </div>
+      </div>
+    </div>
+
+    <sc-for list="{{ notifSettings }}" as="ns" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-13 · {{ ns.label }}</span>
+        <div data-screen-label="S-13 Notification settings" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter;background:var(--surf)"><span>9:15</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px;gap:4px;background:var(--surf);border-bottom:1px solid var(--line)"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span><span style="font:700 18px 'Plus Jakarta Sans'">Notifications</span></div>
+          <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:16px">
+            <sc-if value="{{ ns.blocked }}"><div style="background:var(--errT);color:var(--err);border-radius:8px;padding:12px;display:flex;gap:10px;align-items:flex-start;font:500 14px/20px Inter"><i class="ph ph-bell-slash" style="font-size:20px"></i><span style="flex:1">{{ ns.blocked }}</span><span style="font-weight:700;text-decoration:underline;white-space:nowrap">Open settings</span></div></sc-if>
+            <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px;opacity:{{ ns.op }}">
+              <sc-for list="{{ ns.rows }}" as="r"><div style="display:flex;align-items:center;gap:12px;min-height:72px;border-bottom:1px solid var(--line)"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:500 16px Inter">{{ r.t }}</span><span style="font-size:14px;line-height:20px;color:var(--tx2)">{{ r.d }}</span></div><span style="width:52px;height:32px;border-radius:16px;position:relative;flex:none;background:{{ r.track }}"><span style="position:absolute;top:4px;width:24px;height:24px;border-radius:50%;background:#fff;left:{{ r.knob }}"></span></span></div></sc-for>
+            </div>
+            <span style="font-size:14px;line-height:20px;color:var(--tx2)">{{ ns.foot }}</span>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-15 · Log out confirm</span>
+      <div data-screen-label="S-15 Log out" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative">
+        <div style="height:24px;flex:none;background:var(--surf)"></div>
+        <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 16px;background:var(--surf);border-bottom:1px solid var(--line);font:700 18px 'Plus Jakarta Sans'">Settings</div>
+        <div style="position:absolute;inset:0;background:rgba(10,14,12,.5);display:flex;align-items:center;justify-content:center;padding:24px">
+          <div role="dialog" style="background:var(--surf);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;width:100%;box-sizing:border-box;box-shadow:var(--shadow)">
+            <span style="font:700 20px 'Plus Jakarta Sans'">Log out of Sabzi?</span>
+            <span style="font-size:16px;line-height:24px;color:var(--tx2)">You'll stop getting arrival alerts on this phone until you log in again with an OTP.</span>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><span style="height:48px;padding:0 16px;display:flex;align-items:center;font:600 16px Inter;color:var(--primary)">Cancel</span><span style="height:48px;padding:0 16px;display:flex;align-items:center;font:600 16px Inter;color:var(--err)">Log out</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+  <h2 style="margin:0;font:700 28px 'Plus Jakarta Sans';color:#17201A">S-14 Help · S-16 Delete account</h2>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-14 · Default</span>
+      <div data-screen-label="S-14 Help" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+        <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter;background:var(--surf)"><span>9:16</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+        <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px;gap:4px;background:var(--surf);border-bottom:1px solid var(--line)"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span><span style="font:700 18px 'Plus Jakarta Sans'">Help and contact</span></div>
+        <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div style="min-height:80px;border-radius:12px;background:var(--surf);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 14px Inter"><i class="ph ph-phone" style="font-size:24px;color:var(--primary)"></i>Call</div>
+            <div style="min-height:80px;border-radius:12px;background:var(--surf);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 14px Inter"><i class="ph ph-whatsapp-logo" style="font-size:24px;color:var(--primary)"></i>WhatsApp</div>
+            <div style="min-height:80px;border-radius:12px;background:var(--surf);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 14px Inter"><i class="ph ph-envelope-simple" style="font-size:24px;color:var(--primary)"></i>Email</div>
+          </div>
+          <span style="font-size:14px;color:var(--tx2)">Support: 9 AM – 7 PM, every day</span>
+          <h3 style="margin:4px 0 0;font:600 18px 'Plus Jakarta Sans'">Common questions</h3>
+          <div style="background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 16px">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 0;border-bottom:1px solid var(--line)"><div style="display:flex;gap:12px;align-items:center"><span style="flex:1;font:600 15px/21px Inter">How do I know my vendor has arrived?</span><i class="ph ph-caret-up" style="color:var(--tx2)"></i></div><span style="font-size:14px;line-height:20px;color:var(--tx2)">Follow him at your society. When he taps "I've arrived" at your gate, you get an alert.</span></div>
+            <sc-for list="{{ faqs }}" as="q"><div style="display:flex;gap:12px;align-items:center;min-height:52px;border-bottom:1px solid var(--line)"><span style="flex:1;font:500 15px/21px Inter;padding:8px 0">{{ q }}</span><i class="ph ph-caret-down" style="color:var(--tx2)"></i></div></sc-for>
+          </div>
+        </div>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+      </div>
+    </div>
+
+    <sc-for list="{{ deleteStates }}" as="ds" hint-placeholder-count="2">
+      <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-16 · {{ ds.label }}</span>
+        <div data-screen-label="S-16 Delete" style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+          <div style="height:24px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font:600 12px Inter;background:var(--surf)"><span>9:17</span><span style="display:flex;gap:4px"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+          <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 4px;gap:4px;background:var(--surf);border-bottom:1px solid var(--line)"><span style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i class="ph ph-arrow-left" style="font-size:24px"></i></span><span style="font:700 18px 'Plus Jakarta Sans'">Delete account</span></div>
+          <div style="flex:1;padding:20px 16px 16px;display:flex;flex-direction:column;gap:16px">
+            <p style="margin:0;font-size:16px;line-height:24px">This removes your account for good. We delete:</p>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:22px;color:var(--tx2)">
+              <span style="display:flex;gap:10px"><i class="ph ph-x-circle" style="font-size:20px;color:var(--err);flex:none"></i>Your name, phone number and email</span>
+              <span style="display:flex;gap:10px"><i class="ph ph-x-circle" style="font-size:20px;color:var(--err);flex:none"></i>The vendors you follow and your requests</span>
+              <span style="display:flex;gap:10px"><i class="ph ph-x-circle" style="font-size:20px;color:var(--err);flex:none"></i>Your reviews (ratings stay, shown as "Former buyer")</span>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;margin-top:8px"><span style="font:500 14px Inter">Type DELETE to confirm</span><div style="height:56px;border-radius:8px;display:flex;align-items:center;padding:0 14px;font:600 17px Inter;letter-spacing:.04em;background:var(--surf);border:{{ ds.border }}">{{ ds.value }}</div></label>
+            <div style="margin-top:auto;height:52px;border-radius:12px;font:600 16px Inter;display:flex;align-items:center;justify-content:center;gap:10px;background:{{ ds.btnBg }};color:{{ ds.btnTx }}"><sc-if value="{{ ds.spin }}"><span style="width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></span></sc-if>{{ ds.btn }}</div>
+          </div>
+          <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 14px Inter;color:#56625A">S-16 · Deleted (farewell)</span>
+      <div style="width:360px;height:800px;border-radius:24px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column">
+        <div style="height:24px;flex:none"></div>
+        <div style="flex:1;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px">
+          <svg viewBox="0 0 200 150" width="160" height="120" style="flex:none;display:block" role="img" aria-label="waving tempo"><g transform="translate(40 56) scale(1.5)"><rect x="0" y="14" width="54" height="30" rx="4" fill="#178046"></rect><rect x="4" y="18" width="46" height="5" rx="2" fill="#24A05E"></rect><rect x="54" y="6" width="36" height="38" rx="8" fill="#F2A93B"></rect><rect x="62" y="12" width="20" height="13" rx="3" fill="#C7D6E8"></rect><rect x="54" y="38" width="38" height="6" rx="2" fill="#17201A"></rect><circle cx="22" cy="48" r="9" fill="#17201A"></circle><circle cx="22" cy="48" r="3.5" fill="#DFE6DE"></circle><circle cx="42" cy="48" r="9" fill="#17201A"></circle><circle cx="42" cy="48" r="3.5" fill="#DFE6DE"></circle><circle cx="80" cy="48" r="9" fill="#17201A"></circle><circle cx="80" cy="48" r="3.5" fill="#DFE6DE"></circle><circle cx="90" cy="32" r="2.5" fill="#FFFFFF"></circle></g><circle cx="40" cy="48" r="8" fill="#F2A93B"></circle><rect x="34" y="54" width="12" height="22" rx="5" fill="#24A05E"></rect><rect x="16" y="34" width="6" height="20" rx="3" fill="#F2A93B"></rect><ellipse cx="100" cy="132" rx="76" ry="6" fill="#DFE6DE"></ellipse></svg>
+          <h2 style="margin:0;font:700 24px/30px 'Plus Jakarta Sans'">Your account is deleted</h2>
+          <p style="margin:0;font-size:16px;line-height:24px;color:var(--tx2)">Thank you for buying local. You're welcome back any time.</p>
+        </div>
+        <div style="padding:0 16px 16px"><div style="height:52px;border-radius:12px;border:1.5px solid var(--primary);color:var(--primary);font:600 16px Inter;display:flex;align-items:center;justify-content:center">Close</div></div>
+        <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:108px;height:4px;border-radius:2px;background:var(--tx)"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+const THEMES = {
+  light: {leaf:'#24A05E',primary:'#178046',primaryP:'#12653A',tint:'#EAF6EF',tint2:'#CFEBDB',onP:'#FFFFFF',amber:'#F2A93B',amberT:'#FDF2DF',amberTx:'#6B4300',err:'#C93B3B',errT:'#FBEAEA',warn:'#8A5A12',warnT:'#FBF0DC',info:'#2F6FBF',infoT:'#E7F0FA',bg:'#F8FAF7',surf:'#FFFFFF',surf2:'#F1F4F0',line:'#DFE6DE',tx:'#17201A',tx2:'#56625A',mut:'#616B63',dis:'#C5CCC6',disTx:'#FFFFFF',shadow:'0 8px 24px rgba(23,32,26,.16)'},
+  dark: {leaf:'#45C57F',primary:'#3CC17A',primaryP:'#2FA566',tint:'#173324',tint2:'#1F4430',onP:'#08210F',amber:'#F5B85A',amberT:'#3A2C14',amberTx:'#F5C97A',err:'#F07070',errT:'#3A1C1C',warn:'#E8B060',warnT:'#33280F',info:'#7FAEE8',infoT:'#16243A',bg:'#0F1411',surf:'#161D18',surf2:'#1E2721',line:'#2B352E',tx:'#ECF2ED',tx2:'#A9B5AC',mut:'#7D8980',dis:'#2B352E',disTx:'#7D8980',shadow:'0 8px 24px rgba(0,0,0,.5)'}
+};
+const B = { line: '1px solid var(--line)', focus: '2px solid var(--primary)', err: '2px solid var(--err)', ok: '2px solid var(--primary)' };
+const boxes = (vals, kind, cursor) => vals.map((v, i) => ({
+  v,
+  border: kind === 'err' ? B.err : kind === 'ok' ? B.ok : i === cursor ? B.focus : B.line,
+  bg: kind === 'err' ? 'var(--errT)' : kind === 'ok' ? 'var(--tint)' : v ? 'var(--surf)' : 'var(--surf2)',
+  c: kind === 'err' ? 'var(--err)' : kind === 'ok' ? 'var(--primary)' : 'var(--tx)'
+}));
+const pBtn = { btnBg: 'var(--primary)', btnTx: 'var(--onP)' };
+const dBtn = { btnBg: 'var(--dis)', btnTx: 'var(--disTx)' };
+const tabs = (sel, vendor) => (vendor ? [['sun','Today'],['map-pin','Stops'],['clipboard-text','Requests'],['user-circle','Me']] : [['house','Home'],['heart','Following'],['clipboard-text','Requests'],['user','Profile']])
+  .map(([i, t], k) => ({ t, i: (k === sel ? 'ph-fill ph-' : 'ph ph-') + i, c: k === sel ? 'var(--primary)' : 'var(--tx2)', bg: k === sel ? 'var(--tint)' : 'transparent' }));
+const tog = on => ({ track: on ? 'var(--primary)' : 'var(--dis)', knob: on ? '24px' : '4px' });
+
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  apply() { const el = this.rootRef.current; if (!el) return; const t = THEMES[this.props.theme ?? 'light']; for (const k in t) el.style.setProperty('--' + k, t[k]); }
+  componentDidMount() { this.apply(); }
+  componentDidUpdate() { this.apply(); }
+  renderVals() {
+    const dots = n => [0,1,2].map(i => ({ w: i === n ? '24px' : '8px', c: i === n ? 'var(--primary)' : 'var(--line)' }));
+    return {
+      rootRef: this.rootRef,
+      slides: [
+        { n: 1, is1: true, art: 'illustration · tempo at a society gate, phone buzzing', title: 'Know when your sabziwala arrives', body: 'Get one alert when he reaches your gate. No more waiting by the window.', cta: 'Next', dots: dots(0) },
+        { n: 2, is2: true, art: 'illustration · crate of vegetables with price tags', title: "See today's vegetables and prices", body: 'He posts his menu every morning, with a fresh photo of his tempo.', cta: 'Next', dots: dots(1) },
+        { n: 3, is3: true, art: 'illustration · two vendors, stars and a check', title: 'Pick vendors by quality', body: 'Real ratings from your neighbours. Fresh, correct weight, fair price.', cta: 'Get started', dots: dots(2) }
+      ],
+      keys: ['1','2','3','4','5','6','7','8','9','','0','⌫'],
+      phoneStates: [
+        { label: 'Empty', value: '10-digit mobile number', valC: 'var(--mut)', border: B.line, btn: 'Send OTP', ...dBtn, keypad: false, gest: 'transparent' },
+        { label: 'Valid (keypad open)', value: '98220 41567', valC: 'var(--tx)', border: B.focus, btn: 'Send OTP', ...pBtn, keypad: true, gest: 'var(--surf2)' },
+        { label: 'Invalid number', value: '98220 41', valC: 'var(--tx)', border: B.err, err: 'Enter all 10 digits of your mobile number.', btn: 'Send OTP', ...dBtn, keypad: false, gest: 'transparent' },
+        { label: 'Sending', value: '98220 41567', valC: 'var(--tx)', border: B.line, btn: 'Send OTP', ...pBtn, spin: true, keypad: false, gest: 'transparent' },
+        { label: 'Too many attempts', value: '98220 41567', valC: 'var(--tx)', border: B.line, err: 'Too many tries. Try again in 59 min, or use email instead.', btn: 'Try again in 59 min', ...dBtn, keypad: false, gest: 'transparent' }
+      ],
+      otpStates: [
+        { label: 'Waiting', boxes: boxes(['','','','','',''], null, 0), msg: 'We\'ll fill this in when the SMS arrives.', msgC: 'var(--tx2)', msgIcon: 'ph ph-chat-centered-dots', resend: 'Resend in 0:24', resendC: 'var(--mut)', btn: 'Verify', ...dBtn },
+        { label: 'Auto-filled · verifying', boxes: boxes(['4','8','2','9','1','6'], null, -1), msg: 'Code read from SMS', msgC: 'var(--primary)', msgIcon: 'ph ph-check-circle', resend: 'Resend in 0:12', resendC: 'var(--mut)', btn: 'Verifying', ...pBtn, spin: true },
+        { label: 'Wrong OTP', boxes: boxes(['4','8','2','9','1','3'], 'err'), msg: 'That code is wrong. Check the SMS and try again.', msgC: 'var(--err)', msgIcon: 'ph ph-warning-circle', resend: 'Resend in 0:08', resendC: 'var(--mut)', btn: 'Verify', ...pBtn },
+        { label: 'Expired OTP', boxes: boxes(['4','8','2','9','1','6'], 'err'), msg: 'This code has expired. Tap Resend code for a new one.', msgC: 'var(--err)', msgIcon: 'ph ph-clock-countdown', resend: 'Resend code', resendC: 'var(--primary)', btn: 'Verify', ...dBtn },
+        { label: 'Success', boxes: boxes(['4','8','2','9','1','6'], 'ok'), msg: 'Verified', msgC: 'var(--primary)', msgIcon: 'ph-fill ph-check-circle', resend: '', resendC: 'var(--mut)', btn: 'Verified', ...pBtn }
+      ],
+      emailStates: [
+        { label: 'Empty', isEmail: true, title: 'Log in with email', sub: 'Only works if you added an email to your account.', value: 'name@example.com', valC: 'var(--mut)', border: B.line, link: 'Use phone number instead', btn: 'Send code', ...dBtn },
+        { label: 'Invalid email', isEmail: true, title: 'Log in with email', sub: 'Only works if you added an email to your account.', value: 'priya.kulkarni@gmail', valC: 'var(--tx)', border: B.err, err: 'This email looks incomplete. Check the part after @.', link: 'Use phone number instead', btn: 'Send code', ...dBtn },
+        { label: 'Not linked to any account', isEmail: true, title: 'Log in with email', sub: 'Only works if you added an email to your account.', value: 'priya.k@yahoo.com', valC: 'var(--tx)', border: B.err, err: 'No account uses this email. Log in with your phone number, then add email in Profile.', link: 'Use phone number instead', btn: 'Send code', ...pBtn },
+        { label: 'Code sent', isCode: true, title: 'Check your email', sub: 'We sent a 6-digit code to priya.kulkarni@gmail.com', boxes: boxes(['7','3','','','',''], null, 2), link: 'Resend code', btn: 'Verify', ...dBtn },
+        { label: 'Wrong code', isCode: true, title: 'Check your email', sub: 'We sent a 6-digit code to priya.kulkarni@gmail.com', boxes: boxes(['7','3','0','5','5','1'], 'err'), err: 'That code is wrong. Check the latest email from Sabzi.', link: 'Resend code', btn: 'Verify', ...pBtn }
+      ],
+      roleStates: [
+        { label: 'Nothing selected', bBorder: B.line, bBg: 'var(--surf)', bIcon: 'ph ph-circle', vBorder: B.line, vBg: 'var(--surf)', vIcon: 'ph ph-circle', ...dBtn },
+        { label: 'Buyer selected', bBorder: B.ok, bBg: 'var(--tint)', bIcon: 'ph-fill ph-check-circle', vBorder: B.line, vBg: 'var(--surf)', vIcon: 'ph ph-circle', ...pBtn },
+        { label: 'Vendor selected', bBorder: B.line, bBg: 'var(--surf)', bIcon: 'ph ph-circle', vBorder: B.ok, vBg: 'var(--tint)', vIcon: 'ph-fill ph-check-circle', ...pBtn }
+      ],
+      perms: [
+        { label: 'S-08 · Buyer', icon: 'ph ph-device-mobile-speaker', art: 'phone buzzing', title: 'Get told when your vendor is at the gate', body: 'One alert when he arrives. Deals only if you turn them on. Nothing else.', h: '52px' },
+        { label: 'S-08 · Vendor', icon: 'ph ph-device-mobile-speaker', art: 'phone buzzing', title: 'Know when buyers request items', body: 'See what people want before you go to the market.', h: '56px' },
+        { label: 'S-09 · Buyer', icon: 'ph ph-map-trifold', art: 'map with society pins', title: 'Find societies near you', body: 'We use your location once to list nearby societies. You can search by name instead.', h: '52px' },
+        { label: 'S-09 · Vendor', icon: 'ph ph-map-pin-line', art: 'tempo at a gate pin', title: "Tap 'I've arrived' and we'll pick the right gate", body: 'Only used when you tap the button. Never tracked while driving.', h: '56px' }
+      ],
+      profiles: [
+        { label: 'S-10 · Buyer, email not added', title: 'Profile', initial: 'P', avBg: 'var(--tint)', avTx: 'var(--primaryP)', name: 'Priya Kulkarni', role: 'Buyer · Green Park, B-wing', roleIcon: 'ph ph-house-line', last4: '1567', email: 'Not added', emailC: 'var(--mut)', action: 'Add', actC: 'var(--primary)', links: [{i:'buildings',t:'My societies'},{i:'bell',t:'Notification settings'},{i:'gear',t:'Settings'},{i:'lifebuoy',t:'Help and contact'}], tabs: tabs(3) },
+        { label: 'S-10 · Vendor, email unverified', title: 'Me', initial: 'RP', avBg: '#D9C7A8', avTx: '#4A3A1E', name: 'Ramesh Pawar', role: 'Vendor · Ramesh Sabzi', roleIcon: 'ph ph-truck', last4: '3310', email: 'ramesh.sabzi@gmail.com', emailC: 'var(--tx)', action: 'Verify', actC: 'var(--warn)', warn: 'Email not verified. Verify it so you can log in if you lose your phone.', links: [{i:'qr-code',t:'My QR'},{i:'storefront',t:'Business details'},{i:'gear',t:'Settings'},{i:'lifebuoy',t:'Help and contact'}], tabs: tabs(3, true) }
+      ],
+      emailVerify: [
+        { label: 'Empty → code sent', title: 'Add email', sub: 'A second way to log in if you change your phone. We never send marketing mail.', eBorder: B.line, code: true, boxes: boxes(['','','','','',''], null, 0), btn: 'Verify' },
+        { label: 'Error', title: 'Add email', sub: 'A second way to log in if you change your phone.', eBorder: B.line, code: true, boxes: boxes(['1','9','0','2','7','7'], 'err'), err: 'That code is wrong. Check the latest email from Sabzi.', btn: 'Verify' },
+        { label: 'Verified', title: 'Add email', sub: 'A second way to log in if you change your phone.', eBorder: B.ok, code: true, boxes: boxes(['1','9','0','2','7','4'], 'ok'), btn: 'Done', snack: true }
+      ],
+      notifSettings: [
+        { label: 'Buyer · all on', op: 1, foot: 'Quiet hours: no alerts between 10 PM and 6 AM.', rows: [{t:'Arrival alerts',d:'When a vendor you follow reaches your gate',...tog(true)},{t:'Evening deals',d:'At most one per vendor a day',...tog(true)},{t:'Request replies',d:'When a vendor answers your request',...tog(true)}] },
+        { label: 'Vendor · some off', op: 1, foot: 'Arrival alerts to your buyers are always sent when you tap "I\'ve arrived".', rows: [{t:'Request alerts',d:'New requests for tomorrow',...tog(true)},{t:'Rating alerts',d:'When a buyer rates you',...tog(false)}] },
+        { label: 'Blocked at system level', op: .45, blocked: "Notifications are off for Sabzi. You won't know when vendors arrive.", foot: 'Turn notifications on in phone settings to change these.', rows: [{t:'Arrival alerts',d:'When a vendor you follow reaches your gate',...tog(true)},{t:'Evening deals',d:'At most one per vendor a day',...tog(true)},{t:'Request replies',d:'When a vendor answers your request',...tog(true)}] }
+      ],
+      faqs: ['Why can\'t I rate a vendor yet?', 'How do I request an item for tomorrow?', 'Can I pay in the app?', 'My society isn\'t listed', 'How do I report a vendor?', 'How do I become a vendor?'],
+      deleteStates: [
+        { label: 'Default', value: 'DEL', border: B.focus, btn: 'Delete my account', ...dBtn },
+        { label: 'Confirming', value: 'DELETE', border: B.line, btn: 'Deleting', btnBg: 'var(--err)', btnTx: '#fff', spin: true }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
