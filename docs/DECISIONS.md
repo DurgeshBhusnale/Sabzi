@@ -2,6 +2,15 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M1 database design
+- **Buyer-safe read models are owner-rights views** (`v_vendor_public`, `v_review_public`, `v_vendor_requests`) and `security definer` functions (`v_vendor_today`, `vendor_public_stops`, `my_follower_counts`). Base `reviews` and `requests` rows (which carry `buyer_id`) are readable only by their author and admins, so vendors see a buyer's first name and society and nothing else.
+- **Column-level grants** stop users changing protected columns (`profiles.role`, `vendors.status`, `vendors.code`…); a trigger also blocks role changes once set (only an owner admin may change one).
+- **Extra tables** beyond TECH_SPEC §4.2: `deals` (one row per vendor per IST day enforces the 1-deal limit), `action_log` (idempotency results for queued RPCs), `vendor_page_views` (VEN-11 profile views). `vendors.verified_seen_at` supports the one-time "verified" celebration.
+- **`stop_events.created_at` defaults to `clock_timestamp()`** so events written in one transaction still order correctly.
+- **Undo**: `undo_stop_event` deletes an arrival up to 10 s after it was written; the push sender waits for the 5 s undo window (M6).
+- **RPC errors** are raised with a machine code as the message (`arrival_cooldown`, `deal_limit`, `rating_too_soon`…) and details (like the unlock time) in `detail`; the app maps codes to copy.
+- **Test OTP phones** `+91 99999 000xx` with code `123456` for seeded users (config.toml, local only).
+
 ## 2026-11-05 — M0 tooling choices
 - **One working branch per session.** The cloud session can only push to its assigned branch (`claude/adoring-johnson-tu32pu`), so each milestone is built on that branch, opened as its own PR to `main`, squash-merged, and then `main` is merged back into the branch before the next milestone. Milestone names (`m0-foundation`, …) are used in PR titles instead of branch names.
 - **pnpm `node-linker=hoisted`** (`.npmrc`). React Native/Metro and Expo autolinking are most reliable with a flat `node_modules` in a monorepo.
