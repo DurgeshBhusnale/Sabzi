@@ -17,6 +17,7 @@ export type VendorPageActions = {
   call: () => void;
   openPhoto: () => void;
   seeAllReviews: () => void;
+  writeReview?: () => void;
   requestTomorrow: () => void;
   goHome: () => void;
   openVendor: (id: string) => void;
@@ -170,7 +171,10 @@ export function VendorPageView({
 
       <Text variant="h2" accessibilityRole="header">{en.buyer.ratingsAndReviews}</Text>
       {isNew ? (
-        <Text color="textSecondary" testID="no-reviews">{en.buyer.noReviews}</Text>
+        <>
+          <Text color="textSecondary" testID="no-reviews">{en.buyer.noReviews}</Text>
+          {following && actions.writeReview ? <Button label={en.eng.writeReview} variant="secondary" onPress={actions.writeReview} /> : null}
+        </>
       ) : (
         <>
           <Card style={{ gap: t.spacing.xs }}>
@@ -193,6 +197,7 @@ export function VendorPageView({
             <ReviewCard key={r.id} review={{ id: r.id, reviewerName: r.reviewer_name, societyName: r.society_name, stars: r.stars, tags: r.tags, text: r.text, date: formatIstRelative(r.created_at), vendorReply: r.vendor_reply, vendorName: first }} />
           ))}
           <Button label={en.buyer.seeAllReviews} variant="tertiary" onPress={actions.seeAllReviews} />
+          {following && actions.writeReview ? <Button label={en.eng.writeReview} variant="secondary" onPress={actions.writeReview} testID="write-review" /> : null}
         </>
       )}
     </View>

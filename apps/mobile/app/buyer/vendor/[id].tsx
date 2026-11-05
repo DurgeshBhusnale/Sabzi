@@ -82,6 +82,7 @@ export default function VendorPageScreen() {
           },
           openPhoto: () => data?.available && router.push({ pathname: '/buyer/photo', params: { path: data.menu?.stock_photo_path ?? '', at: data.menu?.stock_photo_at ?? '', name } }),
           seeAllReviews: () => router.push({ pathname: '/buyer/reviews', params: { vendorId: id, name } }),
+          writeReview: () => router.push({ pathname: '/buyer/review', params: { vendorId: id, name } }),
           requestTomorrow: () => router.push({ pathname: '/buyer/request', params: { vendorId: id, name } }),
           goHome: () => router.replace('/(buyer)/home'),
           openVendor: (vid) => router.push({ pathname: '/buyer/vendor/[id]', params: { id: vid } }),

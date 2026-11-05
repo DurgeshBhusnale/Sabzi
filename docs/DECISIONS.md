@@ -2,6 +2,11 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M7 engagement
+- **Vendor requests tab shows requests before 4 PM** with the "Requests so far" note (the design file shows this state); the push digest goes out at 4 PM. Answering is allowed any time.
+- **Quantities are free text** ("500 g", "1 kg", "2 pieces"); the vendor tab parses and sums grams/kg, pieces and bunches separately and lists anything it can't parse.
+- **Deal default is −20 %** when an item is picked, rounded down to a whole rupee, never below ₹1.
+
 ## 2026-11-05 — M6 notifications
 - **One `notify` edge function for every kind**, called by Postgres triggers through `pg_net` with `{kind, ref}`. Triggers read the function URL and a shared secret from `private.settings` (no grants to app roles); when not configured (local dev) nothing is queued and the vendor's tap never fails.
 - **SQL gathers context, TypeScript decides**: `notify_context` returns followers with all flags; recipient rules, quiet hours and copy live in tested TS shared with the app.

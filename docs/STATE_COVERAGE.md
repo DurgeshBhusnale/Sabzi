@@ -18,9 +18,9 @@ Every screen and state from `docs/DESIGN_BRIEF.md`, where it lives in the code, 
 | V-08 I've arrived | GPS finding, stop suggested, none within 300 m, GPS off, already alerted (unlock time), sending, sent + 5 s undo, offline | `src/features/vendor/ArriveSheet.tsx` | T |
 | V-09 At the stop | Live, leaving-soon sent, left | `app/vendor/live.tsx` | M |
 | V-10 Mark sold out | Some sold out, all sold out (mark today done) | `app/vendor/soldout.tsx`, `SoldOutList.tsx` | M |
-| V-11 Evening price drop | — | M7 | — |
+| V-11 Evening price drop | No items selected, ready (−10% / −20% / stepper, preview), sending, sent, already used today, no remaining stops | `src/features/engagement/DealComposer.tsx`, `app/vendor/deal.tsx` | T `engagement.test.tsx`, D |
 | V-12 Stops | Today, this week, skip confirm, skipped (+ undo snackbar), no stops yet | `app/(vendor)/stops.tsx` | M, D `skip_stop` |
-| V-13 Requests | — | M7 | — |
+| V-13 Requests | Before 4 PM (so far), several (grouped, notes), all answered, none (share QR) | `src/features/engagement/VendorRequestsView.tsx` | T, Vitest grouping |
 | V-14 Me | Normal, zeros (encouraging copy) | `app/(vendor)/me.tsx` | M |
 | V-15 My QR | Default, share | `app/vendor/qr.tsx`, `ui/QrCard.tsx` | T (QrCard) |
 | V-16 My reviews | Several, none, replying, reply posted, flagged | `app/vendor/reviews.tsx` | M, D `reply_review`/`flag_review` |
@@ -42,6 +42,11 @@ Manual check steps (dev build against local Supabase, phone `+91 99999 00001`, O
 | B-08 Following | Several, none (Find vendors), loading, unfollow | `app/(buyer)/following.tsx` | M, D `my_following` |
 | B-15 Notifications | Several, unread markers, empty | `app/buyer/notifications.tsx` | M |
 | B-16 From QR | Logged in → vendor page; logged out → S-03 then back (pending route); unknown code → X-14 | `app/v/[code].tsx`, `src/lib/pendingRoute.ts` | M, D `vendor_by_code` |
-| B-09…B-14 | Reviews, write review, request, requests tab, deals, report | M7 | — |
+| B-09 All reviews | Many, filter with no results, none; author sees own hidden review | `app/buyer/reviews.tsx` | M, D |
+| B-10 Write a review | Empty, stars chosen, submitting, submitted, not eligible (days left), not following, already reviewed (locked 7 days) | `src/features/engagement/WriteReviewView.tsx` | T, D |
+| B-11 Request for tomorrow | Empty, item chosen / something else, sending, sent, limit reached | `app/buyer/request.tsx` | M, D |
+| B-12 Requests tab | Several (by date), none, loading, cancel | `app/(buyer)/requests.tsx` | M, D `my_requests` |
+| B-13 Evening deals | Deals available (where he is now), deals ended | `app/buyer/deals.tsx` | M, D `my_deals_today` |
+| B-14 Report vendor | Empty, submitting, submitted | `app/buyer/report.tsx` | M, D `report_vendor` |
 
 Realtime manual check: log in as Priya (`+91 99999 00011`) in one emulator and Ramesh (`…00001`) in another; tap I've arrived at Green Park Gate 1; Priya's home moves Ramesh into "At the gate now" within ~1–2 s.

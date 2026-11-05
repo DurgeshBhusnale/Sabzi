@@ -853,12 +853,21 @@ isOneToOne: false
 "my_account":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"my_deal_today":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_deals_today":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "my_follower_counts":
 { Args: Record<PropertyKey, never>; Returns: {
               "followers": number,"society_id": string,"society_name": string
             }[]
                            },
 "my_following":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_requests":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
 "my_stops_today":
@@ -876,6 +885,9 @@ isOneToOne: false
                            },
 "normalize_phone":
 { Args: { "p_phone": string }; Returns: string
+                           },
+"notify_context":
+{ Args: { "p_kind": string,"p_ref": string }; Returns: Json
                            },
 "otp_blocked_until":
 { Args: { "p_phone": string }; Returns: string
