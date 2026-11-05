@@ -769,6 +769,30 @@ isOneToOne: false
 "action_seen":
 { Args: { "p_client_id": string }; Returns: Json
                            },
+"admin_items":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_me":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_mfa_ok":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"admin_moderation":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_societies":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_team":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_vendor":
+{ Args: { "p_vendor_id": string }; Returns: Json
+                           },
+"admin_vendors":
+{ Args: { "p_status"?: Database["public"]['Enums']["vendor_status"] }; Returns: Json
+                           },
 "answer_request":
 { Args: { "p_for_date"?: string,"p_item_key": string,"p_status": Database["public"]['Enums']["request_status"] }; Returns: number
                            },
@@ -840,6 +864,9 @@ isOneToOne: false
                            },
 "keep_review":
 { Args: { "p_review_id": string }; Returns: undefined
+                           },
+"make_admin":
+{ Args: { "p_level": Database["public"]['Enums']["admin_level"],"p_name": string,"p_user_id": string }; Returns: undefined
                            },
 "mark_notification_opened":
 { Args: { "p_id": string }; Returns: undefined
@@ -937,6 +964,12 @@ isOneToOne: false
 "send_deal":
 { Args: { "p_client_id"?: string,"p_items": Json }; Returns: Json
                            },
+"set_admin_active":
+{ Args: { "p_active": boolean,"p_user_id": string }; Returns: undefined
+                           },
+"set_admin_level":
+{ Args: { "p_level": Database["public"]['Enums']["admin_level"],"p_user_id": string }; Returns: undefined
+                           },
 "set_notify_pref":
 { Args: { "p_key": string,"p_value": boolean }; Returns: Json
                            },
@@ -945,6 +978,9 @@ isOneToOne: false
                            },
 "set_role":
 { Args: { "p_role": Database["public"]['Enums']["user_role"] }; Returns: undefined
+                           },
+"set_setting":
+{ Args: { "p_key": string,"p_value": Json }; Returns: undefined
                            },
 "set_sold_out":
 { Args: { "p_client_id"?: string,"p_item_id": string,"p_sold_out": boolean }; Returns: Json
@@ -1018,6 +1054,9 @@ isOneToOne: false
                            },
 "verify_vendor":
 { Args: { "p_vendor_id": string }; Returns: undefined
+                           },
+"warn_vendor":
+{ Args: { "p_note": string,"p_report_id": string }; Returns: undefined
                            }
           }
           Enums: {

@@ -6,7 +6,7 @@ set search_path = public, extensions;
 create schema tests;
 create function tests.login(p_uid uuid) returns void language plpgsql as $$
 begin
-  perform set_config('request.jwt.claims', json_build_object('sub', p_uid, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p_uid, 'role', 'authenticated', 'aal', 'aal2')::text, true);
   perform set_config('role', 'authenticated', true);
 end $$;
 create function tests.anon() returns void language plpgsql as $$

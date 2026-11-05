@@ -2,6 +2,12 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M9 admin
+- **2-step login is enforced in the database**: `is_admin()` / `is_owner()` require an `aal2` session (switch `private.settings.admin_require_mfa`), so a stolen admin password alone cannot read or change anything, whatever the client does.
+- **Map pins are coordinates** (with a "Check pin on the map" link) instead of a draggable map widget: no map SDK, API key or tile costs in the pilot. A map picker can be added later.
+- **Team invites go through an edge function** (`admin-invite`) because inviting needs the service-role key, which never reaches the browser.
+- **Admin data hooks** are a 30-line `useData` helper instead of React Query, to keep the admin bundle small; pages are client components using the signed-in admin's JWT and RLS.
+
 ## 2026-11-05 — M8 offline
 - **Own small queue instead of TanStack paused mutations**: vendor actions need visible per-item status (X-04), stale-arrival confirmation and supersede rules, which are clearer in a 150-line tested class persisted to AsyncStorage.
 - **Online first, queue on network failure**: an action is tried at once when online; only a network error (not a server "no") puts it in the queue. Server refusals such as `arrival_cooldown` are permanent and shown, never retried.

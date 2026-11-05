@@ -73,3 +73,19 @@ All 17 are listed and openable in the dev route `app/_dev/states.tsx` (Settings 
 | X-17 | B-02 waitlist |
 
 Empty states (§8.4) and skeletons (§8.5) are part of each screen above (`EmptyState`, `SkeletonBlock`).
+
+## Admin (A-01 … A-11) — milestone M9
+
+| Screen | States | Where | Check |
+| --- | --- | --- | --- |
+| A-01 Login | Default, wrong password, code step (enrol QR first time), locked (rate limit) | `apps/admin/app/login/page.tsx` | Integration (password + TOTP), M |
+| A-02 Dashboard | Placeholder counts (metrics in M11) | `app/(panel)/dashboard` | M |
+| A-03 Societies | Normal, empty, search no results | `app/(panel)/societies` | M |
+| A-04 Society detail | New, edit, saving, validation errors, gates | `app/(panel)/societies/[id]` | M |
+| A-05 Vendors | Each status tab, empty; masked phones | `app/(panel)/vendors` | D `07_admin` |
+| A-06 Vendor detail | Pending / verified / suspended, confirm dialogs, PMC ID (signed URL), full phone | `app/(panel)/vendors/[id]` | D, integration |
+| A-07 Stops planner | Normal, conflict (double booked / shared gate), empty | `app/(panel)/stops` | Vitest `stops.test.ts` |
+| A-08 Items | Normal, editing, custom items pending (approve) | `app/(panel)/items` | M |
+| A-09 Moderation | Items pending, all clear; hide (reason), keep, warn, suspend | `app/(panel)/moderation` | M, D |
+| A-10 Team | Normal, invite, deactivate (owner only) | `app/(panel)/team` | Vitest guard, D, Deno `admin-invite` |
+| A-11 Settings | Normal, confirm for maintenance (owner only) | `app/(panel)/settings` | Vitest guard, D |

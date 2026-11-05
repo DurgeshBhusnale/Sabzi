@@ -1,0 +1,3 @@
+export type Gate = { id: string; name: string; lat: number; lng: number };
+export type SocietyRow = { id: string; name: string; area: 'karve_nagar' | 'sus_pashan'; address: string; lat: number; lng: number; flats_count: number; active: boolean; gates: Gate[]; vendors: number; followers: number; adoption_pct: number };
+export type VendorRow = { id: string; display_name: string; owner_name: string | null; status: 'pending' | 'needs_info' | 'verified' | 'rejected' | 'suspended'; phone_masked: string | null; vehicle: 'tempo' | 'thela'; code: string; stops: number; followers: number; avg_rating: number | null; rating_count: number; last_active: string | null };
