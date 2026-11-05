@@ -13,6 +13,9 @@ export default function Index() {
     takePendingRoute().then(setPending);
   }, [status]);
   if (status === 'loading' || (status === 'signedIn' && pending === undefined)) return <Splash />;
-  if (pending && step === 'buyer') return <Redirect href={pending as never} />;
+  if (pending && (step === 'buyer' || step === 'name' || step === 'role')) {
+    if (step !== 'buyer') return <Redirect href={homeFor(step) as never} />;
+    return <Redirect href={pending as never} />;
+  }
   return <Redirect href={homeFor(step) as never} />;
 }

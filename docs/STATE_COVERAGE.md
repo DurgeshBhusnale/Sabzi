@@ -89,3 +89,16 @@ Empty states (§8.4) and skeletons (§8.5) are part of each screen above (`Empty
 | A-09 Moderation | Items pending, all clear; hide (reason), keep, warn, suspend | `app/(panel)/moderation` | M, D |
 | A-10 Team | Normal, invite, deactivate (owner only) | `app/(panel)/team` | Vitest guard, D, Deno `admin-invite` |
 | A-11 Settings | Normal, confirm for maintenance (owner only) | `app/(panel)/settings` | Vitest guard, D |
+
+## QR, web page, sticker — milestone M10
+
+| Item | Where | Check |
+| --- | --- | --- |
+| QR URL `https://sabzi.example/v/<code>` (one constant `PUBLIC_BASE_URL`) | `packages/shared/src/constants.ts`, `ui/QrCard.tsx`, `apps/admin/lib/pdf.ts` | Vitest (QR decodes) |
+| App route `v/[code]` (B-16) and `s/[id]` (poster) | `apps/mobile/app/v/[code].tsx`, `app/s/[id].tsx`; Android App Links intent filter in `app.json` | Manual (below) |
+| Web fallback §9.4 | `apps/admin/app/v/[code]/page.tsx` (public, no login) | Vitest render + curl against local stack |
+| Society page (poster QR) | `apps/admin/app/s/[id]/page.tsx` | curl |
+| `/.well-known/assetlinks.json` | `apps/admin/app/.well-known/assetlinks.json/route.ts` (needs `ANDROID_SHA256_CERT_FINGERPRINTS`) | curl |
+| Sticker A6 + poster A4 PDF | `apps/admin/lib/pdf.ts`, buttons on A-06 and A-04 | Vitest (page size, QR decodes to URL) |
+
+Manual check — app installed: on the Android phone open `adb shell am start -a android.intent.action.VIEW -d "https://sabzi.example/v/RMSH4K7P"` (or scan the sticker); the app opens Ramesh's page (or asks to log in, then returns to it). App not installed: the same URL opens the web page with "Get the app to follow Ramesh". App Links need the real domain, the hosted `assetlinks.json` and the release key fingerprint (owner to-do).

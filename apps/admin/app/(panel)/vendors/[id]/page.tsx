@@ -8,6 +8,7 @@ import { Badge, Button, Card, Confirm, Field, Input, PageTitle, Skeleton } from 
 import { rpc, sb } from '../../../../lib/supabase';
 import { useData } from '../../../../lib/hooks';
 import { STATUS_LABEL, STATUS_TONE } from '../../../../lib/vendorStatus';
+import { buildStickerPdf, downloadPdf } from '../../../../lib/pdf';
 
 type VendorDetail = {
   vendor: { user_id: string; display_name: string; vehicle: string; vehicle_no: string | null; pmc_vendor_id: string | null; pmc_doc_path: string | null; delivery_available: boolean; allow_calls: boolean; status: keyof typeof STATUS_LABEL; status_reason: string | null; code: string; verified_at: string | null };
@@ -68,7 +69,21 @@ export default function VendorDetailPage() {
             {v.status === 'pending' ? <Button variant="secondary" onClick={() => setAction('needs_info')}>Ask for info</Button> : null}
             {v.status === 'pending' || v.status === 'needs_info' ? <Button variant="secondary" onClick={() => setAction('rejected')}>Reject</Button> : null}
             {v.status === 'verified' ? <Button variant="destructive" onClick={() => setAction('suspended')}>Suspend</Button> : null}
-            <a href={`/api/sticker/${v.user_id}`}><Button variant="secondary">QR sticker (PDF)</Button></a>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                let photo: Uint8Array | null = null;
+                const path = (d.data!.vendor as { photo_path?: string | null }).photo_path;
+                if (path) {
+                  const res = await fetch(sb().storage.from('vendor-photos').getPublicUrl(path).data.publicUrl).catch(() => null);
+                  if (res?.ok) photo = new Uint8Array(await res.arrayBuffer());
+                }
+                const { pdf } = await buildStickerPdf({ name: v.display_name, code: v.code, verified: v.status === 'verified', photoJpg: photo });
+                downloadPdf(pdf, `sticker-${v.code}.pdf`);
+              }}
+            >
+              QR sticker (PDF)
+            </Button>
           </>
         }
       />

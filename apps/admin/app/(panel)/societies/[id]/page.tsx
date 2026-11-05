@@ -7,6 +7,7 @@ import { Button, Card, Field, Input, PageTitle, Select, Skeleton } from '../../.
 import { rpc, sb } from '../../../../lib/supabase';
 import { useData } from '../../../../lib/hooks';
 import type { Gate, SocietyRow } from '../../../../lib/types';
+import { buildPosterPdf, downloadPdf } from '../../../../lib/pdf';
 
 type Form = { name: string; area: 'karve_nagar' | 'sus_pashan'; address: string; lat: string; lng: string; flats_count: string; active: boolean };
 
@@ -113,7 +114,18 @@ function SocietyForm({ society, onSaved }: { society: SocietyRow | null; onSaved
           </div>
           {gateError ? <p className="text-sm text-error">{gateError}</p> : null}
           <Button variant="secondary" onClick={addGate} disabled={!society}>Add gate</Button>
-          {society ? <a className="text-sm text-primary underline" href={`/api/poster/${society.id}`}>Print society poster (A4 PDF)</a> : null}
+          {society ? (
+            <Button
+              variant="tertiary"
+              onClick={async () => {
+                const card = await rpc<{ vendors: { display_name: string; avg_rating: number | null; rating_count: number }[] } | null>('public_society_card', { p_society_id: society.id });
+                const { pdf } = await buildPosterPdf({ id: society.id, name: society.name, vendors: (card?.vendors ?? []).map((x) => ({ name: x.display_name, rating: x.rating_count ? Number(x.avg_rating) : null })) });
+                downloadPdf(pdf, `poster-${society.name.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+              }}
+            >
+              Print society poster (A4 PDF)
+            </Button>
+          ) : null}
           {society ? <p className="text-sm text-text-secondary">{`${society.vendors} vendors · ${society.followers} followers · ${society.adoption_pct}% of flats`}</p> : null}
         </Card>
       </div>

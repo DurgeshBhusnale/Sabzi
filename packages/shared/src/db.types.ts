@@ -305,6 +305,44 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"qr_scans": {
+                  Row: {
+                    "created_at": string,"id": number,"society_id": string | null,"source": string,"vendor_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: never,"society_id"?: string | null,"source": string,"vendor_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: never,"society_id"?: string | null,"source"?: string,"vendor_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "qr_scans_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
+      referencedRelation: "societies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "qr_scans_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
+      referencedRelation: "v_vendor_requests"
+      referencedColumns: ["society_id"]
+    },{
+      foreignKeyName: "qr_scans_vendor_id_fkey"
+      columns: ["vendor_id"]
+isOneToOne: false
+      referencedRelation: "v_vendor_public"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "qr_scans_vendor_id_fkey"
+      columns: ["vendor_id"]
+isOneToOne: false
+      referencedRelation: "vendors"
+      referencedColumns: ["user_id"]
+    }
+                  ]
                 },"reports": {
                   Row: {
                     "created_at": string,"id": string,"photo_path": string | null,"reason": Database["public"]['Enums']["report_reason"],"reporter_id": string,"resolution_note": string | null,"status": Database["public"]['Enums']["report_status"],"text": string | null,"vendor_id": string
@@ -928,8 +966,17 @@ isOneToOne: false
 "otp_status":
 { Args: { "p_phone": string }; Returns: Json
                            },
+"public_society_card":
+{ Args: { "p_society_id": string }; Returns: Json
+                           },
+"public_vendor_card":
+{ Args: { "p_code": string }; Returns: Json
+                           },
 "publish_menu":
 { Args: { "p_client_id"?: string,"p_date": string,"p_items": Json }; Returns: Json
+                           },
+"record_qr_scan":
+{ Args: { "p_code": string,"p_source": string }; Returns: undefined
                            },
 "record_vendor_view":
 { Args: { "p_vendor_id": string }; Returns: undefined

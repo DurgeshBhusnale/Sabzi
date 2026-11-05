@@ -2,6 +2,11 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M10 QR
+- **The web fallback lives in the Next.js app** (public routes `/v/[code]`, `/s/[id]`, `/.well-known/assetlinks.json`) rather than an edge function, so one deployment serves the admin panel, the QR pages and App Links verification.
+- **PDFs are made in the admin's browser** with pdf-lib: no server route needs admin credentials, and the vendor photo comes from public storage. Helvetica is used (no ₹ needed on the sticker); QR uses error-correction level H with a 4-module quiet zone for outdoor stickers.
+- **Society posters point to `/s/<society_id>`**, which lists that society's vendors and opens the app's `s/[id]` route (saves the society for a buyer).
+
 ## 2026-11-05 — M9 admin
 - **2-step login is enforced in the database**: `is_admin()` / `is_owner()` require an `aal2` session (switch `private.settings.admin_require_mfa`), so a stolen admin password alone cannot read or change anything, whatever the client does.
 - **Map pins are coordinates** (with a "Check pin on the map" link) instead of a draggable map widget: no map SDK, API key or tile costs in the pilot. A map picker can be added later.
