@@ -473,6 +473,9 @@ export const en = {
     pickSocietyFirst: 'Pick your society first',
     deliveryShort: 'Home delivery',
   },
+  notifications: {
+    view: 'View',
+  },
   system: {
     notFound: "This vendor isn't available any more.",
   },

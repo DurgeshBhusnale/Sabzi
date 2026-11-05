@@ -10,6 +10,7 @@ import { makeQueryClient } from '../src/lib/queryClient';
 import { fontAssets } from '../src/theme/fonts';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider';
 import { Splash } from '../src/features/system/Splash';
+import { NotificationsProvider } from '../src/features/notifications/NotificationsProvider';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -35,7 +36,9 @@ export default function RootLayout() {
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <SessionProvider>
-            <Root />
+            <NotificationsProvider>
+              <Root />
+            </NotificationsProvider>
           </SessionProvider>
         </QueryClientProvider>
       </ThemeProvider>

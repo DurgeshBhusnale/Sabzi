@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Screen, TopAppBar } from '../../src/ui';
+import { NotificationsBlockedBanner } from '../../src/features/notifications/BlockedBanner';
 import { HomeView } from '../../src/features/buyer/HomeView';
 import { SocietySwitcher } from '../../src/features/buyer/SocietySwitcher';
 import { buyerKeys, useBuyerHome, useMySocieties, useNotifications } from '../../src/features/buyer/hooks';
@@ -24,6 +25,7 @@ export default function BuyerHome() {
       refreshing={home.isRefetching}
       onRefresh={() => home.refetch()}
     >
+      <NotificationsBlockedBanner role="buyer" />
       <HomeView
         vendors={home.data}
         loading={home.isLoading}

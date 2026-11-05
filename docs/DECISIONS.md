@@ -2,6 +2,14 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M6 notifications
+- **One `notify` edge function for every kind**, called by Postgres triggers through `pg_net` with `{kind, ref}`. Triggers read the function URL and a shared secret from `private.settings` (no grants to app roles); when not configured (local dev) nothing is queued and the vendor's tap never fails.
+- **SQL gathers context, TypeScript decides**: `notify_context` returns followers with all flags; recipient rules, quiet hours and copy live in tested TS shared with the app.
+- **Quiet hours keep the in-app row** (NOT-4 list) but skip the push for deals, request replies and vendor digests. Arrival, leaving-soon and not-coming are always pushed.
+- **Leaving soon goes to all arrival-alert followers at that society** (VEN-7's "opened or not yet seen" covers everyone in practice).
+- **Vendor "new requests" is one digest at 16:00 IST** (pg_cron) instead of one push per request, matching V-13 opening at 4 PM.
+- **Foreground alerts** use our own banner (§9.2), not the system heads-up.
+
 ## 2026-11-05 — M5 buyer flows
 - **One RPC per buyer screen** (`buyer_home`, `vendor_page`, `my_following`) returning JSON, so a screen loads in one round trip on 3G and caches as one query.
 - **Realtime invalidates, does not patch**: any `stop_events` change refetches buyer queries. Simple and correct; the payload is small.
