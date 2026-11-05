@@ -43,6 +43,26 @@ isOneToOne: false
       referencedColumns: ["user_id"]
     }
                   ]
+                },"app_opens": {
+                  Row: {
+                    "date": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "date": string,"user_id": string
+                  }
+                  Update: {
+                    "date"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "app_opens_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["user_id"]
+    }
+                  ]
                 },"app_settings": {
                   Row: {
                     "is_public": boolean,"key": string,"updated_at": string,"value": NonNullable<Json>
@@ -81,6 +101,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "societies"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "buyer_societies_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
     },{
       foreignKeyName: "buyer_societies_society_id_fkey"
       columns: ["society_id"]
@@ -169,6 +195,12 @@ isOneToOne: false
       foreignKeyName: "follows_society_id_fkey"
       columns: ["society_id"]
 isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
+    },{
+      foreignKeyName: "follows_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
       referencedRelation: "v_vendor_requests"
       referencedColumns: ["society_id"]
     },{
@@ -203,6 +235,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "societies"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "gates_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
     },{
       foreignKeyName: "gates_society_id_fkey"
       columns: ["society_id"]
@@ -327,6 +365,12 @@ isOneToOne: false
       foreignKeyName: "qr_scans_society_id_fkey"
       columns: ["society_id"]
 isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
+    },{
+      foreignKeyName: "qr_scans_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
       referencedRelation: "v_vendor_requests"
       referencedColumns: ["society_id"]
     },{
@@ -405,6 +449,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "societies"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "requests_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
     },{
       foreignKeyName: "requests_society_id_fkey"
       columns: ["society_id"]
@@ -705,6 +755,12 @@ isOneToOne: false
       foreignKeyName: "waitlist_society_id_fkey"
       columns: ["society_id"]
 isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
+    },{
+      foreignKeyName: "waitlist_society_id_fkey"
+      columns: ["society_id"]
+isOneToOne: false
       referencedRelation: "v_vendor_requests"
       referencedColumns: ["society_id"]
     },{
@@ -718,7 +774,29 @@ isOneToOne: false
                 }
           }
           Views: {
-            "v_review_public": {
+            "v_metric_alerts_daily": {
+                  Row: {
+                    "alerts": number | null,"area": Database["public"]['Enums']["pilot_area"] | null,"date": string | null,"opens": number | null,"opens_15m": number | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"v_metric_society_adoption": {
+                  Row: {
+                    "area": Database["public"]['Enums']["pilot_area"],"flats_count": number,"followers": number | null,"name": string,"society_id": string,"vendors": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "area"?: Database["public"]['Enums']["pilot_area"] | null,"flats_count"?: number | null,"followers"?: never,"name"?: string | null,"society_id"?: string | null,"vendors"?: never
+                         }
+                        Update: {
+                           "area"?: Database["public"]['Enums']["pilot_area"] | null,"flats_count"?: number | null,"followers"?: never,"name"?: string | null,"society_id"?: string | null,"vendors"?: never
+                         }
+                        Relationships: [
+                    
+                  ]
+                },"v_review_public": {
                   Row: {
                     "created_at": string,"hidden_reason": string | null,"id": string,"is_mine": boolean | null,"reviewer_name": string | null,"society_name": string | null,"stars": number,"status": Database["public"]['Enums']["review_status"],"tags": (string)[],"text": string | null,"updated_at": string,"vendor_id": string,"vendor_replied_at": string | null,"vendor_reply": string | null
                   }
@@ -915,6 +993,18 @@ isOneToOne: false
 "menu_json":
 { Args: { "p_date": string,"p_vendor": string }; Returns: Json
                            },
+"metrics_daily":
+{ Args: { "p_area"?: Database["public"]['Enums']["pilot_area"],"p_from"?: string,"p_to"?: string }; Returns: Json
+                           },
+"metrics_societies":
+{ Args: { "p_area"?: Database["public"]['Enums']["pilot_area"] }; Returns: Json
+                           },
+"metrics_summary":
+{ Args: { "p_area"?: Database["public"]['Enums']["pilot_area"],"p_from"?: string,"p_to"?: string }; Returns: Json
+                           },
+"metrics_vendors":
+{ Args: { "p_area"?: Database["public"]['Enums']["pilot_area"],"p_from"?: string,"p_to"?: string }; Returns: Json
+                           },
 "my_account":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -974,6 +1064,9 @@ isOneToOne: false
                            },
 "publish_menu":
 { Args: { "p_client_id"?: string,"p_date": string,"p_items": Json }; Returns: Json
+                           },
+"record_app_open":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "record_qr_scan":
 { Args: { "p_code": string,"p_source": string }; Returns: undefined
@@ -1098,6 +1191,9 @@ isOneToOne: false
                            },
 "vendor_stop_today":
 { Args: { "p_gate": string,"p_vendor": string }; Returns: string
+                           },
+"vendors_in_area":
+{ Args: { "p_area": Database["public"]['Enums']["pilot_area"] }; Returns: string[]
                            },
 "verify_vendor":
 { Args: { "p_vendor_id": string }; Returns: undefined

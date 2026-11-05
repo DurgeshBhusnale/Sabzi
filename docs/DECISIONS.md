@@ -2,6 +2,12 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M11 analytics
+- **PostHog via its HTTP batch API, not the SDK**: no autocapture or session replay (privacy), no extra native modules, ~60 lines. Distinct id is a random per-install id.
+- **Retention is measured server-side** from a one-row-per-day `app_opens` table (dashboard numbers come from SQL, per TECH_SPEC §10). Pilot start comes from `app_settings.pilot_start_date`, else the first buyer sign-up.
+- **Active vendor** = published a menu on 5+ of the 7 days ending the selected date; **alert usefulness** = arrival notifications opened within 15 minutes / sent, from `notifications.opened_at`.
+- **Charts are hand-written SVG** (2 series, primary + info, palette validated for colour-blind separation) to avoid a chart library in the admin bundle.
+
 ## 2026-11-05 — M10 QR
 - **The web fallback lives in the Next.js app** (public routes `/v/[code]`, `/s/[id]`, `/.well-known/assetlinks.json`) rather than an edge function, so one deployment serves the admin panel, the QR pages and App Links verification.
 - **PDFs are made in the admin's browser** with pdf-lib: no server route needs admin credentials, and the vendor photo comes from public storage. Helvetica is used (no ₹ needed on the sticker); QR uses error-correction level H with a 4-module quiet zone for outdoor stickers.
