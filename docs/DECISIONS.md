@@ -2,6 +2,12 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M8 offline
+- **Own small queue instead of TanStack paused mutations**: vendor actions need visible per-item status (X-04), stale-arrival confirmation and supersede rules, which are clearer in a 150-line tested class persisted to AsyncStorage.
+- **Online first, queue on network failure**: an action is tried at once when online; only a network error (not a server "no") puts it in the queue. Server refusals such as `arrival_cooldown` are permanent and shown, never retried.
+- **Buyer writes are not queued** (TECH_SPEC §8); they show an error with retry.
+- **Weak network = 2G/3G** from NetInfo; there is no reliable bandwidth probe on Android without extra traffic.
+
 ## 2026-11-05 — M7 engagement
 - **Vendor requests tab shows requests before 4 PM** with the "Requests so far" note (the design file shows this state); the push digest goes out at 4 PM. Answering is allowed any time.
 - **Quantities are free text** ("500 g", "1 kg", "2 pieces"); the vendor tab parses and sums grams/kg, pieces and bunches separately and lists anything it can't parse.

@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Screen, Snackbar } from '../../src/ui';
 import { en } from '../../src/i18n/en';
 import { useSession } from '../../src/features/auth/session';
+import { PendingActionsChip } from '../../src/features/system/PendingActions';
+import { NetworkBanner } from '../../src/features/system/NetworkBanner';
 import { NotificationsBlockedBanner } from '../../src/features/notifications/BlockedBanner';
 import { TodayView } from '../../src/features/vendor/TodayView';
 import { useInvalidateVendor, useMyVendor, useStats, useStopsToday, useTodayMenu, vendorKeys } from '../../src/features/vendor/hooks';
@@ -32,6 +34,8 @@ export default function VendorToday() {
   }, [published]);
   return (
     <Screen refreshing={refreshing} onRefresh={() => invalidate(vendorKeys.today, vendorKeys.stops, vendorKeys.stats, vendorKeys.me)}>
+      <NetworkBanner dataUpdatedAt={menu.dataUpdatedAt || undefined} />
+      <PendingActionsChip />
       <NotificationsBlockedBanner role="vendor" />
       <TodayView
         vendor={vendor.data}

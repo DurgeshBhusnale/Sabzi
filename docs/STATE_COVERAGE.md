@@ -50,3 +50,26 @@ Manual check steps (dev build against local Supabase, phone `+91 99999 00001`, O
 | B-14 Report vendor | Empty, submitting, submitted | `app/buyer/report.tsx` | M, D `report_vendor` |
 
 Realtime manual check: log in as Priya (`+91 99999 00011`) in one emulator and Ramesh (`…00001`) in another; tap I've arrived at Green Park Gate 1; Priya's home moves Ramesh into "At the gate now" within ~1–2 s.
+
+## System (X-01 … X-17) — milestone M8
+
+All 17 are listed and openable in the dev route `app/_dev/states.tsx` (Settings → "Dev: system states", dev builds only); `__tests__/system-states.test.tsx` opens each one.
+
+| ID | Where in the real app |
+| --- | --- |
+| X-01 | Buyer home when offline with nothing cached |
+| X-02 | `NetworkBanner` on buyer home, vendor page, vendor Today, set menu (time from the cached query) |
+| X-03 | `NetworkBanner` on 2G/3G |
+| X-04 | `PendingActionsChip` on vendor Today (queued, sending, sent, failed + retry, stale arrival confirm) |
+| X-05 / X-06 | `SystemStates.tsx` (server error / timeout) |
+| X-07 | S-03 with `expired=1` banner |
+| X-08 | `NotificationsBlockedBanner` (M6) |
+| X-09 | Arrive sheet "Location is off" + B-01 location-off state; full screen in `SystemStates.tsx` |
+| X-10 | `app/vendor/photo.tsx` camera denied |
+| X-11 / X-12 / X-13 | `AppStatusGate` from `app_settings` (min/latest version, maintenance) |
+| X-14 | `app/+not-found.tsx`, vendor page unavailable, unknown QR code |
+| X-15 | `app/(vendor)/_layout.tsx` suspended |
+| X-16 | S-03 "Too many tries" + `X16OtpLimit` |
+| X-17 | B-02 waitlist |
+
+Empty states (§8.4) and skeletons (§8.5) are part of each screen above (`EmptyState`, `SkeletonBlock`).

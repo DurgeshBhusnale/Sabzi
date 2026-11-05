@@ -11,6 +11,7 @@ import { uploadImage } from '../../src/lib/storage';
 import { openAppSettings } from '../../src/lib/permissions';
 import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
+import { useOffline } from '../../src/lib/offline/OfflineProvider';
 
 type Phase = 'intro' | 'preview' | 'uploading' | 'failed' | 'denied';
 
@@ -19,6 +20,7 @@ export default function StockPhoto() {
   const t = useTheme();
   const vendor = useMyVendor();
   const invalidate = useInvalidateVendor();
+  const offline = useOffline();
   const [phase, setPhase] = useState<Phase>('intro');
   const [uri, setUri] = useState<string | null>(null);
 
@@ -35,8 +37,10 @@ export default function StockPhoto() {
     setPhase('uploading');
     try {
       const path = `${vendor.data.user_id}/${todayIst()}.jpg`;
-      await uploadImage('stock-photos', path, uri);
-      await setStockPhoto(path);
+      await offline.runOrQueue('stock_photo', { path, uri }, 'photo', async (cid) => {
+        await uploadImage('stock-photos', path, uri);
+        await setStockPhoto(path, cid);
+      });
       track('stock_photo_added');
       await invalidate(vendorKeys.today);
       router.back();

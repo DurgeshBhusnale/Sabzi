@@ -2,6 +2,9 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Screen, TopAppBar } from '../../src/ui';
+import { NetworkBanner } from '../../src/features/system/NetworkBanner';
+import { X01NoInternet } from '../../src/features/system/SystemStates';
+import { useOffline } from '../../src/lib/offline/OfflineProvider';
 import { NotificationsBlockedBanner } from '../../src/features/notifications/BlockedBanner';
 import { HomeView } from '../../src/features/buyer/HomeView';
 import { SocietySwitcher } from '../../src/features/buyer/SocietySwitcher';
@@ -17,6 +20,8 @@ export default function BuyerHome() {
   const notifs = useNotifications();
   const qc = useQueryClient();
   const [switcher, setSwitcher] = useState(false);
+  const { online } = useOffline();
+  if (!online && !home.data && !home.isLoading) return <X01NoInternet onRetry={() => home.refetch()} />;
   const current = mine.data?.find((s) => s.id === societyId);
   const firstGate = home.data?.[0]?.gate_name;
   return (
@@ -25,6 +30,7 @@ export default function BuyerHome() {
       refreshing={home.isRefetching}
       onRefresh={() => home.refetch()}
     >
+      <NetworkBanner dataUpdatedAt={home.dataUpdatedAt || undefined} />
       <NotificationsBlockedBanner role="buyer" />
       <HomeView
         vendors={home.data}

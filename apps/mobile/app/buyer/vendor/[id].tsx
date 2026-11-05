@@ -13,6 +13,7 @@ import { notificationPermission, openAppSettings } from '../../../src/lib/permis
 import { vendorQrUrl } from '../../../src/ui/QrCard';
 import { track } from '../../../src/lib/analytics';
 import { en } from '../../../src/i18n/en';
+import { NetworkBanner } from '../../../src/features/system/NetworkBanner';
 
 const COACH_KEY = 'sabzi.coach.follow';
 
@@ -61,6 +62,7 @@ export default function VendorPageScreen() {
       refreshing={page.isRefetching}
       onRefresh={() => page.refetch()}
     >
+      <NetworkBanner dataUpdatedAt={page.dataUpdatedAt || undefined} />
       <VendorPageView
         page={data}
         loading={page.isLoading}

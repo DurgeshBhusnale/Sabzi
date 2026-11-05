@@ -5,6 +5,8 @@ import { MenuEditor } from '../../src/features/vendor/MenuEditor';
 import { buildDraft } from '../../src/features/vendor/menuLogic';
 import { useInvalidateVendor, useTodayMenu, useUsualItems, useYesterdayMenu, vendorKeys } from '../../src/features/vendor/hooks';
 import { publishMenu } from '../../src/features/vendor/api';
+import { useOffline } from '../../src/lib/offline/OfflineProvider';
+import { NetworkBanner } from '../../src/features/system/NetworkBanner';
 import { AppErrorException } from '../../src/lib/errors';
 import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
@@ -15,12 +17,14 @@ export default function SetMenu() {
   const today = useTodayMenu();
   const yesterday = useYesterdayMenu();
   const invalidate = useInvalidateVendor();
+  const offline = useOffline();
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const loading = usual.isLoading || today.isLoading || yesterday.isLoading;
 
   return (
     <Screen header={<TopAppBar title={en.vendor.menuTitle} onBack={() => router.back()} />}>
+      <NetworkBanner />
       {loading ? (
         <SkeletonBlock kind="menuRow" count={4} />
       ) : !usual.data?.length ? (
@@ -35,10 +39,15 @@ export default function SetMenu() {
             setPublishing(true);
             setError(null);
             try {
-              const r = await publishMenu(items);
-              track('menu_published', { items: r.items });
+              const r = await offline.runOrQueue('publish_menu', { items }, 'menu', (cid) => publishMenu(items, cid));
+              track('menu_published', { items: items.length, queued: r.queued });
+              if (r.queued) {
+                setError(en.system.queuedMenu);
+                setTimeout(() => router.replace('/(vendor)/today'), 1500);
+                return;
+              }
               await invalidate(vendorKeys.today);
-              router.replace({ pathname: '/(vendor)/today', params: { published: String(r.followers) } });
+              router.replace({ pathname: '/(vendor)/today', params: { published: String(r.result.followers) } });
             } catch (e) {
               setError(e instanceof AppErrorException ? e.message : en.errors.network);
             } finally {

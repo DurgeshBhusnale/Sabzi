@@ -12,6 +12,7 @@ import { remainingFollowers } from '../../src/features/vendor/arrival';
 import { AppErrorException } from '../../src/lib/errors';
 import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
+import { useOffline } from '../../src/lib/offline/OfflineProvider';
 
 /** V-11 */
 export default function EveningDeal() {
@@ -20,6 +21,7 @@ export default function EveningDeal() {
   const menu = useTodayMenu();
   const stops = useStopsToday();
   const invalidate = useInvalidateVendor();
+  const offline = useOffline();
   const used = useQuery({ queryKey: ['vendor', 'deal-today'], queryFn: () => myDealToday() });
   const [sent, setSent] = useState<{ followers: number; summary: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,8 +55,9 @@ export default function EveningDeal() {
           onSend={async (items) => {
             setError(null);
             try {
-              const r = await sendDeal(items);
-              track('deal_sent', { items: items.length });
+              const q = await offline.runOrQueue('send_deal', { items }, 'deal', (cid) => sendDeal(items, cid));
+              track('deal_sent', { items: items.length, queued: q.queued });
+              const r = q.queued ? { followers: remaining } : q.result;
               await invalidate(vendorKeys.today, ['vendor', 'deal-today']);
               const names = (menu.data?.lines ?? []).filter((l) => items.some((i) => i.item_id === l.itemId)).map((l) => `${l.name} ₹${items.find((i) => i.item_id === l.itemId)!.deal_price}`);
               setSent({ followers: r.followers, summary: names.join(' · ') });

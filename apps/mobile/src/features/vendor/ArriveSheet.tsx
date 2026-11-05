@@ -10,12 +10,12 @@ import { en } from '../../i18n/en';
 import { AppErrorException } from '../../lib/errors';
 import { track } from '../../lib/analytics';
 
-type Phase = 'finding' | 'choose' | 'sending' | 'sent' | 'error';
+type Phase = 'finding' | 'choose' | 'sending' | 'sent' | 'queued' | 'error';
 
 export type ArriveDeps = {
   getPosition: () => Promise<{ lat: number; lng: number } | null>;
   locationAllowed: () => Promise<boolean>;
-  send: (stop: TodayStop, pos: { lat: number; lng: number } | null) => Promise<{ event_id: string; followers: number }>;
+  send: (stop: TodayStop, pos: { lat: number; lng: number } | null) => Promise<{ event_id: string; followers: number } | { queued: true }>;
   undo: (eventId: string) => Promise<void>;
   onDone: () => void;
   openSettings: () => void;
@@ -74,6 +74,11 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
     setPhase('sending');
     try {
       const r = await deps.send(selected, pos);
+      if ('queued' in r) {
+        track('vendor_arrived', { queued: true });
+        setPhase('queued');
+        return;
+      }
       track('vendor_arrived', { followers: r.followers });
       setSent(r);
       setUndoLeft(5);
@@ -121,6 +126,8 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
               onClose();
             }}
           />
+        ) : phase === 'queued' ? (
+          <Button size="xl" label={en.common.done} onPress={onClose} testID="queued-done" />
         ) : phase === 'choose' ? (
           <Button
             size="xl"
@@ -141,6 +148,7 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
           <Text color="textSecondary">{selected ? `${selected.societyName} · ${selected.gateName}` : ''}</Text>
         </View>
       ) : null}
+      {phase === 'queued' ? <Banner kind="pending" message={en.system.queuedArrival} testID="arrival-queued" /> : null}
       {phase === 'choose' ? (
         <>
           {suggestion?.kind === 'none_nearby' ? <Banner kind="pending" message={en.vendor.notNear} testID="none-nearby" /> : null}

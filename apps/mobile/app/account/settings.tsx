@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import Constants from 'expo-constants';
 import { useState } from 'react';
 import { Linking } from 'react-native';
-import { Bell, FileText, HelpCircle, Languages, LogOut, Shield, Trash2 } from 'lucide-react-native';
+import { Bell, Code, FileText, HelpCircle, Languages, LogOut, Shield, Trash2 } from 'lucide-react-native';
 import { PUBLIC_BASE_URL } from '@sabzi/shared';
 import { useTheme, type SchemePreference } from '../../src/theme/ThemeProvider';
 import { Card, Dialog, Screen, SegmentedControl, Text, TopAppBar } from '../../src/ui';
@@ -44,6 +44,12 @@ export default function Settings() {
         <LinkRow icon={LogOut} label={en.settings.logOut} onPress={() => setLogout(true)} />
         <LinkRow icon={Trash2} label={en.settings.deleteAccount} onPress={() => router.push('/account/delete')} />
       </Card>
+      {__DEV__ ? (
+        <Card>
+          <LinkRow icon={Code} label="Dev: components" onPress={() => router.push('/_dev/components')} />
+          <LinkRow icon={Code} label="Dev: system states X-01…X-17" onPress={() => router.push('/_dev/states')} />
+        </Card>
+      ) : null}
       <Text variant="caption" color="textMuted" align="center">{en.settings.version(Constants.expoConfig?.version ?? '0.0.0')}</Text>
       <Dialog
         visible={logout}

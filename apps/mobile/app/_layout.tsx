@@ -4,13 +4,16 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { SessionProvider } from '../src/features/auth/session';
 import { makeQueryClient } from '../src/lib/queryClient';
 import { fontAssets } from '../src/theme/fonts';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider';
 import { Splash } from '../src/features/system/Splash';
 import { NotificationsProvider } from '../src/features/notifications/NotificationsProvider';
+import { OfflineProvider } from '../src/lib/offline/OfflineProvider';
+import { AppStatusGate } from '../src/features/system/AppStatusGate';
+import { PERSIST_MAX_AGE, queryPersister } from '../src/lib/persist';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -34,13 +37,17 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <SessionProvider>
-            <NotificationsProvider>
-              <Root />
-            </NotificationsProvider>
-          </SessionProvider>
-        </QueryClientProvider>
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: queryPersister, maxAge: PERSIST_MAX_AGE }}>
+          <AppStatusGate>
+            <SessionProvider>
+              <OfflineProvider>
+                <NotificationsProvider>
+                  <Root />
+                </NotificationsProvider>
+              </OfflineProvider>
+            </SessionProvider>
+          </AppStatusGate>
+        </PersistQueryClientProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

@@ -14,6 +14,7 @@ import { currentStop } from '../../src/features/vendor/arrival';
 import { arrive, undoStopEvent } from '../../src/features/vendor/api';
 import { currentPosition, locationPermission, openAppSettings, requestLocationPermission } from '../../src/lib/permissions';
 import { SystemScreen } from '../../src/features/system/SystemScreen';
+import { useOffline } from '../../src/lib/offline/OfflineProvider';
 import { en } from '../../src/i18n/en';
 
 const TabBar = makeTabBar([
@@ -30,6 +31,7 @@ function ArriveLayer() {
   const vendor = useMyVendor();
   const stops = useStopsToday();
   const invalidate = useInvalidateVendor();
+  const offline = useOffline();
   const verified = vendor.data?.status === 'verified';
   const live = currentStop(stops.data ?? []);
   const showFab = /\/(today|stops)$/.test(path) && !live;
@@ -47,7 +49,11 @@ function ArriveLayer() {
         deps={{
           locationAllowed: async () => (await locationPermission()) === 'granted' || (await requestLocationPermission()) === 'granted',
           getPosition: () => currentPosition(),
-          send: (s, pos) => arrive(s.gateId, pos),
+          isOnline: () => offline.online,
+          send: async (s, pos) => {
+            const r = await offline.runOrQueue('vendor_arrive', { gate_id: s.gateId, pos }, 'arrival', (cid) => arrive(s.gateId, pos, cid));
+            return r.queued ? { queued: true as const } : r.result;
+          },
           undo: (id) => undoStopEvent(id),
           openSettings: openAppSettings,
           onDone: () => {

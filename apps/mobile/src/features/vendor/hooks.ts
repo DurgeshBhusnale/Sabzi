@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as api from './api';
+import { useOffline } from '../../lib/offline/OfflineProvider';
 
 export const vendorKeys = {
   me: ['vendor', 'me'] as const,
@@ -32,8 +33,10 @@ export function useInvalidateVendor() {
 
 export function useSoldOut() {
   const qc = useQueryClient();
+  const offline = useOffline();
   return useMutation({
-    mutationFn: ({ itemId, soldOut }: { itemId: string; soldOut: boolean }) => api.setSoldOut(itemId, soldOut),
+    mutationFn: ({ itemId, soldOut }: { itemId: string; soldOut: boolean }) =>
+      offline.runOrQueue('set_sold_out', { item_id: itemId, sold_out: soldOut }, 'sold out', (cid) => api.setSoldOut(itemId, soldOut, cid)),
     onMutate: async ({ itemId, soldOut }) => {
       await qc.cancelQueries({ queryKey: vendorKeys.today });
       const prev = qc.getQueryData<api.DayMenu | null>(vendorKeys.today);
@@ -41,6 +44,8 @@ export function useSoldOut() {
       return { prev };
     },
     onError: (_e, _v, ctx) => ctx?.prev && qc.setQueryData(vendorKeys.today, ctx.prev),
-    onSettled: () => qc.invalidateQueries({ queryKey: vendorKeys.today }),
+    onSettled: (r) => {
+      if (!r || !r.queued) qc.invalidateQueries({ queryKey: vendorKeys.today });
+    },
   });
 }

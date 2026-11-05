@@ -10,6 +10,7 @@ import { currentStop } from '../../src/features/vendor/arrival';
 import { eventOpenCount, leavingSoon, left } from '../../src/features/vendor/api';
 import { useInvalidateVendor, useSoldOut, useStopsToday, useTodayMenu, vendorKeys } from '../../src/features/vendor/hooks';
 import { en } from '../../src/i18n/en';
+import { useOffline } from '../../src/lib/offline/OfflineProvider';
 
 /** V-09: live banner, leaving soon / I've left, quick sold-out list, live open count. */
 export default function AtTheStop() {
@@ -18,6 +19,7 @@ export default function AtTheStop() {
   const menu = useTodayMenu();
   const sold = useSoldOut();
   const invalidate = useInvalidateVendor();
+  const offline = useOffline();
   const live = currentStop(stops.data ?? []);
   const opens = useQuery({ queryKey: ['vendor', 'opens', live?.arrivalEventId], queryFn: () => eventOpenCount(live!.arrivalEventId!), enabled: !!live?.arrivalEventId, refetchInterval: 15_000 });
   const [toast, setToast] = useState<string | null>(null);
@@ -51,8 +53,8 @@ export default function AtTheStop() {
             onPress={async () => {
               setBusy('leaving');
               try {
-                await leavingSoon(live.gateId);
-                setToast(en.vendor.toldLeavingSnack(live.followers));
+                const r = await offline.runOrQueue('vendor_leaving_soon', { gate_id: live.gateId }, 'leaving', (cid) => leavingSoon(live.gateId, cid));
+                setToast(r.queued ? en.system.queuedAction : en.vendor.toldLeavingSnack(live.followers));
                 await invalidate(vendorKeys.stops);
               } finally {
                 setBusy(null);
@@ -70,7 +72,7 @@ export default function AtTheStop() {
             onPress={async () => {
               setBusy('left');
               try {
-                await left(live.gateId);
+                await offline.runOrQueue('vendor_left', { gate_id: live.gateId }, 'left', (cid) => left(live.gateId, cid));
                 await invalidate(vendorKeys.stops);
                 router.replace('/(vendor)/today');
               } finally {
