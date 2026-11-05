@@ -2,9 +2,6 @@
 
 For the owner. Do these in order. Nothing here needs code changes unless noted.
 
-## 0. Get the code onto GitHub
-- [ ] Reconnect GitHub for Claude (claude.ai → Settings → Connectors → GitHub) or push the branch `claude/adoring-johnson-tu32pu` yourself — the build session could not push (see `docs/QUESTIONS.md`). Open one PR to `main` and merge it once CI is green.
-
 ## 1. Supabase staging project
 - [ ] Create a Supabase project in **Mumbai (ap-south-1)**, plan with PITR backups if possible.
 - [ ] `npx supabase link --project-ref <ref>` then `npx supabase db push` (applies `supabase/migrations`). Do **not** run `seed.sql` on production; on staging only if you want sample data.

@@ -2,7 +2,7 @@
 
 Built in one unattended Claude Code session on 5 Nov 2026. All 13 milestones (M0–M12) are built and tested.
 
-> **Important — the code has not reached GitHub yet.** This cloud session could clone the repo but every write was refused (`git push`, the REST API and the GitHub tools all returned 403 "Resource not accessible by integration" — the Claude GitHub App has no write access to `DurgeshBhusnale/Sabzi`). So no PRs were opened or merged; all work is in **13 commits on the local branch `claude/adoring-johnson-tu32pu`** of the session's container. To keep it: reconnect GitHub at <https://claude.ai/connect-github> (or install the Claude GitHub App on the repo) and ask this session — or a new one with the same container — to push that branch, then open one PR to `main` and merge after CI. If the container is gone before that, the work would need to be redone from `docs/` (which describes every decision).
+All work is merged to `main` in [PR #1](https://github.com/DurgeshBhusnale/Sabzi/pull/1) (one commit per milestone on the branch, squash-merged; CI `verify`, `database` and `functions` jobs green).
 
 ## What was built
 
@@ -66,13 +66,12 @@ Sample logins (local only, OTP `123456`): vendors Ramesh `+91 99999 00001`, Suni
 
 Full steps are in `docs/RELEASE_CHECKLIST.md`. In short:
 
-1. **GitHub write access** for Claude, then push/merge the branch (see the warning at the top).
-2. **Supabase** staging project (Mumbai): `db push`, deploy 4 functions, set function secrets, `private.settings` notify URL/secret, SMS hook, TOTP MFA, create the owner admin.
-3. **MSG91**: DLT entity, sender ID and OTP template → `MSG91_AUTH_KEY`, `MSG91_TEMPLATE_ID`.
-4. **FCM**: Firebase project + service-account key in EAS credentials; real EAS project id in `app.json`.
-5. **Domain**: replace `sabzi.example` (`PUBLIC_BASE_URL`, app.json intent filter), deploy `apps/admin` there, set `ANDROID_SHA256_CERT_FINGERPRINTS`.
-6. **Brand**: final name/logo → `APP_NAME`, `assets/brand/mark.svg` (regenerate icons), Play Store URL, support phone/email.
-7. **Legal**: review `/privacy` and `/terms` (DPDP), name a grievance officer.
-8. **PostHog** key (optional for the pilot).
-9. **EAS builds**: preview APK on a 2 GB phone with 3G throttling, then production AAB to the internal testing track.
-10. Answer the open questions in `docs/QUESTIONS.md`.
+1. **Supabase** staging project (Mumbai): `db push`, deploy 4 functions, set function secrets, `private.settings` notify URL/secret, SMS hook, TOTP MFA, create the owner admin.
+2. **MSG91**: DLT entity, sender ID and OTP template → `MSG91_AUTH_KEY`, `MSG91_TEMPLATE_ID`.
+3. **FCM**: Firebase project + service-account key in EAS credentials; real EAS project id in `app.json`.
+4. **Domain**: replace `sabzi.example` (`PUBLIC_BASE_URL`, app.json intent filter), deploy `apps/admin` there, set `ANDROID_SHA256_CERT_FINGERPRINTS`.
+5. **Brand**: final name/logo → `APP_NAME`, `assets/brand/mark.svg` (regenerate icons), Play Store URL, support phone/email.
+6. **Legal**: review `/privacy` and `/terms` (DPDP), name a grievance officer.
+7. **PostHog** key (optional for the pilot).
+8. **EAS builds**: preview APK on a 2 GB phone with 3G throttling, then production AAB to the internal testing track.
+9. Answer the open questions in `docs/QUESTIONS.md`.
