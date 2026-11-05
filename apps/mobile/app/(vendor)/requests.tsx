@@ -1,0 +1,10 @@
+import { Screen, EmptyState, TopAppBar } from '../../src/ui';
+
+/** Placeholder until M4 builds this tab. */
+export default function VendorRequests() {
+  return (
+    <Screen header={<TopAppBar title="Requests" />}>
+      <EmptyState title="Requests" body="Coming in the next build." />
+    </Screen>
+  );
+}

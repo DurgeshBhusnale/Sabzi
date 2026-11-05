@@ -2,6 +2,13 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M3 mobile shell
+- **No UI kit and no reanimated**: components use React Native primitives and the built-in `Animated` API (pulse, shimmer); bottom sheets use `Modal`. Fewer native modules for a 2 GB RAM phone and the 30 MB APK target.
+- **Icons: lucide-react-native** (TECH_SPEC) instead of Phosphor used in the design file; same outline style, 24 dp, 1.75 stroke. Jest maps lucide to its CJS build.
+- **QR codes** are always black on white (`qrColors` token) so every scanner reads them in dark mode.
+- **Global notification toggles** (S-13) live in `profiles.notify_prefs`; per-vendor toggles stay on `follows`. The push sender must respect both (M6).
+- **Vendor photo on S-07** is collected on V-01 (business details) instead, so S-07 is name only.
+
 ## 2026-11-05 — M2 auth
 - **Wrong-OTP counting lives in an edge function** (`otp-verify`). Supabase Auth has no hook for failed verifications, so the app verifies through `otp-verify`, which checks/records failures in `otp_attempts` (SQL functions, service role only) and returns the session. The send-SMS hook also refuses blocked numbers, so a blocked number cannot get new codes.
 - **Local SMS hook is a Postgres function** (`hook_send_sms`); production points the Auth "Send SMS" HTTP hook at the `send-sms-hook` edge function (MSG91 flow API with a DLT template). Without `MSG91_AUTH_KEY`/`MSG91_TEMPLATE_ID` the function logs a stub line and returns success.

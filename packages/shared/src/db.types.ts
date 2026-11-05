@@ -293,14 +293,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "admin_active": boolean,"admin_level": Database["public"]['Enums']["admin_level"] | null,"created_at": string,"deleted_at": string | null,"email": string | null,"email_verified": boolean,"name": string | null,"push_token": string | null,"role": Database["public"]['Enums']["user_role"] | null,"updated_at": string,"user_id": string
+                    "admin_active": boolean,"admin_level": Database["public"]['Enums']["admin_level"] | null,"created_at": string,"deleted_at": string | null,"email": string | null,"email_verified": boolean,"name": string | null,"notify_prefs": NonNullable<Json>,"push_token": string | null,"role": Database["public"]['Enums']["user_role"] | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "admin_active"?: boolean,"admin_level"?: Database["public"]['Enums']["admin_level"] | null,"created_at"?: string,"deleted_at"?: string | null,"email"?: string | null,"email_verified"?: boolean,"name"?: string | null,"push_token"?: string | null,"role"?: Database["public"]['Enums']["user_role"] | null,"updated_at"?: string,"user_id": string
+                    "admin_active"?: boolean,"admin_level"?: Database["public"]['Enums']["admin_level"] | null,"created_at"?: string,"deleted_at"?: string | null,"email"?: string | null,"email_verified"?: boolean,"name"?: string | null,"notify_prefs"?: NonNullable<Json>,"push_token"?: string | null,"role"?: Database["public"]['Enums']["user_role"] | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "admin_active"?: boolean,"admin_level"?: Database["public"]['Enums']["admin_level"] | null,"created_at"?: string,"deleted_at"?: string | null,"email"?: string | null,"email_verified"?: boolean,"name"?: string | null,"push_token"?: string | null,"role"?: Database["public"]['Enums']["user_role"] | null,"updated_at"?: string,"user_id"?: string
+                    "admin_active"?: boolean,"admin_level"?: Database["public"]['Enums']["admin_level"] | null,"created_at"?: string,"deleted_at"?: string | null,"email"?: string | null,"email_verified"?: boolean,"name"?: string | null,"notify_prefs"?: NonNullable<Json>,"push_token"?: string | null,"role"?: Database["public"]['Enums']["user_role"] | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -893,6 +893,9 @@ isOneToOne: false
                            },
 "send_deal":
 { Args: { "p_client_id"?: string,"p_items": Json }; Returns: Json
+                           },
+"set_notify_pref":
+{ Args: { "p_key": string,"p_value": boolean }; Returns: Json
                            },
 "set_role":
 { Args: { "p_role": Database["public"]['Enums']["user_role"] }; Returns: undefined

@@ -33,6 +33,13 @@ export type ColorTokens = {
   onDisabled: string;
   scrim: string;
   shadow: string;
+  /** Snackbar uses the same dark ground in both themes (design system file) */
+  snackbarBg: string;
+  snackbarText: string;
+  snackbarAction: string;
+  /** Item illustration placeholder tint (initial-letter circles) */
+  artTint: string;
+  artText: string;
 };
 
 export const lightColors: ColorTokens = {
@@ -63,6 +70,11 @@ export const lightColors: ColorTokens = {
   onDisabled: '#FFFFFF',
   scrim: 'rgba(23,32,26,0.48)',
   shadow: '#17201A',
+  snackbarBg: '#17201A',
+  snackbarText: '#FFFFFF',
+  snackbarAction: '#7FE0A8',
+  artTint: '#FCE3DE',
+  artText: '#B23A26',
 };
 
 export const darkColors: ColorTokens = {
@@ -93,10 +105,18 @@ export const darkColors: ColorTokens = {
   onDisabled: '#7D8980',
   scrim: 'rgba(0,0,0,0.6)',
   shadow: '#000000',
+  snackbarBg: '#17201A',
+  snackbarText: '#FFFFFF',
+  snackbarAction: '#7FE0A8',
+  artTint: '#3A1C1C',
+  artText: '#F5A99B',
 };
 
 export const colors = { light: lightColors, dark: darkColors } as const;
 export type ColorScheme = keyof typeof colors;
+
+/** QR codes stay black on white in both themes so every scanner reads them */
+export const qrColors = { fg: '#000000', bg: '#FFFFFF' } as const;
 
 export const fontFamilies = {
   heading: 'PlusJakartaSans',
@@ -179,6 +199,16 @@ export const radius = {
 export const elevation = {
   /** Only for bottom sheets, the floating "I've arrived" button and snackbars */
   raised: { shadowOpacity: 0.14, shadowRadius: 24, shadowOffsetY: 8, elevation: 8 },
+} as const;
+
+/** Buttons: 48 dp buyer, 56 dp vendor XL (design brief §3) */
+export const controlHeights = {
+  buyer: 48,
+  vendorXL: 56,
+  fab: 64,
+  chip: 36,
+  unitChip: 48,
+  input: 52,
 } as const;
 
 export const layout = {
