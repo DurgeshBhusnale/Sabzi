@@ -14,8 +14,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: pnpm install --frozen-lockfile || pnpm install
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - name: Expo doctor
+        working-directory: apps/mobile
+        run: npx -y expo-doctor@latest
+      - name: Admin build
+        working-directory: apps/admin
+        run: npx next build
 
   database:
     runs-on: ubuntu-latest
@@ -24,14 +31,39 @@ jobs:
       - name: Check for Supabase project
         id: check
         run: |
-          if [ -f supabase/config.toml ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -d supabase/migrations ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
       - uses: supabase/setup-cli@v1
         if: steps.check.outputs.present == 'true'
         with:
           version: latest
       - if: steps.check.outputs.present == 'true'
-        run: supabase start
+        run: supabase start -x studio,imgproxy,vector,logflare,supavisor,postgres-meta
       - if: steps.check.outputs.present == 'true'
         run: supabase db reset
       - if: steps.check.outputs.present == 'true'
         run: supabase test db
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.present == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.present == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - if: steps.check.outputs.present == 'true'
+        run: pnpm install --frozen-lockfile && pnpm --filter @sabzi/integration test:integration
+
+  functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for edge functions
+        id: check
+        run: |
+          if [ -f supabase/functions/deno.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: denoland/setup-deno@v2
+        if: steps.check.outputs.present == 'true'
+        with:
+          deno-version: v2.x
+      - if: steps.check.outputs.present == 'true'
+        working-directory: supabase/functions
+        run: deno test --allow-env --allow-read --allow-net

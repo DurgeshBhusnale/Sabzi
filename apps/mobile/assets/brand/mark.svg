@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Leaf + location pin mark (design brief §2.7). Pin in white, leaf in brand-leaf inside it. -->
+  <path d="M256 64c-88 0-152 66-152 150 0 112 152 234 152 234s152-122 152-234c0-84-64-150-152-150z" fill="#FFFFFF"/>
+  <path d="M206 262c0-62 46-108 118-112-4 70-48 118-110 118-3 0-6 0-8-1 14-26 36-46 62-60-30 10-52 28-66 52 1 1 2 2 4 3z" fill="#24A05E"/>
+</svg>

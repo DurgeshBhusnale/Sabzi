@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "zod": "npm:zod@^4.1.0",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.119.0",
+    "@sabzi/shared/": "../../packages/shared/src/",
+    "@std/assert": "jsr:@std/assert@^1.0.0"
+  },
+  "compilerOptions": { "strict": true },
+  "lint": { "rules": { "exclude": ["no-explicit-any"] } }
+}
