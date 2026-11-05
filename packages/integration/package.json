@@ -1,0 +1,20 @@
+{
+  "name": "@sabzi/integration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Integration tests against the local Supabase stack (npx supabase start && npx supabase db reset first)",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:integration": "vitest run"
+  },
+  "dependencies": {
+    "@sabzi/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

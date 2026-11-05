@@ -277,6 +277,20 @@ isOneToOne: false
       referencedColumns: ["user_id"]
     }
                   ]
+                },"otp_attempts": {
+                  Row: {
+                    "blocked_until": string | null,"failures": number,"first_failure_at": string | null,"phone": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "blocked_until"?: string | null,"failures"?: number,"first_failure_at"?: string | null,"phone": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "blocked_until"?: string | null,"failures"?: number,"first_failure_at"?: string | null,"phone"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"profiles": {
                   Row: {
                     "admin_active": boolean,"admin_level": Database["public"]['Enums']["admin_level"] | null,"created_at": string,"deleted_at": string | null,"email": string | null,"email_verified": boolean,"name": string | null,"push_token": string | null,"role": Database["public"]['Enums']["user_role"] | null,"updated_at": string,"user_id": string
@@ -767,8 +781,17 @@ isOneToOne: false
 "cancel_request":
 { Args: { "p_request_id": string }; Returns: undefined
                            },
+"complete_profile":
+{ Args: { "p_name": string }; Returns: undefined
+                           },
 "create_request":
 { Args: { "p_free_text"?: string,"p_item_id"?: string,"p_note"?: string,"p_qty"?: string,"p_society_id": string,"p_vendor_id": string }; Returns: string
+                           },
+"delete_my_account":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"email_login_available":
+{ Args: { "p_email": string }; Returns: boolean
                            },
 "flag_review":
 { Args: { "p_reason": string,"p_review_id": string }; Returns: undefined
@@ -787,6 +810,9 @@ isOneToOne: false
                            },
 "hide_review":
 { Args: { "p_reason": string,"p_review_id": string }; Returns: undefined
+                           },
+"hook_send_sms":
+{ Args: { "event": Json }; Returns: Json
                            },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
@@ -812,10 +838,28 @@ isOneToOne: false
 "mark_notification_opened":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"my_account":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "my_follower_counts":
 { Args: Record<PropertyKey, never>; Returns: {
               "followers": number,"society_id": string,"society_name": string
             }[]
+                           },
+"normalize_phone":
+{ Args: { "p_phone": string }; Returns: string
+                           },
+"otp_blocked_until":
+{ Args: { "p_phone": string }; Returns: string
+                           },
+"otp_record_failure":
+{ Args: { "p_phone": string }; Returns: string
+                           },
+"otp_record_success":
+{ Args: { "p_phone": string }; Returns: undefined
+                           },
+"otp_status":
+{ Args: { "p_phone": string }; Returns: Json
                            },
 "publish_menu":
 { Args: { "p_client_id"?: string,"p_date": string,"p_items": Json }; Returns: Json
@@ -844,6 +888,9 @@ isOneToOne: false
 "review_vendor":
 { Args: { "p_review_id": string }; Returns: string
                            },
+"save_push_token":
+{ Args: { "p_token": string }; Returns: undefined
+                           },
 "send_deal":
 { Args: { "p_client_id"?: string,"p_items": Json }; Returns: Json
                            },
@@ -858,6 +905,9 @@ isOneToOne: false
                            },
 "set_vendor_status":
 { Args: { "p_reason"?: string,"p_status": Database["public"]['Enums']["vendor_status"],"p_vendor_id": string }; Returns: undefined
+                           },
+"setting_int":
+{ Args: { "p_default": number,"p_key": string }; Returns: number
                            },
 "skip_stop":
 { Args: { "p_date"?: string,"p_stop_id": string }; Returns: Json

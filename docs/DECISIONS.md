@@ -2,6 +2,13 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M2 auth
+- **Wrong-OTP counting lives in an edge function** (`otp-verify`). Supabase Auth has no hook for failed verifications, so the app verifies through `otp-verify`, which checks/records failures in `otp_attempts` (SQL functions, service role only) and returns the session. The send-SMS hook also refuses blocked numbers, so a blocked number cannot get new codes.
+- **Local SMS hook is a Postgres function** (`hook_send_sms`); production points the Auth "Send SMS" HTTP hook at the `send-sms-hook` edge function (MSG91 flow API with a DLT template). Without `MSG91_AUTH_KEY`/`MSG91_TEMPLATE_ID` the function logs a stub line and returns success.
+- **Account deletion** scrubs the profile, frees the phone and email in `auth.users`, bans the auth user, removes follows/societies/notifications, cancels open requests and suspends a vendor; reviews stay and show "Former user".
+- **Auth screens (S-01…S-16) are built in M3** with the component library; M2 ships the data layer they call.
+- **Integration tests** live in `packages/integration` (`pnpm --filter @sabzi/integration test:integration`) and need the local stack, so they run in CI's database job, not in `pnpm verify`.
+
 ## 2026-11-05 — M1 database design
 - **Buyer-safe read models are owner-rights views** (`v_vendor_public`, `v_review_public`, `v_vendor_requests`) and `security definer` functions (`v_vendor_today`, `vendor_public_stops`, `my_follower_counts`). Base `reviews` and `requests` rows (which carry `buyer_id`) are readable only by their author and admins, so vendors see a buyer's first name and society and nothing else.
 - **Column-level grants** stop users changing protected columns (`profiles.role`, `vendors.status`, `vendors.code`…); a trigger also blocks role changes once set (only an owner admin may change one).

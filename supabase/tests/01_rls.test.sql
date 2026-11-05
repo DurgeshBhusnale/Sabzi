@@ -227,7 +227,7 @@ select throws_ok($$ select phone from auth.users $$, '42501', null, 'buyer canno
 select is(get_vendor_phone(:sunita), null, 'no phone when allow_calls is off');
 select is(get_vendor_phone(:ramesh), '+919999900001', 'phone returned when allow_calls is on');
 select tests.logout();
-select is((select count(*)::int from information_schema.columns where table_schema = 'public' and column_name ilike '%phone%'), 0, 'no public table or view exposes a phone column');
+select is((select count(*)::int from information_schema.column_privileges where table_schema = 'public' and column_name ilike '%phone%' and grantee in ('anon', 'authenticated') and privilege_type = 'SELECT'), 0, 'no table or view readable by app users has a phone column');
 
 select * from finish();
 rollback;

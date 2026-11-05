@@ -294,6 +294,12 @@ max_frequency = "30s"
 # Force log out if the user has been inactive longer than the specified duration.
 # inactivity_timeout = "8h"
 
+# Local: Postgres hook refuses blocked numbers (AUTH-2). Production: HTTP hook to the
+# send-sms-hook edge function (MSG91), configured in the Supabase dashboard (see docs/HANDOFF.md).
+[auth.hook.send_sms]
+enabled = true
+uri = "pg-functions://postgres/public/hook_send_sms"
+
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
 # [auth.hook.before_user_created]
 # enabled = true
@@ -305,12 +311,13 @@ max_frequency = "30s"
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+# GoTrue needs an SMS provider block to accept phone sign-in. These are placeholder values, not credentials:
+# every SMS goes through the send_sms hook above (and test numbers never send at all).
 [auth.sms.twilio]
-enabled = false
-account_sid = ""
-message_service_sid = ""
-# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
-auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+enabled = true
+account_sid = "local-placeholder"
+message_service_sid = "local-placeholder"
+auth_token = "local-placeholder"
 
 # Multi-factor-authentication is available to Supabase Pro plan.
 [auth.mfa]
@@ -435,3 +442,13 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+[functions.otp-verify]
+enabled = true
+verify_jwt = false
+import_map = "./functions/deno.json"
+
+[functions.send-sms-hook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/deno.json"
