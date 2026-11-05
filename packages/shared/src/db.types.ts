@@ -778,6 +778,9 @@ isOneToOne: false
 "auth_role":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["user_role"]
                            },
+"buyer_home":
+{ Args: { "p_society_id": string }; Returns: Json
+                           },
 "cancel_request":
 { Args: { "p_request_id": string }; Returns: undefined
                            },
@@ -844,6 +847,9 @@ isOneToOne: false
 "mark_verified_seen":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
+"menu_json":
+{ Args: { "p_date": string,"p_vendor": string }; Returns: Json
+                           },
 "my_account":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -851,6 +857,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "followers": number,"society_id": string,"society_name": string
             }[]
+                           },
+"my_following":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "my_stops_today":
 { Args: Record<PropertyKey, never>; Returns: {
@@ -910,11 +919,17 @@ isOneToOne: false
 "save_push_token":
 { Args: { "p_token": string }; Returns: undefined
                            },
+"save_society":
+{ Args: { "p_society_id": string }; Returns: undefined
+                           },
 "send_deal":
 { Args: { "p_client_id"?: string,"p_items": Json }; Returns: Json
                            },
 "set_notify_pref":
 { Args: { "p_key": string,"p_value": boolean }; Returns: Json
+                           },
+"set_primary_society":
+{ Args: { "p_society_id": string }; Returns: undefined
                            },
 "set_role":
 { Args: { "p_role": Database["public"]['Enums']["user_role"] }; Returns: undefined
@@ -933,6 +948,9 @@ isOneToOne: false
                            },
 "skip_stop":
 { Args: { "p_date"?: string,"p_stop_id": string }; Returns: Json
+                           },
+"society_served":
+{ Args: { "p_society_id": string }; Returns: boolean
                            },
 "submit_review":
 { Args: { "p_stars": number,"p_tags"?: (string)[],"p_text"?: string,"p_vendor_id": string }; Returns: string
@@ -960,11 +978,17 @@ isOneToOne: false
 "vendor_arrive":
 { Args: { "p_client_id"?: string,"p_gate_id": string,"p_lat"?: number,"p_lng"?: number }; Returns: Json
                            },
+"vendor_by_code":
+{ Args: { "p_code": string }; Returns: string
+                           },
 "vendor_leaving_soon":
 { Args: { "p_client_id"?: string,"p_gate_id": string }; Returns: Json
                            },
 "vendor_left":
 { Args: { "p_client_id"?: string,"p_gate_id": string }; Returns: Json
+                           },
+"vendor_page":
+{ Args: { "p_society_id"?: string,"p_vendor_id": string }; Returns: Json
                            },
 "vendor_public_stops":
 { Args: { "p_vendor_id": string }; Returns: {

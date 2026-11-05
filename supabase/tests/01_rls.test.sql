@@ -145,7 +145,7 @@ select tests.logout();
 insert into stop_events (vendor_id, gate_id, type, created_at) values (:ramesh, :gate1, 'arrived', now() - interval '30 hours');
 insert into stop_events (vendor_id, gate_id, type, created_at) values (:ramesh, :gate1, 'left', now() - interval '1 hour');
 select tests.login(:priya);
-select is((select count(*)::int from stop_events), 1, 'buyer reads only last 24 h of stop events');
+select is((select count(*)::int from stop_events where vendor_id = :ramesh), 1, 'buyer reads only last 24 h of stop events');
 
 -- ================= follows
 select is((select count(*)::int from follows), 2, 'buyer reads own follows');

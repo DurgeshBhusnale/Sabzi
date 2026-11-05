@@ -14,6 +14,9 @@ export function anonClient(): SupabaseClient<Database> {
 /** Signs in with a test phone from config.toml (OTP 123456) */
 export async function phoneLogin(phone: string): Promise<SupabaseClient<Database>> {
   const c = anonClient();
+  // Test numbers verify without a send; sending is rate-limited to once per 30 s per number.
+  const first = await c.auth.verifyOtp({ phone, token: '123456', type: 'sms' });
+  if (!first.error) return c;
   const sent = await c.auth.signInWithOtp({ phone });
   if (sent.error) throw sent.error;
   const { error } = await c.auth.verifyOtp({ phone, token: '123456', type: 'sms' });

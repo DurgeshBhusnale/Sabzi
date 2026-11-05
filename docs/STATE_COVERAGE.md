@@ -27,3 +27,21 @@ Every screen and state from `docs/DESIGN_BRIEF.md`, where it lives in the code, 
 | X-15 | Vendor suspended | `app/(vendor)/_layout.tsx` | M |
 
 Manual check steps (dev build against local Supabase, phone `+91 99999 00001`, OTP `123456`): open Today; set menu with "Yesterday"; publish; add photo; tap I've arrived near Green Park (or choose manually); undo; send again; open live mode; leaving soon; I've left; Stops → Not going today on Sahyadri → confirm; Me → My QR → Share; My reviews → reply to Arjun.
+
+## Buyer (B-01 … B-16) — milestone M5
+
+| Screen | State | Where | Check |
+| --- | --- | --- | --- |
+| B-01 Pick society | Loading nearby, results (near you by distance), no search results, location off (search only), selected | `src/features/buyer/SocietyPicker.tsx`, `app/buyer-setup/society.tsx` | T `buyer-screens.test.tsx` |
+| B-02 Not served | Default, after joining waitlist | `app/buyer-setup/not-served.tsx` | M |
+| B-03 Home | One vendor at the gate, nobody at the gate yet, evening with deals, all left, no vendors here, loading, pull to refresh, realtime update, not-coming collapsed, coach mark (on vendor page Follow) | `src/features/buyer/HomeView.tsx`, `app/(buyer)/home.tsx` | T; realtime: `packages/integration/test/realtime.test.ts` |
+| B-04 Society switcher | 1 saved, 3 saved (add disabled with hint), make primary, remove | `src/features/buyer/SocietySwitcher.tsx` | T |
+| B-05 Vendor page | At the gate, expected, leaving soon, left, not coming (+ coming instead), menu not posted, all sold out, no photo, new vendor, loading, unavailable, menu search > 12, call only when allowed | `src/features/buyer/VendorPageView.tsx` | T |
+| B-06 Photo viewer | Loaded, loading, failed | `app/buyer/photo.tsx` | M |
+| B-07 Follow sheet | Default (pre-selects current society), notifications blocked (Turn on), unfollow | `src/features/buyer/FollowSheet.tsx` | T |
+| B-08 Following | Several, none (Find vendors), loading, unfollow | `app/(buyer)/following.tsx` | M, D `my_following` |
+| B-15 Notifications | Several, unread markers, empty | `app/buyer/notifications.tsx` | M |
+| B-16 From QR | Logged in → vendor page; logged out → S-03 then back (pending route); unknown code → X-14 | `app/v/[code].tsx`, `src/lib/pendingRoute.ts` | M, D `vendor_by_code` |
+| B-09…B-14 | Reviews, write review, request, requests tab, deals, report | M7 | — |
+
+Realtime manual check: log in as Priya (`+91 99999 00011`) in one emulator and Ramesh (`…00001`) in another; tap I've arrived at Green Park Gate 1; Priya's home moves Ramesh into "At the gate now" within ~1–2 s.

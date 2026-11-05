@@ -2,6 +2,13 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M5 buyer flows
+- **One RPC per buyer screen** (`buyer_home`, `vendor_page`, `my_following`) returning JSON, so a screen loads in one round trip on 3G and caches as one query.
+- **Realtime invalidates, does not patch**: any `stop_events` change refetches buyer queries. Simple and correct; the payload is small.
+- **Distance to societies is computed on the phone** from the (small) society list, so B-01 works with location off and needs no PostGIS.
+- **The B-03 coach mark is shown on the vendor page next to Follow** (first visit only, stored on the device), because Follow lives there, not on home cards.
+- **Pinch zoom in B-06** uses ScrollView zoom (iOS) — Android shows the full photo; a gesture library can be added later if pilots ask.
+
 ## 2026-11-05 — M4 vendor flows
 - **Stock photo uses the system camera** (`expo-image-picker` `launchCameraAsync`, gallery not offered) instead of a custom `expo-camera` viewfinder; the "Fit your tempo in the frame" guide is shown before opening the camera. Saves a native module and works on low-end phones. Compression steps down size/quality until the JPEG is under 300 KB.
 - **Undo for arrival is server-side**: the RPC writes the event at once; `undo_stop_event` deletes it within 10 s; the push sender (M6) waits for the 5 s undo window and skips deleted events. The app never delays the RPC, so a killed app cannot lose an arrival.
