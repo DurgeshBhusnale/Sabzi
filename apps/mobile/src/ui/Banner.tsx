@@ -12,10 +12,10 @@ const KINDS: Record<BannerKind, { bg: K; fg: K; icon: LucideIcon }> = {
   offline: { bg: 'surface2', fg: 'textPrimary', icon: WifiOff },
   weak: { bg: 'warningTint', fg: 'warning', icon: Signal },
   pending: { bg: 'warningTint', fg: 'warning', icon: Clock },
-  info: { bg: 'infoTint', fg: 'info', icon: Info },
+  info: { bg: 'infoTint', fg: 'onInfoTint', icon: Info },
   deal: { bg: 'dealAmberTint', fg: 'dealAmberText', icon: Tag },
-  error: { bg: 'errorTint', fg: 'error', icon: CircleAlert },
-  success: { bg: 'primaryTint', fg: 'primary', icon: Info },
+  error: { bg: 'errorTint', fg: 'onErrorTint', icon: CircleAlert },
+  success: { bg: 'primaryTint', fg: 'onPrimaryTint', icon: Info },
 };
 
 export function Banner({ kind, message, actionLabel, onAction, testID }: { kind: BannerKind; message: string; actionLabel?: string; onAction?: () => void; testID?: string }) {

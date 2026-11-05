@@ -2,6 +2,12 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M12 hardening
+- **New on-tint text tokens** (`onPrimaryTint`, `onErrorTint`, `onInfoTint`, `onDealAmber`): the design's primary/error/info text on their tints measured 4.3–4.49:1 and the dark-mode deal badge 1.14:1; small pill text needs 4.5:1. Brand colours themselves are unchanged.
+- **Lists are not virtualised yet**: every list in v1 is bounded (≤ 50 items, a handful of vendors per society, 7 days of notifications) and rendered inside one scroll view per screen. Switch to `FlatList` if a list grows past ~100 rows.
+- **Background location and storage permissions are blocked** in `app.json`; only foreground location, camera and notifications are requested.
+- **Icons are generated** from `apps/mobile/assets/brand/mark.svg` (placeholder mark; regenerate when the brand is final).
+
 ## 2026-11-05 — M11 analytics
 - **PostHog via its HTTP batch API, not the SDK**: no autocapture or session replay (privacy), no extra native modules, ~60 lines. Distinct id is a random per-install id.
 - **Retention is measured server-side** from a one-row-per-day `app_opens` table (dashboard numbers come from SQL, per TECH_SPEC §10). Pilot start comes from `app_settings.pilot_start_date`, else the first buyer sign-up.

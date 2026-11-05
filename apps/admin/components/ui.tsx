@@ -41,7 +41,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
 }
 
 export function Badge({ tone = 'neutral', children }: { tone?: 'neutral' | 'green' | 'amber' | 'red' | 'blue'; children: ReactNode }) {
-  const t = { neutral: 'bg-surface-2 text-text-secondary', green: 'bg-primary-tint text-primary', amber: 'bg-deal-amber-tint text-deal-amber-text', red: 'bg-error-tint text-error', blue: 'bg-info-tint text-info' }[tone];
+  const t = { neutral: 'bg-surface-2 text-text-secondary', green: 'bg-primary-tint text-on-primary-tint', amber: 'bg-deal-amber-tint text-deal-amber-text', red: 'bg-error-tint text-on-error-tint', blue: 'bg-info-tint text-on-info-tint' }[tone];
   return <span className={cx('inline-flex items-center rounded-pill px-xs py-[2px] text-xs font-semibold', t)}>{children}</span>;
 }
 

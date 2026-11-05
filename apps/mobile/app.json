@@ -41,6 +41,19 @@
             "DEFAULT"
           ]
         }
+      ],
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "POST_NOTIFICATIONS"
+      ],
+      "blockedPermissions": [
+        "ACCESS_BACKGROUND_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
       ]
     },
     "web": {
@@ -54,12 +67,44 @@
         {
           "backgroundColor": "#F8FAF7",
           "image": "./assets/splash-icon.png",
-          "imageWidth": 160
+          "imageWidth": 160,
+          "dark": {
+            "backgroundColor": "#0F1411",
+            "image": "./assets/splash-icon.png"
+          }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Sabzi uses your location only when you tap \"I have arrived\" or look for societies near you."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Sabzi uses the camera to add today’s stock photo.",
+          "photosPermission": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#24A05E"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

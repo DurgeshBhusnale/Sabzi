@@ -16,6 +16,8 @@ Pilot: Karve Nagar and Sus–Pashan. Version 1 scope is in `docs/PRD.md`.
 | `docs/CLOUD_SESSIONS.md` | How to run development in Claude Code cloud sessions |
 | `docs/PROMPTS.md` | Ready-to-paste prompts: unattended master, resume, watchdog, per milestone |
 | `docs/PROGRESS.md`, `docs/DECISIONS.md`, `docs/QUESTIONS.md` | Running log, decisions, open questions |
+| `docs/HANDOFF.md`, `docs/RELEASE_CHECKLIST.md`, `docs/STATE_COVERAGE.md` | What was built, how to release it, where every screen state lives |
+| `packages/integration` | Integration tests against the local Supabase stack |
 | `apps/mobile` | Expo (React Native) app, buyer and vendor modes |
 | `apps/admin` | Next.js admin panel |
 | `packages/shared` | Design tokens, Zod schemas, DB types, constants |
@@ -30,7 +32,8 @@ pnpm install
 npx supabase start
 npx supabase db reset
 pnpm verify
-pnpm --filter mobile start
+pnpm --filter mobile start      # needs a dev build: npx expo run:android
+pnpm --filter admin dev        # admin panel on :3001
 ```
 
 ## Stack

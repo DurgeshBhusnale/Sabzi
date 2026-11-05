@@ -17,6 +17,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - name: Expo doctor
+        working-directory: apps/mobile
+        run: npx -y expo-doctor@latest
+      - name: Admin build
+        working-directory: apps/admin
+        run: npx next build
 
   database:
     runs-on: ubuntu-latest

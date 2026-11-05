@@ -38,7 +38,7 @@ export function MenuItemRow({
         <StatusPill status="sold_out" label={en.menu.soldOut} />
       ) : deal ? (
         <View style={{ backgroundColor: t.colors.dealAmber, borderRadius: t.radius.chip, paddingHorizontal: t.spacing.xs, paddingVertical: t.spacing.xxs }}>
-          <Text variant="price" color="dealAmberText">{formatPrice(dealPrice!, unit)}</Text>
+          <Text variant="price" color="onDealAmber">{formatPrice(dealPrice!, unit)}</Text>
         </View>
       ) : (
         <Text variant="price">{formatPrice(price, unit)}</Text>

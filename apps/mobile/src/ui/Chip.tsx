@@ -25,7 +25,7 @@ export function Chip({
   const unit = kind === 'unit';
   const height = unit ? t.heights.unitChip : t.heights.chip;
   const bg = unit ? (selected ? c.primary : c.surface2) : selected ? c.primaryTint : c.surface;
-  const fg = disabled ? 'textMuted' : unit ? (selected ? 'onPrimary' : 'textPrimary') : selected ? 'primary' : 'textPrimary';
+  const fg = disabled ? 'textMuted' : unit ? (selected ? 'onPrimary' : 'textPrimary') : selected ? 'onPrimaryTint' : 'textPrimary';
   return (
     <Pressable
       testID={testID}

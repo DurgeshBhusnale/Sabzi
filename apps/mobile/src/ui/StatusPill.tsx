@@ -10,18 +10,18 @@ export type PillStatus = 'at_gate' | 'expected' | 'leaving_soon' | 'left' | 'not
 
 type K = keyof ColorTokens;
 const STYLE: Record<PillStatus, { bg: K; fg: K; dot?: K }> = {
-  at_gate: { bg: 'primaryTint', fg: 'primary', dot: 'brandLeaf' },
+  at_gate: { bg: 'primaryTint', fg: 'onPrimaryTint', dot: 'brandLeaf' },
   expected: { bg: 'surface2', fg: 'textSecondary' },
   leaving_soon: { bg: 'dealAmberTint', fg: 'dealAmberText' },
   left: { bg: 'surface2', fg: 'textMuted' },
-  not_coming: { bg: 'errorTint', fg: 'error' },
-  verified: { bg: 'primaryTint', fg: 'primary' },
-  sold_out: { bg: 'errorTint', fg: 'error' },
-  deal: { bg: 'dealAmber', fg: 'dealAmberText' },
+  not_coming: { bg: 'errorTint', fg: 'onErrorTint' },
+  verified: { bg: 'primaryTint', fg: 'onPrimaryTint' },
+  sold_out: { bg: 'errorTint', fg: 'onErrorTint' },
+  deal: { bg: 'dealAmber', fg: 'onDealAmber' },
   waiting: { bg: 'surface2', fg: 'textSecondary' },
-  will_bring: { bg: 'primaryTint', fg: 'primary' },
-  cant_bring: { bg: 'errorTint', fg: 'error' },
-  new: { bg: 'infoTint', fg: 'info' },
+  will_bring: { bg: 'primaryTint', fg: 'onPrimaryTint' },
+  cant_bring: { bg: 'errorTint', fg: 'onErrorTint' },
+  new: { bg: 'infoTint', fg: 'onInfoTint' },
 };
 
 /** Pulsing dot for "At the gate" (respects reduced motion by being subtle and short). */
@@ -70,7 +70,7 @@ export function StatusPill({ status, label, large = false }: { status: PillStatu
       ]}
     >
       {s.dot ? <PulseDot color={large ? t.colors.onPrimary : t.colors[s.dot]} large={large} /> : null}
-      {status === 'verified' ? <Icon icon={BadgeCheck} size={16} color="primary" /> : null}
+      {status === 'verified' ? <Icon icon={BadgeCheck} size={16} color="onPrimaryTint" /> : null}
       <Text variant={large ? 'button' : 'caption'} weight="600" color={fg}>
         {label}
       </Text>

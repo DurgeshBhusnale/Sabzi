@@ -37,6 +37,11 @@ export type ColorTokens = {
   snackbarBg: string;
   snackbarText: string;
   snackbarAction: string;
+  /** AA-safe text on the tinted grounds (pills, banners, selected chips) — M12 contrast pass */
+  onPrimaryTint: string;
+  onErrorTint: string;
+  onInfoTint: string;
+  onDealAmber: string;
   /** Item illustration placeholder tint (initial-letter circles) */
   artTint: string;
   artText: string;
@@ -73,6 +78,10 @@ export const lightColors: ColorTokens = {
   snackbarBg: '#17201A',
   snackbarText: '#FFFFFF',
   snackbarAction: '#7FE0A8',
+  onPrimaryTint: '#12653A',
+  onErrorTint: '#B03030',
+  onInfoTint: '#245FA8',
+  onDealAmber: '#4A2E00',
   artTint: '#FCE3DE',
   artText: '#B23A26',
 };
@@ -108,6 +117,10 @@ export const darkColors: ColorTokens = {
   snackbarBg: '#17201A',
   snackbarText: '#FFFFFF',
   snackbarAction: '#7FE0A8',
+  onPrimaryTint: '#3CC17A',
+  onErrorTint: '#F07070',
+  onInfoTint: '#7FAEE8',
+  onDealAmber: '#2A1A00',
   artTint: '#3A1C1C',
   artText: '#F5A99B',
 };
