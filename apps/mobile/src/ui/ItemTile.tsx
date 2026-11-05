@@ -17,6 +17,7 @@ export function ItemTile({
   unit,
   wasPrice,
   missingPrice = false,
+  showSetPrice = true,
   onPress,
   testID,
 }: {
@@ -26,6 +27,8 @@ export function ItemTile({
   unit?: PriceUnit;
   wasPrice?: number | null;
   missingPrice?: boolean;
+  /** V-02 picker hides the "Set price" hint */
+  showSetPrice?: boolean;
   onPress?: () => void;
   testID?: string;
 }) {
@@ -38,7 +41,7 @@ export function ItemTile({
       ? `${name}, ${en.menu.soldOut}`
       : state === 'priced' && price != null && unit
         ? `${name}, ${formatPrice(price, unit)}`
-        : selected
+        : selected && showSetPrice
           ? `${name}, ${en.menu.setPrice}`
           : name;
   return (
@@ -78,7 +81,7 @@ export function ItemTile({
       ) : (
         <Text variant="bodySmall" weight="600" align="center" numberOfLines={2}>{name}</Text>
       )}
-      {state === 'selected' ? <Text variant="caption" color={missingPrice ? 'error' : 'textSecondary'}>{en.menu.setPrice}</Text> : null}
+      {state === 'selected' && showSetPrice ? <Text variant="caption" color={missingPrice ? 'error' : 'textSecondary'}>{en.menu.setPrice}</Text> : null}
       {state === 'sold_out' ? <Text variant="caption" color="error">{en.menu.soldOut}</Text> : null}
     </Pressable>
   );

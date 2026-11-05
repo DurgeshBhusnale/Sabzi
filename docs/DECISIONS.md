@@ -2,6 +2,13 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-05 — M4 vendor flows
+- **Stock photo uses the system camera** (`expo-image-picker` `launchCameraAsync`, gallery not offered) instead of a custom `expo-camera` viewfinder; the "Fit your tempo in the frame" guide is shown before opening the camera. Saves a native module and works on low-end phones. Compression steps down size/quality until the JPEG is under 300 KB.
+- **Undo for arrival is server-side**: the RPC writes the event at once; `undo_stop_event` deletes it within 10 s; the push sender (M6) waits for the 5 s undo window and skips deleted events. The app never delays the RPC, so a killed app cannot lose an arrival.
+- **Menu publish has no undo** (only a "Live for N followers" snackbar); re-publishing replaces the menu, which covers mistakes. "Not going today" has a 5 s undo (unskip).
+- **"Mark today as done"** (V-10, all sold out) skips the remaining upcoming stops, which tells those followers the vendor is not coming.
+- **Vendor routing**: `(vendor)` layout redirects to V-01 when no vendor row exists, to V-03 once for the verified celebration, and shows X-15 when suspended.
+
 ## 2026-11-05 — M3 mobile shell
 - **No UI kit and no reanimated**: components use React Native primitives and the built-in `Animated` API (pulse, shimmer); bottom sheets use `Modal`. Fewer native modules for a 2 GB RAM phone and the 30 MB APK target.
 - **Icons: lucide-react-native** (TECH_SPEC) instead of Phosphor used in the design file; same outline style, 24 dp, 1.75 stroke. Jest maps lucide to its CJS build.

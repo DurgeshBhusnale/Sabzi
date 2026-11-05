@@ -1,10 +1,56 @@
-import { Screen, EmptyState, TopAppBar } from '../../src/ui';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import { Screen, Snackbar } from '../../src/ui';
+import { en } from '../../src/i18n/en';
+import { useSession } from '../../src/features/auth/session';
+import { TodayView } from '../../src/features/vendor/TodayView';
+import { useInvalidateVendor, useMyVendor, useStats, useStopsToday, useTodayMenu, vendorKeys } from '../../src/features/vendor/hooks';
+import { currentStop } from '../../src/features/vendor/arrival';
+import { eventOpenCount } from '../../src/features/vendor/api';
 
-/** Placeholder until M4 builds this tab. */
+/** V-04 */
 export default function VendorToday() {
+  const { account } = useSession();
+  const vendor = useMyVendor();
+  const menu = useTodayMenu();
+  const stops = useStopsToday();
+  const stats = useStats();
+  const invalidate = useInvalidateVendor();
+  const live = currentStop(stops.data ?? []);
+  const opens = useQuery({ queryKey: ['vendor', 'opens', live?.arrivalEventId], queryFn: () => eventOpenCount(live!.arrivalEventId!), enabled: !!live?.arrivalEventId, refetchInterval: 30_000 });
+  const refreshing = menu.isRefetching || stops.isRefetching;
+  const { published } = useLocalSearchParams<{ published?: string }>();
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const toast = published && dismissed !== published ? en.vendor.liveFor(Number(published)) : null;
+  useEffect(() => {
+    if (!published) return;
+    const id = setTimeout(() => setDismissed(published), 4000);
+    return () => clearTimeout(id);
+  }, [published]);
   return (
-    <Screen header={<TopAppBar title="Today" />}>
-      <EmptyState title="Today" body="Coming in the next build." />
+    <Screen refreshing={refreshing} onRefresh={() => invalidate(vendorKeys.today, vendorKeys.stops, vendorKeys.stats, vendorKeys.me)}>
+      <TodayView
+        vendor={vendor.data}
+        name={account?.name ?? ''}
+        menu={menu.data}
+        stops={stops.data}
+        stats={stats.data}
+        loading={menu.isLoading || stops.isLoading}
+        openCount={opens.data ?? 0}
+        actions={{
+          onSetMenu: () => router.push('/vendor/menu'),
+          onAddPhoto: () => router.push('/vendor/photo'),
+          onOpenLive: () => router.push('/vendor/live'),
+          onSendDeal: () => router.push('/vendor/deal'),
+        }}
+      />
+      {toast ? (
+        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 96 }}>
+          <Snackbar kind="success" message={toast} />
+        </View>
+      ) : null}
     </Screen>
   );
 }

@@ -1,10 +1,11 @@
-import { Screen, EmptyState, TopAppBar } from '../../src/ui';
+import { EmptyState, Screen, TopAppBar } from '../../src/ui';
+import { en } from '../../src/i18n/en';
 
-/** Placeholder until M4 builds this tab. */
+/** V-13 is built in M7. */
 export default function VendorRequests() {
   return (
-    <Screen header={<TopAppBar title="Requests" />}>
-      <EmptyState title="Requests" body="Coming in the next build." />
+    <Screen header={<TopAppBar title={en.nav.vendorTabs.requests} />}>
+      <EmptyState illustration="list" title={en.vendor.requestsSoon} />
     </Screen>
   );
 }

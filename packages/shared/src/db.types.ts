@@ -793,6 +793,9 @@ isOneToOne: false
 "email_login_available":
 { Args: { "p_email": string }; Returns: boolean
                            },
+"event_open_count":
+{ Args: { "p_event_id": string }; Returns: number
+                           },
 "flag_review":
 { Args: { "p_reason": string,"p_review_id": string }; Returns: undefined
                            },
@@ -838,6 +841,9 @@ isOneToOne: false
 "mark_notification_opened":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"mark_verified_seen":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
 "my_account":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
@@ -845,6 +851,19 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "followers": number,"society_id": string,"society_name": string
             }[]
+                           },
+"my_stops_today":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "arrival_event_id": string,"arrived_at": string,"followers": number,"gate_id": string,"gate_lat": number,"gate_lng": number,"gate_name": string,"last_arrival_at": string,"leaving_at": string,"left_at": string,"skipped": boolean,"society_id": string,"society_name": string,"stop_id": string,"window_end": string,"window_start": string
+            }[]
+                           },
+"my_stops_week":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "days_of_week": (number)[],"gate_name": string,"society_name": string,"stop_id": string,"window_end": string,"window_start": string
+            }[]
+                           },
+"my_vendor_stats":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "normalize_phone":
 { Args: { "p_phone": string }; Returns: string
