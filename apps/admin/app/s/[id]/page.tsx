@@ -1,4 +1,4 @@
-import { APP_NAME, PLAY_STORE_URL } from '@sabzi/shared/constants';
+import { APP_NAME, APP_SCHEME, PLAY_STORE_URL } from '@sabzi/shared/constants';
 import { publicClient } from '../../../lib/server/public';
 
 export const dynamic = 'force-dynamic';
@@ -30,7 +30,7 @@ export default async function SocietyLanding({ params }: { params: Promise<{ id:
           </ul>
           <a href={PLAY_STORE_URL} className="flex min-h-12 items-center justify-center rounded-card bg-primary font-semibold text-on-primary">Get the app</a>
           <p className="text-center text-sm text-text-secondary">
-            Already have the app? <a className="font-semibold text-primary underline" href={`sabzi://s/${s.id}`}>Open</a>
+            Already have the app? <a className="font-semibold text-primary underline" href={`${APP_SCHEME}://s/${s.id}`}>Open</a>
           </p>
         </>
       )}

@@ -10,7 +10,7 @@ import { setPendingRoute } from '../../src/lib/pendingRoute';
 import { en } from '../../src/i18n/en';
 
 /**
- * B-16: opened from a QR scan (https://<domain>/v/<code> or sabzi://v/<code>).
+ * B-16: opened from a QR scan (https://<domain>/v/<code> or pheri://v/<code>).
  * Not logged in → S-03, remembering the code; logged in → vendor page with Follow.
  */
 export default function QrEntry() {

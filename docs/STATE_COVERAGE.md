@@ -107,7 +107,8 @@ Manual check — app installed: on the Android phone open `adb shell am start -a
 
 | Screen | States | Where | Check |
 | --- | --- | --- | --- |
-| Sign-in (replaces S-03) | Consent needed, signing in, cancelled, failed, offline | `app/(auth)/signin.tsx` | T `google-signin.test.tsx` |
+| Sign-in (replaces S-03) | Google or email, consent needed, signing in, cancelled, failed, offline | `app/(auth)/signin.tsx` | T `google-signin.test.tsx` |
+| S-05 Email sign-in / sign-up | Email, invalid, code sent (resend timer), wrong code, too many requests, signed in | `app/(auth)/email.tsx` | T, integration `email.test.ts` |
 | S-07 Profile building | Name prefilled from Google, mobile number (invalid / valid), saving, error | `app/(auth)/name.tsx` | T |
 | Change mobile number | Add, change, saved | `app/account/phone.tsx` | M, D `10_google_signin` |
-| S-03/S-04/S-05 phone and email OTP | Built, hidden (`AUTH_METHODS`) | `app/(auth)/phone.tsx`, `otp.tsx`, `email.tsx` | T (M3 tests still run) |
+| S-03/S-04 phone OTP | Built, hidden (`AUTH_METHODS.phoneOtp`) | `app/(auth)/phone.tsx`, `otp.tsx`, `email.tsx` | T (M3 tests still run) |

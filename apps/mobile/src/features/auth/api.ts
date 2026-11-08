@@ -11,7 +11,7 @@ export type OtpResult = { ok: true } | { ok: false; code: 'otp_blocked'; blocked
 
 // ---------------------------------------------------------------------------------------------
 // Google sign-in (primary while SMS OTP waits for DLT registration). Supabase OAuth with PKCE:
-// open Google in an auth session, come back to sabzi://auth/callback?code=…, exchange the code.
+// open Google in an auth session, come back to pheri://auth/callback?code=…, exchange the code.
 // ---------------------------------------------------------------------------------------------
 
 export type Browser = { openAuthSessionAsync: (url: string, redirect: string) => Promise<{ type: string; url?: string }> };
@@ -86,13 +86,23 @@ export async function verifyPhoneOtp(localNumber: string, token: string, c: Clie
 }
 
 /** S-05: email OTP login only for an existing, verified email (AUTH-4). */
-export async function sendEmailOtp(email: string, c: Client = getSupabase()): Promise<OtpResult> {
+/**
+ * Email sign-in / sign-up with a 6-digit code (no password). New emails get a new account, like Google.
+ * `allowSignUp: false` restores the old S-05 rule (only emails already verified on an account).
+ */
+export async function sendEmailOtp(email: string, c: Client = getSupabase(), opts: { allowSignUp?: boolean } = {}): Promise<OtpResult> {
+  const allowSignUp = opts.allowSignUp ?? true;
   const parsed = emailSchema.safeParse(email);
   if (!parsed.success) return { ok: false, code: 'invalid_email' };
-  const avail = await c.rpc('email_login_available', { p_email: parsed.data });
-  if (!avail.data) return { ok: false, code: 'email_not_linked' };
-  const { error } = await c.auth.signInWithOtp({ email: parsed.data, options: { shouldCreateUser: false } });
-  if (error) return { ok: false, code: 'email_not_linked' };
+  if (!allowSignUp) {
+    const avail = await c.rpc('email_login_available', { p_email: parsed.data });
+    if (!avail.data) return { ok: false, code: 'email_not_linked' };
+  }
+  const { error } = await c.auth.signInWithOtp({ email: parsed.data, options: { shouldCreateUser: allowSignUp } });
+  if (error) {
+    if (error.status === 429 || /rate|seconds/i.test(error.message)) return { ok: false, code: 'too_many_requests' };
+    return { ok: false, code: allowSignUp ? 'email_failed' : 'email_not_linked' };
+  }
   return { ok: true };
 }
 

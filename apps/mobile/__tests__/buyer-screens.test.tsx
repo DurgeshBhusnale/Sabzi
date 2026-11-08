@@ -117,7 +117,7 @@ describe('B-05 vendor page', () => {
   });
   it('new vendor with no ratings', async () => {
     await renderUi(<VendorPageView page={page({ rating_count: 0 })} loading={false} actions={pageActions} />);
-    expect(screen.getByText('New on Sabzi')).toBeTruthy();
+    expect(screen.getByText('New on Pheri')).toBeTruthy();
     expect(screen.getByTestId('no-reviews')).toBeTruthy();
   });
   it('search when more than 12 items', async () => {

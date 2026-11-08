@@ -21,8 +21,8 @@ async function imageCount(pdf: Uint8Array): Promise<number> {
 describe('QR sticker PDF (ADM-4, §9.3)', () => {
   it('is A6 portrait with a QR that decodes to the vendor URL', async () => {
     const { pdf, qr, url } = await buildStickerPdf({ name: 'Ramesh Sabzi', code: 'RMSH4K7P', verified: true });
-    expect(url).toBe('https://sabzi.example/v/RMSH4K7P');
-    expect(decodePng(qr)).toBe('https://sabzi.example/v/RMSH4K7P');
+    expect(url).toBe('https://pheri.anchorlit.in/v/RMSH4K7P');
+    expect(decodePng(qr)).toBe('https://pheri.anchorlit.in/v/RMSH4K7P');
     const doc = await PDFDocument.load(pdf);
     expect(doc.getPageCount()).toBe(1);
     const { width, height } = doc.getPage(0).getSize();
@@ -35,7 +35,7 @@ describe('QR sticker PDF (ADM-4, §9.3)', () => {
 describe('society poster PDF', () => {
   it('is A4 with a QR to the society page', async () => {
     const { pdf, qr } = await buildPosterPdf({ id: '40000000-0000-4000-8000-000000000001', name: 'Green Park Residency', vendors: [{ name: 'Ramesh Sabzi', rating: 4.4 }, { name: 'Imran Vegetables' }] });
-    expect(decodePng(qr)).toBe('https://sabzi.example/s/40000000-0000-4000-8000-000000000001');
+    expect(decodePng(qr)).toBe('https://pheri.anchorlit.in/s/40000000-0000-4000-8000-000000000001');
     const doc = await PDFDocument.load(pdf);
     expect(Math.round(doc.getPage(0).getSize().width)).toBe(Math.round(A4.width));
   });

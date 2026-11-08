@@ -11,8 +11,8 @@ import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
 
 /**
- * Sign-in (replaces S-03 while SMS OTP waits for DLT): Google via Supabase OAuth, with the DPDP consent
- * checkbox. Phone and email entry points appear only when enabled in AUTH_METHODS.
+ * Sign-in / sign-up (replaces S-03 while SMS OTP waits for DLT): Google via Supabase OAuth, or an email
+ * code, both behind the DPDP consent checkbox. The phone entry point appears only when AUTH_METHODS.phoneOtp is on.
  */
 export default function SignIn({ google = signInWithGoogle }: { google?: typeof signInWithGoogle }) {
   const t = useTheme();
@@ -43,7 +43,9 @@ export default function SignIn({ google = signInWithGoogle }: { google?: typeof 
           <Button label={busy ? en.auth.signingIn : en.auth.continueGoogle} onPress={go} loading={busy} disabled={!consent} testID="google-signin" />
           {/* FUTURE: phone OTP sign-in (needs DLT registration for SMS). Turn on with AUTH_METHODS.phoneOtp. */}
           {AUTH_METHODS.phoneOtp ? <Button label={en.auth.phoneTitle} variant="secondary" onPress={() => router.push('/(auth)/phone')} /> : null}
-          {AUTH_METHODS.emailOtp ? <Button label={en.auth.useEmail} variant="tertiary" onPress={() => router.push('/(auth)/email')} /> : null}
+          {AUTH_METHODS.emailOtp ? (
+            <Button label={en.auth.continueEmail} variant="secondary" disabled={!consent} onPress={() => router.push('/(auth)/email')} testID="email-signin" />
+          ) : null}
         </View>
       }
     >

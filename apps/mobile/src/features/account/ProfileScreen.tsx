@@ -44,8 +44,8 @@ export function ProfileScreen({ onBack }: { onBack?: () => void }) {
           sub={account.phone_last4 ? en.profile.phone(account.phone_last4) : undefined}
           onPress={() => router.push('/account/phone')}
         />
-        {/* Email add/verify is only for an extra login method; Google users already sign in with email. */}
-        {account.provider !== 'google' ? (
+        {/* Email add/verify is only an extra login for phone-OTP users; Google and email users already sign in with email. */}
+        {account.provider === 'phone' ? (
         <LinkRow
           icon={Bell}
           label={account.email && account.email_verified ? en.profile.email : account.pending_email ? en.profile.verifyEmail : en.profile.addEmail}
