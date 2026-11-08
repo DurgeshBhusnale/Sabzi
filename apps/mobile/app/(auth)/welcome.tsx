@@ -20,8 +20,8 @@ export default function Welcome() {
       scroll={false}
       footer={
         <View style={{ gap: t.spacing.xs }}>
-          <Button label={last ? en.welcome.getStarted : en.welcome.next} onPress={() => (last ? router.push('/(auth)/phone') : setI(i + 1))} testID="welcome-next" />
-          <Button label={en.welcome.logIn} variant="tertiary" onPress={() => router.push('/(auth)/phone')} />
+          <Button label={last ? en.welcome.getStarted : en.welcome.next} onPress={() => (last ? router.push('/(auth)/signin') : setI(i + 1))} testID="welcome-next" />
+          <Button label={en.welcome.logIn} variant="tertiary" onPress={() => router.push('/(auth)/signin')} />
         </View>
       }
     >

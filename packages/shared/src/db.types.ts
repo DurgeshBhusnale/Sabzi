@@ -329,6 +329,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"profile_phones": {
+                  Row: {
+                    "phone": string,"updated_at": string,"user_id": string,"verified": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "phone": string,"updated_at"?: string,"user_id": string,"verified"?: boolean
+                  }
+                  Update: {
+                    "phone"?: string,"updated_at"?: string,"user_id"?: string,"verified"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "profile_phones_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["user_id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "admin_active": boolean,"admin_level": Database["public"]['Enums']["admin_level"] | null,"created_at": string,"deleted_at": string | null,"email": string | null,"email_verified": boolean,"name": string | null,"notify_prefs": NonNullable<Json>,"push_token": string | null,"role": Database["public"]['Enums']["user_role"] | null,"updated_at": string,"user_id": string
@@ -927,6 +947,9 @@ isOneToOne: false
 "complete_profile":
 { Args: { "p_name": string }; Returns: undefined
                            },
+"complete_profile_with_phone":
+{ Args: { "p_name": string,"p_phone": string }; Returns: undefined
+                           },
 "create_request":
 { Args: { "p_free_text"?: string,"p_item_id"?: string,"p_note"?: string,"p_qty"?: string,"p_society_id": string,"p_vendor_id": string }; Returns: string
                            },
@@ -1110,6 +1133,9 @@ isOneToOne: false
 "set_admin_level":
 { Args: { "p_level": Database["public"]['Enums']["admin_level"],"p_user_id": string }; Returns: undefined
                            },
+"set_my_phone":
+{ Args: { "p_phone": string }; Returns: undefined
+                           },
 "set_notify_pref":
 { Args: { "p_key": string,"p_value": boolean }; Returns: Json
                            },
@@ -1154,6 +1180,9 @@ isOneToOne: false
                            },
 "upsert_stop":
 { Args: { "p_active"?: boolean,"p_days": (number)[],"p_end": string,"p_gate_id": string,"p_id": string,"p_start": string,"p_vendor_id": string }; Returns: string
+                           },
+"user_phone":
+{ Args: { "p_user_id": string }; Returns: string
                            },
 "v_vendor_today":
 { Args: { "p_society_id": string }; Returns: {

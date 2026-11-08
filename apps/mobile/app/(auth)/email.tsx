@@ -1,3 +1,5 @@
+// FUTURE: email OTP login is kept but not reachable while AUTH_METHODS.phoneOtp / emailOtp are false
+// (SMS needs DLT registration). Sign-in currently goes through app/(auth)/signin.tsx (Google).
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Button, OtpInput, Screen, Text, TextInput, TopAppBar } from '../../src/ui';

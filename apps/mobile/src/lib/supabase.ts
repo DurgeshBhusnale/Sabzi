@@ -13,7 +13,7 @@ let client: Client | null = null;
 export function getSupabase(): Client {
   if (!client) {
     client = createClient<Database>(url, anonKey, {
-      auth: { storage: AsyncStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+      auth: { storage: AsyncStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: 'pkce' },
     });
   }
   return client;

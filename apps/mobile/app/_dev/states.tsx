@@ -36,7 +36,7 @@ export const X_SCREENS: { id: string; title: string; render: () => React.ReactEl
   },
   { id: 'X-05', title: 'Server error', render: () => <X05ServerError onRetry={noop} /> },
   { id: 'X-06', title: 'Request timed out', render: () => <X06Timeout onRetry={noop} /> },
-  { id: 'X-07', title: 'Session expired', render: () => <X07SessionExpired onLogin={() => router.push({ pathname: '/(auth)/phone', params: { expired: '1' } })} /> },
+  { id: 'X-07', title: 'Session expired', render: () => <X07SessionExpired onLogin={() => router.push('/(auth)/signin')} /> },
   { id: 'X-08', title: 'Notifications blocked', render: () => <Screen><Banner kind="error" message={en.permissions.notifBlockedBuyer} actionLabel={en.common.openSettings} testID="x08" /><Banner kind="error" message={en.permissions.notifBlockedVendor} actionLabel={en.common.openSettings} /></Screen> },
   { id: 'X-09', title: 'Location denied', render: () => <X09LocationDenied role="vendor" onContinue={noop} /> },
   { id: 'X-10', title: 'Camera denied', render: () => <X10CameraDenied onSkip={noop} /> },

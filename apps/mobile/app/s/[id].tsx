@@ -20,7 +20,7 @@ export default function SocietyEntry() {
       .catch(() => undefined)
       .finally(() => qc.invalidateQueries({ queryKey: buyerKeys.mine }).then(() => setDone(true)));
   }, [status, step, id, qc]);
-  if (status === 'signedOut') return <Redirect href="/(auth)/phone" />;
+  if (status === 'signedOut') return <Redirect href="/(auth)/signin" />;
   if (status === 'signedIn' && step !== 'buyer') return <Redirect href="/" />;
   if (done) return <Redirect href="/(buyer)/home" />;
   return <Screen><SkeletonBlock kind="vendorCard" /></Screen>;

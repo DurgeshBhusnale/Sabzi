@@ -102,3 +102,12 @@ Empty states (§8.4) and skeletons (§8.5) are part of each screen above (`Empty
 | Sticker A6 + poster A4 PDF | `apps/admin/lib/pdf.ts`, buttons on A-06 and A-04 | Vitest (page size, QR decodes to URL) |
 
 Manual check — app installed: on the Android phone open `adb shell am start -a android.intent.action.VIEW -d "https://sabzi.example/v/RMSH4K7P"` (or scan the sticker); the app opens Ramesh's page (or asks to log in, then returns to it). App not installed: the same URL opens the web page with "Get the app to follow Ramesh". App Links need the real domain, the hosted `assetlinks.json` and the release key fingerprint (owner to-do).
+
+## Sign-in (testing phase, 8 Nov)
+
+| Screen | States | Where | Check |
+| --- | --- | --- | --- |
+| Sign-in (replaces S-03) | Consent needed, signing in, cancelled, failed, offline | `app/(auth)/signin.tsx` | T `google-signin.test.tsx` |
+| S-07 Profile building | Name prefilled from Google, mobile number (invalid / valid), saving, error | `app/(auth)/name.tsx` | T |
+| Change mobile number | Add, change, saved | `app/account/phone.tsx` | M, D `10_google_signin` |
+| S-03/S-04/S-05 phone and email OTP | Built, hidden (`AUTH_METHODS`) | `app/(auth)/phone.tsx`, `otp.tsx`, `email.tsx` | T (M3 tests still run) |

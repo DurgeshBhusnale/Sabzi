@@ -1,10 +1,28 @@
 /** Product limits — TECH_SPEC, PRD and BUILD_PLAN M0. Change here only. */
 export const APP_NAME = 'Sabzi';
-export const PUBLIC_BASE_URL = 'https://sabzi.example';
+
+declare const process: { env: Record<string, string | undefined> } | undefined;
+
+/**
+ * Public web base for QR links, App Links and the web fallback pages. During the testing phase this is a
+ * subdomain (for example https://test.<domain>); set EXPO_PUBLIC_BASE_URL (app) and NEXT_PUBLIC_BASE_URL
+ * (web) per environment — no code change when moving to the launch domain.
+ */
+export const PUBLIC_BASE_URL: string = (
+  (typeof process !== 'undefined' ? process.env.EXPO_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL : undefined) ||
+  'https://sabzi.example'
+).replace(/\/$/, '');
 export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=in.sabzi.app';
 export const SUPPORT_PHONE = '+912000000000';
 export const SUPPORT_EMAIL = 'help@sabzi.example';
 export const IST_TIMEZONE = 'Asia/Kolkata';
+
+/**
+ * Sign-in methods. Phone OTP needs DLT registration for SMS in India, which is not done yet, so the app
+ * signs in with Google (Supabase OAuth) and collects the mobile number in the profile without SMS.
+ * The phone OTP code (screens, `otp-verify`, `send-sms-hook`, SQL) is kept; flip `phoneOtp` to bring it back.
+ */
+export const AUTH_METHODS = { google: true, phoneOtp: false, emailOtp: false } as const;
 
 export const LIMITS = {
   /** One arrival alert per stop (gate) per 2 hours — VEN-6 */
