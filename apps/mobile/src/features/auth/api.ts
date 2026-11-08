@@ -1,3 +1,5 @@
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { emailSchema, otpSchema, phoneLocalSchema, toE164, nameSchema } from '@sabzi/shared';
 import { getSupabase, type Client } from '../../lib/supabase';
 import { AppErrorException, raise } from '../../lib/errors';
@@ -6,6 +8,37 @@ import { en } from '../../i18n/en';
 export type Role = 'buyer' | 'vendor';
 
 export type OtpResult = { ok: true } | { ok: false; code: 'otp_blocked'; blockedUntil: string } | { ok: false; code: string };
+
+// ---------------------------------------------------------------------------------------------
+// Google sign-in (primary while SMS OTP waits for DLT registration). Supabase OAuth with PKCE:
+// open Google in an auth session, come back to sabzi://auth/callback?code=…, exchange the code.
+// ---------------------------------------------------------------------------------------------
+
+export type Browser = { openAuthSessionAsync: (url: string, redirect: string) => Promise<{ type: string; url?: string }> };
+
+export const authRedirectUrl = () => Linking.createURL('auth/callback');
+
+export type GoogleResult = { ok: true } | { ok: false; code: 'cancelled' | 'google_failed' | 'network' };
+
+export async function signInWithGoogle(c: Client = getSupabase(), browser: Browser = WebBrowser, redirectTo: string = authRedirectUrl()): Promise<GoogleResult> {
+  const { data, error } = await c.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, skipBrowserRedirect: true, queryParams: { prompt: 'select_account' } },
+  });
+  if (error || !data?.url) return { ok: false, code: 'network' };
+  const res = await browser.openAuthSessionAsync(data.url, redirectTo);
+  if (res.type !== 'success' || !res.url) return { ok: false, code: 'cancelled' };
+  const params = new URL(res.url.replace(/#/, '?')).searchParams;
+  const code = params.get('code');
+  if (!code) return { ok: false, code: 'google_failed' };
+  const ex = await c.auth.exchangeCodeForSession(code);
+  if (ex.error) return { ok: false, code: 'google_failed' };
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Phone OTP (kept for later; hidden while AUTH_METHODS.phoneOtp is false — needs DLT for SMS).
+// ---------------------------------------------------------------------------------------------
 
 /** S-03: validate and send the SMS OTP. Checks the 1-hour block first (AUTH-2). */
 export async function sendPhoneOtp(localNumber: string, c: Client = getSupabase()): Promise<OtpResult> {
@@ -90,7 +123,24 @@ export async function setRole(role: Role, c: Client = getSupabase()): Promise<vo
   if (error) raise(error);
 }
 
-/** S-07 */
+/** S-07 profile building: name + mobile number (stored without SMS verification for now). */
+export async function completeProfileWithPhone(name: string, localPhone: string, c: Client = getSupabase()): Promise<void> {
+  const n = nameSchema.safeParse(name);
+  if (!n.success) throw new AppErrorException({ code: 'invalid_name', message: en.errors.invalid_name });
+  const p = phoneLocalSchema.safeParse(localPhone.replace(/\D/g, '').slice(-10));
+  if (!p.success) throw new AppErrorException({ code: 'invalid_phone', message: en.errors.invalid_phone });
+  const { error } = await c.rpc('complete_profile_with_phone', { p_name: n.data, p_phone: toE164(p.data) });
+  if (error) raise(error);
+}
+
+export async function setMyPhone(localPhone: string, c: Client = getSupabase()): Promise<void> {
+  const p = phoneLocalSchema.safeParse(localPhone.replace(/\D/g, '').slice(-10));
+  if (!p.success) throw new AppErrorException({ code: 'invalid_phone', message: en.errors.invalid_phone });
+  const { error } = await c.rpc('set_my_phone', { p_phone: toE164(p.data) });
+  if (error) raise(error);
+}
+
+/** S-07 (name only; used by the phone-OTP flow where the number is already verified) */
 export async function completeProfile(name: string, c: Client = getSupabase()): Promise<void> {
   const parsed = nameSchema.safeParse(name);
   if (!parsed.success) throw new AppErrorException({ code: 'invalid_name', message: en.errors.invalid_name });
@@ -107,7 +157,10 @@ export type MyAccount = {
   user_id: string;
   role: Role | 'admin' | null;
   name: string | null;
-  phone_last4: string;
+  phone_last4: string | null;
+  /** A mobile number is on file (verified by OTP in future, or given in the profile now) */
+  has_phone?: boolean;
+  provider?: 'google' | 'phone' | 'email' | string;
   email: string | null;
   email_verified: boolean;
   pending_email: string | null;
@@ -135,6 +188,7 @@ export async function signOut(c: Client = getSupabase()): Promise<void> {
 export function nextAuthStep(acc: MyAccount | null): 'phone' | 'role' | 'name' | 'buyer' | 'vendor' | 'admin' {
   if (!acc) return 'phone';
   if (!acc.role) return 'role';
-  if (!acc.name) return 'name';
+  // Profile building needs a name and a mobile number (buyers and vendors alike).
+  if (!acc.name || acc.has_phone === false) return 'name';
   return acc.role;
 }

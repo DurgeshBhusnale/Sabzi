@@ -2,6 +2,12 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-08 — Google sign-in for the testing phase (owner decision)
+- **Reverses "phone OTP mandatory"** (2026-11-05 product decisions) for now: SMS OTP in India needs DLT registration, which isn't done. Sign-in is Google via Supabase OAuth with PKCE (`expo-web-browser` auth session → `sabzi://auth/callback?code=…` → `exchangeCodeForSession`). No native Google SDK, so no extra Android config beyond the redirect URL.
+- **Phone OTP is switched off, not removed**: a feature flag (`AUTH_METHODS.phoneOtp`) rather than commented-out code, so the screens, edge functions and tests keep compiling and passing and can be turned back on with one change. The local stack keeps the phone provider on so the seeded test users and integration tests still work.
+- **Mobile number in profile building**, stored in `profile_phones` with no select grant to app users; owners read their own last 4 digits through `my_account`, admins through admin functions. `user_phone()` prefers a future OTP-verified number. Not unique while unverified (see QUESTIONS).
+- **Base URL from env** (`EXPO_PUBLIC_BASE_URL`, `NEXT_PUBLIC_BASE_URL`; `app.config.ts` sets the App Links host) so the testing subdomain and the launch domain need no code change.
+
 ## 2026-11-05 — M12 hardening
 - **New on-tint text tokens** (`onPrimaryTint`, `onErrorTint`, `onInfoTint`, `onDealAmber`): the design's primary/error/info text on their tints measured 4.3–4.49:1 and the dark-mode deal badge 1.14:1; small pill text needs 4.5:1. Brand colours themselves are unchanged.
 - **Lists are not virtualised yet**: every list in v1 is bounded (≤ 50 items, a handful of vendors per society, 7 days of notifications) and rendered inside one scroll view per screen. Switch to `FlatList` if a list grows past ~100 rows.

@@ -24,7 +24,7 @@ export default function QrEntry() {
     if (status === 'signedOut') setPendingRoute(`/v/${code}`);
   }, [status, code]);
   if (status === 'loading') return <Screen><SkeletonBlock kind="vendorCard" /></Screen>;
-  if (status === 'signedOut') return <Redirect href="/(auth)/phone" />;
+  if (status === 'signedOut') return <Redirect href="/(auth)/signin" />;
   if (step !== 'buyer') return <Redirect href="/" />;
   if (vendor.isLoading) return <Screen header={<TopAppBar title={en.buyer.qrTitle} />}><SkeletonBlock kind="vendorCard" /></Screen>;
   if (!vendor.data) {

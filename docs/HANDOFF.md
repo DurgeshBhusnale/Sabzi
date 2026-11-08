@@ -2,6 +2,11 @@
 
 Built in one unattended Claude Code session on 5 Nov 2026. All 13 milestones (M0–M12) are built and tested.
 
+**Update 8 Nov 2026 — testing phase changes:**
+- **Login is Google sign-in** (Supabase OAuth, PKCE) because SMS OTP needs DLT registration. The app shows only "Continue with Google" (with the consent checkbox). The phone OTP screens, `otp-verify`, `send-sms-hook`, the 5-tries block and the MSG91 code are kept but switched off with `AUTH_METHODS.phoneOtp = false` in `packages/shared/src/constants.ts`.
+- **The mobile number is collected in profile building** (S-07: name, prefilled from Google, + mobile number), stored without SMS verification in `profile_phones`, readable only by its owner (through functions) and admins. It feeds the vendor "Call" button (when the vendor allows calls) and the admin vendor pages; buyers' numbers are never shown to anyone. Users can change it from Profile.
+- **Testing subdomain**: QR links, App Links and the web pages use `EXPO_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL`, so the subdomain now and the launch domain later need no code change.
+
 All work is merged to `main` in [PR #1](https://github.com/DurgeshBhusnale/Sabzi/pull/1) (one commit per milestone on the branch, squash-merged; CI `verify`, `database` and `functions` jobs green).
 
 ## What was built
@@ -10,7 +15,7 @@ All work is merged to `main` in [PR #1](https://github.com/DurgeshBhusnale/Sabzi
 | --- | --- | --- |
 | M0 Repo foundation | Done | pnpm monorepo (Node 22, TS 6), `packages/shared` (tokens, constants, IST/price formatting, geo, status, Zod schemas), Expo SDK 58 app, Next.js 16 admin, Supabase init, CI (verify, database, Deno). |
 | M1 Database | Done | 23 tables, enums, triggers (role set once, max 3 societies, 5 open requests), RLS with column grants, buyer-safe views (no phones, no buyer ids), all RPCs with `client_id` idempotency, storage buckets, seed from the brief. |
-| M2 Auth | Done | Phone OTP (test numbers locally), 5 wrong codes → 1 h block (`otp-verify` function + SQL), SMS hook (MSG91 when configured), email login for verified emails, account deletion ("Former user"). |
+| M2 Auth | Done | Google sign-in (current) + profile mobile number; phone OTP with 5-tries block, SMS hook (MSG91) and email OTP built but switched off until DLT; account deletion ("Former user"). |
 | M3 Mobile shell | Done | Theme (light/dark/system, buyer/vendor type scales), all 27 components with every state, dev gallery, navigation, auth & account screens S-01…S-16. |
 | M4 Vendor | Done | V-01…V-16 (onboarding, Today, 3-tap "Same as yesterday" publish, price editor, camera stock photo < 300 KB, I've arrived with GPS ≤ 300 m, 2 h lock, 5 s undo, live mode, sold out, stops, me, QR, reviews). |
 | M5 Buyer | Done | B-01…B-08, B-15, B-16 (society picker, home with live status via Realtime, vendor page, follow, following, notifications, QR route). |
@@ -25,8 +30,8 @@ All work is merged to `main` in [PR #1](https://github.com/DurgeshBhusnale/Sabzi
 Nothing is marked Partial: every feature runs locally and is tested; the items marked * only need your accounts/secrets (listed below) to work in production. Screen-by-screen coverage is in `docs/STATE_COVERAGE.md`; choices are in `docs/DECISIONS.md`; open questions in `docs/QUESTIONS.md`.
 
 ### Tests (all passing at handoff)
-- `pnpm verify`: shared 95 (Vitest), mobile 245 (Jest + RNTL), admin 12 (Vitest) — plus typecheck and lint.
-- Database: 204 pgTAP tests in `supabase/tests` (every RLS policy allow/deny, all business rules, auth, buyer, notifications, engagement, admin, QR, metrics).
+- `pnpm verify`: shared 95 (Vitest), mobile 252 (Jest + RNTL), admin 12 (Vitest) — plus typecheck and lint.
+- Database: 216 pgTAP tests in `supabase/tests` (every RLS policy allow/deny, all business rules, auth, Google sign-up and private mobile number, buyer, notifications, engagement, admin, QR, metrics).
 - Edge functions: 20 Deno tests (`supabase/functions/tests`).
 - Integration (needs the local stack): 7 tests in `packages/integration` — OTP login, role lock, realtime arrival < 5 s, admin TOTP login → verify vendor → buyer sees him.
 - `expo export --platform android` bundles; `next build` passes; `expo-doctor` 19/20 (the last check needs internet access the sandbox didn't have — it runs in CI).
@@ -60,16 +65,16 @@ cp .env.example .env.local   # NEXT_PUBLIC_SUPABASE_ANON_KEY from `npx supabase 
 pnpm dev                     # http://localhost:3001
 ```
 
-Sample logins (local only, OTP `123456`): vendors Ramesh `+91 99999 00001`, Sunita `…02`, Imran `…03`, Ganesh (pending) `…04`; buyers Priya `…11`, Arjun `…12`, Meera `…13`. Admin: `admin@sabzi.example` / `sabzi-admin-dev` (owner), `field@sabzi.example` / `sabzi-field-dev` (field staff) — first login asks you to scan a TOTP QR. In a dev build, Settings → "Dev: components" and "Dev: system states" open the living style guide and X-01…X-17.
+Sample logins (local only). Google sign-in works locally once you export the Google client id/secret (see the checklist). The seeded test users use phone OTP `123456`, which stays enabled on the local stack for development and tests even though the app hides it — flip `AUTH_METHODS.phoneOtp` to `true` in a dev build to use them: vendors Ramesh `+91 99999 00001`, Sunita `…02`, Imran `…03`, Ganesh (pending) `…04`; buyers Priya `…11`, Arjun `…12`, Meera `…13`. Admin: `admin@sabzi.example` / `sabzi-admin-dev` (owner), `field@sabzi.example` / `sabzi-field-dev` (field staff) — first login asks you to scan a TOTP QR. In a dev build, Settings → "Dev: components" and "Dev: system states" open the living style guide and X-01…X-17.
 
 ## Your to-do list
 
 Full steps are in `docs/RELEASE_CHECKLIST.md`. In short:
 
-1. **Supabase** staging project (Mumbai): `db push`, deploy 4 functions, set function secrets, `private.settings` notify URL/secret, SMS hook, TOTP MFA, create the owner admin.
-2. **MSG91**: DLT entity, sender ID and OTP template → `MSG91_AUTH_KEY`, `MSG91_TEMPLATE_ID`.
+1. **Supabase** staging project (Mumbai): `db push`, deploy the functions, set `NOTIFY_SECRET`, `private.settings` notify URL/secret, Google provider + redirect URLs, TOTP MFA, create the owner admin. Keep the Phone provider off.
+2. **Google OAuth**: consent screen + Web client in Google Cloud, client id/secret in Supabase → Auth → Providers → Google, redirect `sabzi://auth/callback`. *(MSG91/DLT only later, to turn phone OTP back on.)*
 3. **FCM**: Firebase project + service-account key in EAS credentials; real EAS project id in `app.json`.
-4. **Domain**: replace `sabzi.example` (`PUBLIC_BASE_URL`, app.json intent filter), deploy `apps/admin` there, set `ANDROID_SHA256_CERT_FINGERPRINTS`.
+4. **Testing subdomain**: point it at the `apps/admin` deployment; set `NEXT_PUBLIC_BASE_URL` there and `EXPO_PUBLIC_BASE_URL` in EAS; set `ANDROID_SHA256_CERT_FINGERPRINTS`.
 5. **Brand**: final name/logo → `APP_NAME`, `assets/brand/mark.svg` (regenerate icons), Play Store URL, support phone/email.
 6. **Legal**: review `/privacy` and `/terms` (DPDP), name a grievance officer.
 7. **PostHog** key (optional for the pilot).

@@ -37,14 +37,14 @@ describe('dev component gallery', () => {
 });
 
 describe('S-02 welcome', () => {
-  it('walks the slides then goes to phone', async () => {
+  it('walks the slides then goes to sign-in', async () => {
     await renderUi(<Welcome />);
     expect(screen.getByText('Know when your sabziwala arrives')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('welcome-next'));
     expect(screen.getByText("See today's vegetables and prices")).toBeTruthy();
     await fireEvent.press(screen.getByText('Skip'));
     await fireEvent.press(screen.getByText('Get started'));
-    expect(mockRouter.push).toHaveBeenCalledWith('/(auth)/phone');
+    expect(mockRouter.push).toHaveBeenCalledWith('/(auth)/signin');
   });
 });
 

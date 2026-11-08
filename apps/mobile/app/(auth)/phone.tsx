@@ -1,3 +1,5 @@
+// FUTURE: phone number entry is kept but not reachable while AUTH_METHODS.phoneOtp / emailOtp are false
+// (SMS needs DLT registration). Sign-in currently goes through app/(auth)/signin.tsx (Google).
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';

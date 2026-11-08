@@ -20,28 +20,6 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "sabzi.example",
-              "pathPrefix": "/v/"
-            },
-            {
-              "scheme": "https",
-              "host": "sabzi.example",
-              "pathPrefix": "/s/"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ],
       "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
@@ -93,7 +71,8 @@
           "icon": "./assets/android-icon-monochrome.png",
           "color": "#24A05E"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": false
