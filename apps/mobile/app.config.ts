@@ -5,7 +5,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
  * launch domain need no code change (set it in EAS environment variables).
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const base = process.env.EXPO_PUBLIC_BASE_URL ?? 'https://sabzi.example';
+  const base = process.env.EXPO_PUBLIC_BASE_URL ?? 'https://pheri.anchorlit.in';
   const host = new URL(base).host;
   return {
     ...(config as ExpoConfig),

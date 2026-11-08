@@ -2,6 +2,12 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-08 — Brand Pheri, subdomain, email sign-in (owner decisions)
+- **Name Pheri** in `APP_NAME` and the app name; user-facing strings read `APP_NAME`. Internal names (`@sabzi/*` packages, storage keys, repo) stay — renaming them would churn every import for no user benefit.
+- **App id `in.anchorlit.pheri` and scheme `pheri://`** now, before any store upload, because the Android package name can never change after publishing. `APP_ID` / `APP_SCHEME` constants feed the Play Store link, App Links file and web "Open" links.
+- **Default base URL `https://pheri.anchorlit.in`**, still overridable by env.
+- **Email sign-in/sign-up uses a 6-digit code, not a password**: same screen pattern as the designed S-05, nothing to forget or reset, and Supabase links it with a Google identity on the same email. Email templates show the code (`supabase/templates/`); code expiry 10 minutes, one email per 30 s.
+
 ## 2026-11-08 — Google sign-in for the testing phase (owner decision)
 - **Reverses "phone OTP mandatory"** (2026-11-05 product decisions) for now: SMS OTP in India needs DLT registration, which isn't done. Sign-in is Google via Supabase OAuth with PKCE (`expo-web-browser` auth session → `sabzi://auth/callback?code=…` → `exchangeCodeForSession`). No native Google SDK, so no extra Android config beyond the redirect URL.
 - **Phone OTP is switched off, not removed**: a feature flag (`AUTH_METHODS.phoneOtp`) rather than commented-out code, so the screens, edge functions and tests keep compiling and passing and can be turned back on with one change. The local stack keeps the phone provider on so the seeded test users and integration tests still work.

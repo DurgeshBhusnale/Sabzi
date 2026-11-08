@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { APP_NAME, PLAY_STORE_URL, type PriceUnit } from '@sabzi/shared/constants';
+import { APP_NAME, APP_SCHEME, PLAY_STORE_URL, type PriceUnit } from '@sabzi/shared/constants';
 import { formatIstTime, formatPrice, formatTimeWindow } from '@sabzi/shared/format';
 import { publicClient, storageUrl } from '../../../lib/server/public';
 
@@ -75,7 +75,7 @@ export default async function VendorLanding({ params }: { params: Promise<{ code
       </section>
       <a href={PLAY_STORE_URL} className="flex min-h-12 items-center justify-center rounded-card bg-primary font-semibold text-on-primary">{`Get the app to follow ${first}`}</a>
       <p className="text-center text-sm text-text-secondary">
-        Already have the app? <a className="font-semibold text-primary underline" href={`sabzi://v/${card.code}`}>Open</a>
+        Already have the app? <a className="font-semibold text-primary underline" href={`${APP_SCHEME}://v/${card.code}`}>Open</a>
       </p>
     </main>
   );

@@ -1,9 +1,10 @@
+import { APP_NAME } from '@sabzi/shared';
 import type { NotificationRow } from './api';
 
 /** In-app list text for each notification type (mirrors push copy, design brief §9.1). */
 export function notificationText(n: NotificationRow): { title: string; body: string } {
   const p = n.payload as Record<string, string | undefined>;
-  return { title: p.title ?? 'Sabzi', body: p.body ?? '' };
+  return { title: p.title ?? APP_NAME, body: p.body ?? '' };
 }
 
 /** Where tapping a notification goes. */

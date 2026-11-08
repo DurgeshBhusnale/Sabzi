@@ -24,7 +24,7 @@ export default function Login() {
     const me = await rpc<{ admin_level: string; active: boolean } | null>('admin_me');
     if (!me || !me.active) {
       await sb().auth.signOut();
-      throw new Error('This account is not a Sabzi team account.');
+      throw new Error(`This account is not a ${APP_NAME} team account.`);
     }
     const { data } = await sb().auth.mfa.listFactors();
     const totp = data?.totp?.find((f) => f.status === 'verified');

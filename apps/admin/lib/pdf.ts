@@ -73,7 +73,7 @@ export async function buildStickerPdf(v: { name: string; code: string; verified:
   y -= mm(5.5);
   centered(page, "See today's vegetables and prices", y, reg, 11, hex(lightColors.textSecondary));
   y -= mm(8);
-  if (v.verified) centered(page, 'Verified by the Sabzi team', y, bold, 10, hex(lightColors.primary));
+  if (v.verified) centered(page, `Verified by the ${APP_NAME} team`, y, bold, 10, hex(lightColors.primary));
   centered(page, `Code ${v.code}`, mm(6), reg, 9, hex(lightColors.textSecondary));
   return { pdf: await doc.save(), qr, url };
 }

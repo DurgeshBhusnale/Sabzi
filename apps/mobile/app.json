@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Sabzi",
-    "slug": "sabzi",
-    "scheme": "sabzi",
+    "name": "Pheri",
+    "slug": "pheri",
+    "scheme": "pheri",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "in.sabzi.app"
+      "bundleIdentifier": "in.anchorlit.pheri"
     },
     "android": {
-      "package": "in.sabzi.app",
+      "package": "in.anchorlit.pheri",
       "adaptiveIcon": {
         "backgroundColor": "#24A05E",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -55,13 +55,13 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Sabzi uses your location only when you tap \"I have arrived\" or look for societies near you."
+          "locationWhenInUsePermission": "Pheri uses your location only when you tap \"I have arrived\" or look for societies near you."
         }
       ],
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Sabzi uses the camera to add today’s stock photo.",
+          "cameraPermission": "Pheri uses the camera to add today’s stock photo.",
           "photosPermission": false
         }
       ],

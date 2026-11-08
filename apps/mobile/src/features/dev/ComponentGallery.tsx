@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Home, Heart } from 'lucide-react-native';
+import { APP_NAME } from '@sabzi/shared';
 import { useTheme, type SchemePreference } from '../../theme/ThemeProvider';
 import {
   Avatar,
@@ -267,7 +268,7 @@ export function ComponentGallery() {
       <Section title="QR card">
         <QrCard name="Ramesh Sabzi" code="RMSH4K7P" onShare={() => undefined} />
       </Section>
-      <Text variant="caption" color="textMuted">Sabzi · design system v1</Text>
+      <Text variant="caption" color="textMuted">{`${APP_NAME} · design system v1`}</Text>
     </View>
   );
 }

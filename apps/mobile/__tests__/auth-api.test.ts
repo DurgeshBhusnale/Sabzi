@@ -69,10 +69,10 @@ describe('auth api', () => {
     expect(await verifyPhoneOtp('9999900021', '000000', c)).toEqual({ ok: false, code: 'otp_blocked', blockedUntil: 'T' });
   });
 
-  it('email login only for linked emails', async () => {
+  it('login-only mode (allowSignUp: false) needs a linked email', async () => {
     const c = fakeClient();
     c.rpc.mockResolvedValueOnce({ data: false, error: null });
-    expect(await sendEmailOtp('priya@example.com', c)).toEqual({ ok: false, code: 'email_not_linked' });
+    expect(await sendEmailOtp('priya@example.com', c, { allowSignUp: false })).toEqual({ ok: false, code: 'email_not_linked' });
     expect(await sendEmailOtp('not-an-email', c)).toEqual({ ok: false, code: 'invalid_email' });
   });
 

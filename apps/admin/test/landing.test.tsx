@@ -18,7 +18,7 @@ describe('§9.4 web fallback page (QR without the app)', () => {
     expect(screen.getByText('₹40 / kg')).toBeTruthy();
     expect(screen.getByText('Sold out')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Get the app to follow Ramesh' }).getAttribute('href')).toMatch(/play\.google\.com/);
-    expect(screen.getByRole('link', { name: 'Open' }).getAttribute('href')).toBe('sabzi://v/RMSH4K7P');
+    expect(screen.getByRole('link', { name: 'Open' }).getAttribute('href')).toBe('pheri://v/RMSH4K7P');
     expect(rpc).toHaveBeenCalledWith('record_qr_scan', { p_code: 'RMSH4K7P', p_source: 'web' });
   });
   it('unknown code says the vendor is not available', async () => {
