@@ -120,3 +120,5 @@ Simpler than calling FCM directly; uses FCM underneath on Android.
 - No payments, no WhatsApp, no AI features in v1
 
 - **2026-11-09 — Admin: no Tailwind sizing classes named after spacing tokens.** Our spacing tokens (xs, sm, md, …, screen) are mapped into Tailwind's `spacing`, which in v4 also drives `max-w-*`/`min-h-*`, so `max-w-sm` became 12px and squashed the login card on Vercel. Use `max-w-[24rem]`, `max-w-[28rem]`, `min-h-dvh`; `apps/admin/test/tailwind-collisions.test.ts` enforces it.
+
+- **2026-11-09 — Mobile: EAS Update (`expo-updates`) is on.** `eas.json` already gave the preview and production profiles their own channels and `runtimeVersion` was `appVersion`, but `expo-updates` was missing, so `eas build` stopped. Added it with `updates.url` in `app.json`, so JavaScript-only fixes during the pilot can go out with `eas update --channel preview|production` without a new APK. Builds of one app `version` share a runtime; bump `version` for any native change.
