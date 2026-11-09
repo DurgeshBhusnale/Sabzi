@@ -12,7 +12,11 @@ export const buyerKeys = {
   notifications: ['buyer', 'notifications'] as const,
 };
 
-export const useSocieties = () => useQuery({ queryKey: buyerKeys.societies, queryFn: () => api.listSocieties(), staleTime: 3_600_000 });
+// Refetch every time the picker opens: a society the admin adds must show up straight away, and an empty
+// list cached from the first launch (persisted for 24 h) must not hide it. The cached list still shows
+// instantly while the fresh one loads.
+export const useSocieties = () =>
+  useQuery({ queryKey: buyerKeys.societies, queryFn: () => api.listSocieties(), staleTime: 60_000, refetchOnMount: 'always' });
 export const useMySocieties = () => useQuery({ queryKey: buyerKeys.mine, queryFn: () => api.mySocieties() });
 export const useBuyerHome = (societyId: string | null | undefined) =>
   useQuery({ queryKey: buyerKeys.home(societyId), queryFn: () => api.buyerHome(societyId!), enabled: !!societyId, refetchInterval: 120_000 });
