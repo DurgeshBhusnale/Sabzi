@@ -11,7 +11,7 @@ export default async function SocietyLanding({ params }: { params: Promise<{ id:
   const { data } = await publicClient().rpc('public_society_card', { p_society_id: id });
   const s = data as Society | null;
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-md bg-bg p-md">
+    <main className="mx-auto flex min-h-dvh max-w-[28rem] flex-col gap-md bg-bg p-md">
       <p className="font-heading text-lg font-bold text-brand-leaf">{APP_NAME}</p>
       {!s ? (
         <h1 className="font-heading text-xl font-bold">We couldn&apos;t find this society.</h1>

@@ -118,3 +118,5 @@ Simpler than calling FCM directly; uses FCM underneath on Android.
 - Reservations ("keep it aside") moved to v2; vendor demand sheet in v1 uses only buyer requests
 - Pilot areas: Karve Nagar and Sus–Pashan
 - No payments, no WhatsApp, no AI features in v1
+
+- **2026-11-09 — Admin: no Tailwind sizing classes named after spacing tokens.** Our spacing tokens (xs, sm, md, …, screen) are mapped into Tailwind's `spacing`, which in v4 also drives `max-w-*`/`min-h-*`, so `max-w-sm` became 12px and squashed the login card on Vercel. Use `max-w-[24rem]`, `max-w-[28rem]`, `min-h-dvh`; `apps/admin/test/tailwind-collisions.test.ts` enforces it.

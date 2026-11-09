@@ -76,7 +76,7 @@ export function Confirm({ open, title, body, confirmLabel, destructive, onConfir
   if (!open) return null;
   return (
     <div role="dialog" aria-modal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-xl">
-      <div className="w-full max-w-md rounded-sheet bg-surface p-xl">
+      <div className="w-full max-w-[28rem] rounded-sheet bg-surface p-xl">
         <h2 className="font-heading text-lg font-semibold">{title}</h2>
         {body ? <p className="mt-xs text-text-secondary">{body}</p> : null}
         {children}

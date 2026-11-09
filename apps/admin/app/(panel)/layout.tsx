@@ -17,7 +17,7 @@ function Shell({ children }: { children: ReactNode }) {
   if (loading || !me || !me.mfa_ok) return <div className="p-xl"><Skeleton rows={6} /></div>;
   const allowed = canAccess(me.admin_level, pathname);
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-dvh">
       <nav aria-label="Admin" className="flex w-60 shrink-0 flex-col gap-xxs border-r border-border bg-surface p-md">
         <p className="mb-md font-heading text-xl font-bold text-brand-leaf">{APP_NAME}</p>
         {navFor(me.admin_level).map((n) => {
