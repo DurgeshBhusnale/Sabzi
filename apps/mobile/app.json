@@ -79,11 +79,17 @@
     },
     "extra": {
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "e88860c3-2418-495b-ab34-4d120ee5bf63"
+      },
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "owner": "tushars3s-team"
   }
 }
