@@ -36,7 +36,11 @@ export default function PickSociety() {
   }, []);
 
   return (
-    <Screen header={<TopAppBar title={en.buyer.pickTitle} onBack={router.canGoBack() ? () => router.back() : undefined} />}>
+    <Screen
+      header={<TopAppBar title={en.buyer.pickTitle} onBack={router.canGoBack() ? () => router.back() : undefined} />}
+      refreshing={societies.isRefetching}
+      onRefresh={() => void societies.refetch()}
+    >
       <Text color="textSecondary">{en.buyer.pickBody}</Text>
       {error ? <Text color="error">{error}</Text> : null}
       <SocietyPicker
