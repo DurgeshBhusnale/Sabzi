@@ -30,7 +30,7 @@ export default async function VendorLanding({ params }: { params: Promise<{ code
   const card = await load(code);
   if (!card) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-sm p-md text-center">
+      <main className="mx-auto flex min-h-dvh max-w-[28rem] flex-col items-center justify-center gap-sm p-md text-center">
         <h1 className="font-heading text-xl font-bold">This vendor isn&apos;t available any more.</h1>
         <a className="text-primary underline" href={PLAY_STORE_URL}>{`Get ${APP_NAME} to find vendors near you`}</a>
       </main>
@@ -41,7 +41,7 @@ export default async function VendorLanding({ params }: { params: Promise<{ code
   const avatar = storageUrl('vendor-photos', card.photo_path);
   const items = (card.menu?.items ?? []).slice(0, 6);
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col gap-md bg-bg p-md">
+    <main className="mx-auto flex min-h-dvh max-w-[28rem] flex-col gap-md bg-bg p-md">
       <p className="font-heading text-lg font-bold text-brand-leaf">{APP_NAME}</p>
       <section className="overflow-hidden rounded-card border border-border bg-surface">
         {photo ? <img src={photo} alt="Today's stock photo" className="aspect-video w-full object-cover" /> : null}

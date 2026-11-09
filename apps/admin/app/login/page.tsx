@@ -68,8 +68,8 @@ export default function Login() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-md">
-      <Card className="w-full max-w-sm">
+    <main className="flex min-h-dvh items-center justify-center p-md">
+      <Card className="w-full max-w-[24rem]">
         <h1 className="font-heading text-2xl font-bold text-text-primary">{APP_NAME} Admin</h1>
         <p className="mb-lg text-text-secondary">{step === 'password' ? 'Field team login' : '2-step verification'}</p>
         {step === 'password' ? (
