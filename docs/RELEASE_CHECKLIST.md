@@ -42,8 +42,9 @@ For the owner. Do these in order. Nothing here needs code changes unless noted.
 
 ## 3. Push notifications (FCM via Expo)
 - [ ] Create a Firebase project, add Android app `in.anchorlit.pheri`, download `google-services.json` (do not commit it).
-- [ ] `eas credentials` → Android → upload the FCM V1 service-account key.
-- [ ] `eas init` and put the real EAS project id in `apps/mobile/app.json` → `extra.eas.projectId` (replaces `REPLACE_WITH_EAS_PROJECT_ID`).
+- [ ] Upload it to EAS as a file variable (the build reads it via `android.googleServicesFile` in `apps/mobile/app.config.ts`): `cd apps/mobile && eas env:create --name GOOGLE_SERVICES_JSON --type file --value ./google-services.json --visibility secret --environment development --environment preview --environment production`.
+- [ ] Firebase → Project settings → Service accounts → generate a private key (keep it outside the repo); `eas credentials` → Android → Google Service Account → FCM V1 → upload it.
+- [x] `eas init --id <id>`: done, project `e88860c3-2418-495b-ab34-4d120ee5bf63` (owner `tushars3s-team`) is in `apps/mobile/app.json` → `extra.eas.projectId`.
 
 ## 4. Testing subdomain, web pages and App Links
 - [ ] DNS for `anchorlit.in`: add `pheri` as a CNAME to the web deployment below (e.g. Vercel `cname.vercel-dns.com`) and add the domain in the host's settings. No code change: set `EXPO_PUBLIC_BASE_URL=https://pheri.anchorlit.in` as an EAS environment variable (QR links and the Android App Links host follow it, via `apps/mobile/app.config.ts`) and `NEXT_PUBLIC_BASE_URL=https://pheri.anchorlit.in` on the web deployment. At launch, change both values to the main domain and print new stickers.
