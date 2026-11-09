@@ -90,6 +90,9 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
+    "updates": {
+      "url": "https://u.expo.dev/e88860c3-2418-495b-ab34-4d120ee5bf63"
+    },
     "owner": "tushars3s-team"
   }
 }

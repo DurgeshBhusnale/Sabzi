@@ -4,6 +4,7 @@ Newest first. One entry per pull request. Claude updates this file in every PR.
 
 | Date | Milestone | Status | PR | Notes |
 | --- | --- | --- | --- | --- |
+| 2026-11-09 | Release setup: EAS Update | Done | (this PR) | `expo-updates` added (EAS build needs it for the channels in `eas.json`), `updates.url` in `app.json`; see DECISIONS. Tests: typecheck, lint, mobile 256/256 (`screens-auth` passes alone; times out only in a full run on a slow machine). |
 | 2026-11-09 | Release setup: EAS project + FCM config | Done | (this PR) | EAS project id linked in `app.json`; `android.googleServicesFile` from the `GOOGLE_SERVICES_JSON` EAS file variable (push tokens need it); checklist section 3 updated. Owner still uploads google-services.json and the FCM V1 key. |
 | 2026-11-08 | Brand Pheri, subdomain, email sign-in (owner request) | Done | (this PR) | Name Pheri everywhere users see it; app id `in.anchorlit.pheri`, scheme `pheri://`; default base URL `https://pheri.anchorlit.in`; email sign-in/sign-up with a 6-digit code next to Google (code email templates, 10 min expiry); docs updated. Tests: +4 Jest, +2 integration (email sign-up via the mail catcher). |
 | 2026-11-08 | Testing-phase changes (owner request) | Done | (this PR) | Google sign-in replaces phone OTP in the app (phone OTP kept behind `AUTH_METHODS.phoneOtp`); profile building asks for name + mobile number (no SMS); private `profile_phones` table; vendor Call and admin pages use it; base URL from env for the testing subdomain; docs updated. Tests: +12 pgTAP, +7 Jest. |
