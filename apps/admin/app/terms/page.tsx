@@ -6,7 +6,7 @@ export const metadata = { title: `Terms of use · ${APP_NAME}` };
 export default function Terms() {
   return (
     <main className="mx-auto max-w-2xl p-md leading-relaxed">
-      <h1 className="font-heading text-2xl font-bold">{`${APP_NAME} terms of use`}</h1>
+      <h1 className="font-heading text-[30px] leading-[34px]">{`${APP_NAME} terms of use`}</h1>
       <p className="text-sm text-text-secondary">Pilot version · November 2026</p>
       <ol className="mt-md flex list-decimal flex-col gap-sm pl-lg">
         <li>{`${APP_NAME} helps residents know when local vegetable vendors arrive and what they sell. We do not sell vegetables and we do not handle payments; you pay the vendor in person.`}</li>

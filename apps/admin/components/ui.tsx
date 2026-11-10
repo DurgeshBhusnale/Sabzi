@@ -6,12 +6,12 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
 export function Button({ variant = 'primary', loading, className, children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'tertiary' | 'destructive'; loading?: boolean }) {
   const v = {
     primary: 'bg-primary text-on-primary hover:bg-primary-pressed border-primary',
-    secondary: 'bg-surface text-primary border-primary hover:bg-primary-tint',
-    tertiary: 'bg-transparent text-primary border-transparent hover:bg-primary-tint',
-    destructive: 'bg-error text-on-error border-error hover:opacity-90',
+    secondary: 'bg-surface text-text-primary border-border hover:bg-surface-2',
+    tertiary: 'bg-transparent text-accent border-transparent hover:bg-primary-tint',
+    destructive: 'bg-transparent text-error border-error hover:bg-error-tint',
   }[variant];
   return (
-    <button {...rest} disabled={rest.disabled || loading} className={cx('inline-flex min-h-11 items-center justify-center gap-xs rounded-card border px-md font-semibold disabled:cursor-not-allowed disabled:opacity-50', v, className)}>
+    <button {...rest} disabled={rest.disabled || loading} className={cx('inline-flex min-h-10 items-center justify-center gap-xs rounded-input border px-md text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50', v, className)}>
       {loading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden /> : null}
       {children}
     </button>
@@ -19,13 +19,13 @@ export function Button({ variant = 'primary', loading, className, children, ...r
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx('rounded-card border border-border bg-surface p-md', className)}>{children}</div>;
+  return <div className={cx('rounded-[14px] border border-border bg-surface p-lg', className)}>{children}</div>;
 }
 
 export function Field({ label, error, children }: { label: string; error?: string | null; children: ReactNode }) {
   return (
-    <label className="flex flex-col gap-xxs text-sm font-medium text-text-primary">
-      {label}
+    <label className="flex flex-col gap-[6px] text-sm font-medium text-text-primary">
+      <span className="eyebrow text-text-secondary">{label}</span>
       {children}
       {error ? <span className="text-sm font-normal text-error">{error}</span> : null}
     </label>
@@ -33,24 +33,24 @@ export function Field({ label, error, children }: { label: string; error?: strin
 }
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={cx('min-h-11 rounded-input border border-border bg-surface px-sm text-base font-normal focus:border-primary focus:outline-2 focus:outline-primary', props.className)} />;
+  return <input {...props} className={cx('min-h-12 rounded-input border border-border bg-surface px-[14px] text-[15px] font-normal focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-primary-tint', props.className)} />;
 }
 
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={cx('min-h-11 rounded-input border border-border bg-surface px-sm text-base font-normal', props.className)} />;
+  return <select {...props} className={cx('min-h-12 rounded-input border border-border bg-surface px-[14px] text-[15px] font-normal', props.className)} />;
 }
 
 export function Badge({ tone = 'neutral', children }: { tone?: 'neutral' | 'green' | 'amber' | 'red' | 'blue'; children: ReactNode }) {
   const t = { neutral: 'bg-surface-2 text-text-secondary', green: 'bg-primary-tint text-on-primary-tint', amber: 'bg-deal-amber-tint text-deal-amber-text', red: 'bg-error-tint text-on-error-tint', blue: 'bg-info-tint text-on-info-tint' }[tone];
-  return <span className={cx('inline-flex items-center rounded-pill px-xs py-[2px] text-xs font-semibold', t)}>{children}</span>;
+  return <span className={cx('inline-flex items-center h-[22px] rounded-pill px-[10px] text-[11px] font-medium', t)}>{children}</span>;
 }
 
 export function Table({ head, children, empty }: { head: string[]; children: ReactNode; empty?: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-card border border-border bg-surface">
+    <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
       <table className="w-full text-left text-sm">
-        <thead className="bg-surface-2 text-text-secondary">
-          <tr>{head.map((h) => <th key={h} className="px-sm py-xs font-semibold">{h}</th>)}</tr>
+        <thead className="border-b border-border text-text-secondary">
+          <tr>{head.map((h) => <th key={h} className="eyebrow h-10 px-[20px]">{h}</th>)}</tr>
         </thead>
         <tbody className="divide-y divide-border">{children}</tbody>
       </table>
@@ -76,8 +76,8 @@ export function Confirm({ open, title, body, confirmLabel, destructive, onConfir
   if (!open) return null;
   return (
     <div role="dialog" aria-modal className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-xl">
-      <div className="w-full max-w-[28rem] rounded-sheet bg-surface p-xl">
-        <h2 className="font-heading text-lg font-semibold">{title}</h2>
+      <div className="w-full max-w-[28rem] rounded-[20px] bg-bg p-xl">
+        <h2 className="font-heading text-xl italic">{title}</h2>
         {body ? <p className="mt-xs text-text-secondary">{body}</p> : null}
         {children}
         <div className="mt-lg flex justify-end gap-xs">
@@ -89,10 +89,11 @@ export function Confirm({ open, title, body, confirmLabel, destructive, onConfir
   );
 }
 
-export function Empty({ title, body, action }: { title: string; body?: string; action?: ReactNode }) {
+export function Empty({ title, body, action, image }: { title: string; body?: string; action?: ReactNode; image?: string }) {
   return (
     <div className="flex flex-col items-center gap-xs p-xxl text-center">
-      <p className="font-heading text-lg font-semibold">{title}</p>
+      {image ? <img src={image} alt="" width={160} height={160} className="mb-sm rounded-[16px]" /> : null}
+      <p className="font-heading text-xl italic">{title}</p>
       {body ? <p className="text-text-secondary">{body}</p> : null}
       {action}
     </div>
@@ -102,7 +103,7 @@ export function Empty({ title, body, action }: { title: string; body?: string; a
 export function PageTitle({ title, actions }: { title: string; actions?: ReactNode }) {
   return (
     <div className="mb-lg flex items-center justify-between gap-md">
-      <h1 className="font-heading text-2xl font-bold">{title}</h1>
+      <h1 className="font-heading text-[30px] leading-[34px]">{title}</h1>
       <div className="flex gap-xs">{actions}</div>
     </div>
   );

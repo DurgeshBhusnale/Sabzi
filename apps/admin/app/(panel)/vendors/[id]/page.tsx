@@ -105,22 +105,23 @@ export default function VendorDetailPage() {
           ) : <p className="text-sm text-text-muted">No document uploaded</p>}
         </Card>
         <Card className="flex flex-col gap-xs">
-          <h2 className="font-heading text-lg font-semibold">Stops</h2>
+          <h2 className="font-heading text-xl italic">Stops</h2>
           {d.data.stops.length === 0 ? <p className="text-text-secondary">No stops yet. Add them in the stops planner.</p> : null}
           {d.data.stops.map((s) => (
             <p key={s.id} className={s.active ? '' : 'text-text-muted line-through'}>{`${s.society_name} · ${s.gate_name} — ${s.days_of_week.map((x) => DAY_SHORT[x - 1]).join(' ')} ${formatTimeWindow(s.window_start, s.window_end)}`}</p>
           ))}
-          <h2 className="mt-md font-heading text-lg font-semibold">Today’s menu</h2>
+          <h2 className="mt-md font-heading text-xl italic">Today’s menu</h2>
           {d.data.menu?.items.length ? d.data.menu.items.map((i) => <p key={i.item_id} className={i.sold_out ? 'text-text-muted line-through' : ''}>{`${i.name} — ${formatPrice(Number(i.price), i.unit)}`}</p>) : <p className="text-text-secondary">Not posted today</p>}
         </Card>
         <Card className="flex flex-col gap-xs">
-          <h2 className="font-heading text-lg font-semibold">Reviews</h2>
+          <h2 className="font-heading text-xl italic">Reviews</h2>
           {d.data.reviews.slice(0, 6).map((r) => <p key={r.id}>{`${r.stars}★ ${r.reviewer_name}: ${r.text ?? ''}`}{r.status === 'hidden' ? ' (hidden)' : ''}</p>)}
-          <h2 className="mt-md font-heading text-lg font-semibold">Reports</h2>
+          <h2 className="mt-md font-heading text-xl italic">Reports</h2>
           {d.data.reports.length === 0 ? <p className="text-text-secondary">None</p> : d.data.reports.map((r) => <p key={r.id}>{`${REPORT_REASON_LABELS[r.reason]} · ${formatIstRelative(r.created_at)} · ${r.status}`}</p>)}
         </Card>
       </div>
       <Confirm open={!!action} title={action ? ACTION_COPY[action].title : ''} body={action ? ACTION_COPY[action].body : ''} confirmLabel={action ? ACTION_COPY[action].label : ''} destructive={action ? ACTION_COPY[action].destructive : false} onCancel={() => setAction(null)} onConfirm={run}>
+        {action === 'verify' ? <img src="/images/illustrations/admin-verification.webp" alt="" width={160} height={160} className="mx-auto mt-md rounded-[16px]" /> : null}
         {action && ACTION_COPY[action].reason ? <div className="mt-md"><Field label="Reason (shown to the vendor)" error={error}><Input value={reason} onChange={(e) => setReason(e.target.value)} /></Field></div> : error ? <p className="text-error">{error}</p> : null}
       </Confirm>
     </>

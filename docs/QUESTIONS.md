@@ -17,3 +17,12 @@ Claude adds questions here when something is unclear, notes the default it chose
 | 2026-11-08 | Same person signs in with Google once and with the same email by code another time: one account or two? | One account — Supabase links identities with the same verified email automatically. | |
 | 2026-11-08 | Support email and phone are still placeholders (`help@sabzi.example`, `+912000000000`). | Kept until you share real ones (e.g. an `@anchorlit.in` address). | |
 | 2026-11-08 | App id changed to `in.anchorlit.pheri` (was `in.sabzi.app`). If the brand changes again after the first Play Store upload, the id cannot change — only the display name. | Chosen now because nothing is published yet. | |
+
+## 2026-11-11 — Pheri v4 redesign
+
+1. The v4 "Not in spec – for review" file has: lock-screen and expanded push notifications, an in-app banner, a restyled A6 QR sticker and A4 society poster, and a "Tell us your vendor's name" form. Which should be built? (Not built; the existing sticker/poster PDFs and the waitlist form stay.)
+2. Buyer and vendor design files download only up to B-09 and V-12 (256 KB limit). B-10–B-16 and V-13–V-16 were restyled with the shared v4 components — please check them against the full frames in Claude Design.
+3. The website contact details are placeholders (`help@sabzi.example`, `+91 20000 00000` in `packages/shared/src/constants.ts`). Real email and WhatsApp number?
+4. Should website messages be stored (new table + admin inbox) rather than sent by email?
+5. "Find your society" on the website goes to the Play Store listing. Change once the app is public?
+

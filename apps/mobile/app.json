@@ -14,7 +14,7 @@
     "android": {
       "package": "in.anchorlit.pheri",
       "adaptiveIcon": {
-        "backgroundColor": "#24A05E",
+        "backgroundColor": "#0F3D2A",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -43,11 +43,11 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F8FAF7",
+          "backgroundColor": "#F6F5EF",
           "image": "./assets/splash-icon.png",
-          "imageWidth": 160,
+          "imageWidth": 200,
           "dark": {
-            "backgroundColor": "#0F1411",
+            "backgroundColor": "#0F1612",
             "image": "./assets/splash-icon.png"
           }
         }

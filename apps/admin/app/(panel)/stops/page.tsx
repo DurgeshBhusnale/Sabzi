@@ -103,7 +103,7 @@ export default function StopsPlanner() {
           <Button onClick={add} loading={saving} disabled={!vendorId || !gateId}>Add stop</Button>
         </Card>
         <Card>
-          <h2 className="mb-md font-heading text-lg font-semibold">Week</h2>
+          <h2 className="mb-md font-heading text-xl italic">Week</h2>
           {!vendorId ? <Empty title="Pick a vendor to see his week" /> : mine.length === 0 ? <Empty title="No stops yet" body="Add the first stop on the left." /> : (
             <div className="grid grid-cols-7 gap-xs text-sm">
               {DAY_SHORT.map((d, i) => (

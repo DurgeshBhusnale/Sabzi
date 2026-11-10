@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { House, Truck } from 'lucide-react-native';
+import { Circle, CircleCheck, House, Truck } from 'lucide-react-native';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, Icon, Screen, Text } from '../../src/ui';
 import { setRole, type Role } from '../../src/features/auth/api';
@@ -61,19 +61,22 @@ export default function RoleScreen() {
             accessibilityLabel={`${c.title}. ${c.body}`}
             onPress={() => setRoleState(c.role)}
             style={{
-              borderWidth: 2,
+              borderWidth: selected ? 2 : 1,
               borderColor: selected ? t.colors.primary : t.colors.border,
-              backgroundColor: selected ? t.colors.primaryTint : t.colors.surface,
+              backgroundColor: t.colors.surface,
               borderRadius: t.radius.card,
               padding: t.spacing.lg,
               gap: t.spacing.xs,
             }}
           >
-            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: t.colors.primaryTint, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon icon={c.icon} size={32} color="primary" />
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={{ width: 44, height: 44, borderRadius: t.radius.button, backgroundColor: c.role === 'buyer' ? t.colors.sage : t.colors.dealAmberTint, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon icon={c.icon} size={22} color="primary" />
+              </View>
+              <Icon icon={selected ? CircleCheck : Circle} size={22} color={selected ? 'primary' : 'border'} />
             </View>
-            <Text variant="h2">{c.title}</Text>
-            <Text color="textSecondary">{c.body}</Text>
+            <Text variant="h1" style={{ fontSize: 22, lineHeight: 26 }}>{c.title}</Text>
+            <Text variant="bodySmall" color="textSecondary">{c.body}</Text>
           </Pressable>
         );
       })}

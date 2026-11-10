@@ -13,7 +13,7 @@ function Metric({ label, value, target, hint }: { label: string; value: string; 
   return (
     <Card className="flex flex-col gap-xxs">
       <p className="text-sm text-text-secondary">{label}</p>
-      <p className="font-heading text-3xl font-bold tabular-nums">{value}</p>
+      <p className="font-heading text-[40px] leading-[44px] tabular-nums">{value}</p>
       {target ? <p className="text-xs text-text-muted">{`Target ${target}`}</p> : null}
       {hint ? <p className="text-xs text-text-muted">{hint}</p> : null}
     </Card>
@@ -69,38 +69,38 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-2 gap-lg">
             <Card>
-              <h2 className="mb-sm font-heading text-lg font-semibold">Arrival alerts and opens (within 15 min)</h2>
+              <h2 className="mb-sm font-heading text-xl italic">Arrival alerts and opens (within 15 min)</h2>
               <LineChart label="Daily arrival alerts and opens" series={['Alerts sent', 'Opened in 15 min']} data={(daily.data ?? []).map((d) => ({ x: d.date, values: [d.alerts, d.opens] }))} />
             </Card>
             <Card>
-              <h2 className="mb-sm font-heading text-lg font-semibold">Followers by society</h2>
+              <h2 className="mb-sm font-heading text-xl italic">Followers by society</h2>
               <BarChart label="Followers by society" data={(societies.data ?? []).map((x) => ({ label: x.name, value: x.followers, note: `${x.adoption_pct}% of ${x.flats} flats` }))} />
             </Card>
           </div>
           <div className="grid grid-cols-2 gap-lg">
             <div>
-              <h2 className="mb-sm font-heading text-lg font-semibold">Top vendors</h2>
+              <h2 className="mb-sm font-heading text-xl italic">Top vendors</h2>
               <Table head={['Vendor', 'Followers', 'Menu days', 'Arrivals', 'Rating']}>
                 {(vendors.data ?? []).slice(0, 10).map((v) => (
                   <tr key={v.vendor_id}>
-                    <td className="px-sm py-xs font-medium">{v.name}</td>
-                    <td className="px-sm py-xs tabular-nums">{v.followers}</td>
-                    <td className="px-sm py-xs tabular-nums">{v.menu_days}</td>
-                    <td className="px-sm py-xs tabular-nums">{v.arrivals}</td>
-                    <td className="px-sm py-xs tabular-nums">{v.rating_count ? `${v.avg_rating} (${v.rating_count})` : 'New'}</td>
+                    <td className="px-[20px] py-sm font-medium">{v.name}</td>
+                    <td className="px-[20px] py-sm tabular-nums">{v.followers}</td>
+                    <td className="px-[20px] py-sm tabular-nums">{v.menu_days}</td>
+                    <td className="px-[20px] py-sm tabular-nums">{v.arrivals}</td>
+                    <td className="px-[20px] py-sm tabular-nums">{v.rating_count ? `${v.avg_rating} (${v.rating_count})` : 'New'}</td>
                   </tr>
                 ))}
               </Table>
             </div>
             <div>
-              <h2 className="mb-sm font-heading text-lg font-semibold">Societies needing attention</h2>
+              <h2 className="mb-sm font-heading text-xl italic">Societies needing attention</h2>
               <Table head={['Society', 'Why', 'Followers', 'Vendors']} empty={needsAttention(societies.data ?? []).length === 0 ? <Empty title="All societies on track" /> : null}>
                 {needsAttention(societies.data ?? []).map((x) => (
                   <tr key={x.society_id}>
-                    <td className="px-sm py-xs font-medium">{x.name}</td>
-                    <td className="px-sm py-xs">{x.why}</td>
-                    <td className="px-sm py-xs tabular-nums">{x.followers}</td>
-                    <td className="px-sm py-xs tabular-nums">{x.vendors}</td>
+                    <td className="px-[20px] py-sm font-medium">{x.name}</td>
+                    <td className="px-[20px] py-sm">{x.why}</td>
+                    <td className="px-[20px] py-sm tabular-nums">{x.followers}</td>
+                    <td className="px-[20px] py-sm tabular-nums">{x.vendors}</td>
                   </tr>
                 ))}
               </Table>
@@ -110,7 +110,7 @@ export default function Dashboard() {
             <summary className="cursor-pointer text-sm text-primary">Show chart data as a table</summary>
             <Table head={['Date', 'Alerts sent', 'Opened in 15 min']}>
               {(daily.data ?? []).map((d) => (
-                <tr key={d.date}><td className="px-sm py-xs">{d.date}</td><td className="px-sm py-xs tabular-nums">{d.alerts}</td><td className="px-sm py-xs tabular-nums">{d.opens}</td></tr>
+                <tr key={d.date}><td className="px-[20px] py-sm">{d.date}</td><td className="px-[20px] py-sm tabular-nums">{d.alerts}</td><td className="px-[20px] py-sm tabular-nums">{d.opens}</td></tr>
               ))}
             </Table>
           </details>

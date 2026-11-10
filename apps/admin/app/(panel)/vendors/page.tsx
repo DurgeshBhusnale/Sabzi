@@ -28,14 +28,14 @@ export default function Vendors() {
         <Table head={['Name', 'Phone', 'Vehicle', 'Stops', 'Followers', 'Rating', 'Last active', 'Status']} empty={rows.length === 0 ? <Empty title={`No ${STATUS_LABEL[tab].toLowerCase()} vendors`} /> : null}>
           {rows.map((v) => (
             <tr key={v.id} className="hover:bg-surface-2">
-              <td className="px-sm py-xs"><Link className="font-medium text-primary" href={`/vendors/${v.id}`}>{v.display_name}</Link><div className="text-xs text-text-secondary">{v.owner_name}</div></td>
-              <td className="px-sm py-xs tabular-nums">{v.phone_masked}</td>
-              <td className="px-sm py-xs">{v.vehicle === 'tempo' ? 'Tempo' : 'Thela'}</td>
-              <td className="px-sm py-xs">{v.stops}</td>
-              <td className="px-sm py-xs">{v.followers}</td>
-              <td className="px-sm py-xs">{v.rating_count ? `${v.avg_rating} (${v.rating_count})` : 'New'}</td>
-              <td className="px-sm py-xs">{v.last_active ? formatIstRelative(v.last_active) : '—'}</td>
-              <td className="px-sm py-xs"><Badge tone={STATUS_TONE[v.status]}>{STATUS_LABEL[v.status]}</Badge></td>
+              <td className="px-[20px] py-sm"><Link className="font-medium text-primary" href={`/vendors/${v.id}`}>{v.display_name}</Link><div className="text-xs text-text-secondary">{v.owner_name}</div></td>
+              <td className="px-[20px] py-sm tabular-nums">{v.phone_masked}</td>
+              <td className="px-[20px] py-sm">{v.vehicle === 'tempo' ? 'Tempo' : 'Thela'}</td>
+              <td className="px-[20px] py-sm">{v.stops}</td>
+              <td className="px-[20px] py-sm">{v.followers}</td>
+              <td className="px-[20px] py-sm">{v.rating_count ? `${v.avg_rating} (${v.rating_count})` : 'New'}</td>
+              <td className="px-[20px] py-sm">{v.last_active ? formatIstRelative(v.last_active) : '—'}</td>
+              <td className="px-[20px] py-sm"><Badge tone={STATUS_TONE[v.status]}>{STATUS_LABEL[v.status]}</Badge></td>
             </tr>
           ))}
         </Table>

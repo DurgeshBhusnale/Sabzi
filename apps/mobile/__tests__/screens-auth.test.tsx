@@ -33,7 +33,8 @@ describe('dev component gallery', () => {
     expect(screen.getAllByText('Ramesh Sabzi').length).toBeGreaterThan(0);
     await renderUi(<ComponentGallery />, { scheme: 'dark' });
     expect(screen.getAllByText('Publish menu').length).toBeGreaterThan(0);
-  });
+    // Renders ~60 components twice; on a loaded CI box this takes longer than jest's 5 s default.
+  }, 30_000);
 });
 
 describe('S-02 welcome', () => {

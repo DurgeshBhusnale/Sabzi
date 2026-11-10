@@ -25,13 +25,13 @@ export default function Societies() {
         >
           {rows.map((s) => (
             <tr key={s.id} className="hover:bg-surface-2">
-              <td className="px-sm py-xs font-medium"><Link className="text-primary" href={`/societies/${s.id}`}>{s.name}</Link></td>
-              <td className="px-sm py-xs">{PILOT_AREA_LABELS[s.area]}</td>
-              <td className="px-sm py-xs">{s.gates.length}</td>
-              <td className="px-sm py-xs">{s.flats_count}</td>
-              <td className="px-sm py-xs">{s.vendors}</td>
-              <td className="px-sm py-xs">{s.followers}</td>
-              <td className="px-sm py-xs">{`${s.adoption_pct}%`}</td>
+              <td className="px-[20px] py-sm font-medium"><Link className="text-primary" href={`/societies/${s.id}`}>{s.name}</Link></td>
+              <td className="px-[20px] py-sm">{PILOT_AREA_LABELS[s.area]}</td>
+              <td className="px-[20px] py-sm">{s.gates.length}</td>
+              <td className="px-[20px] py-sm">{s.flats_count}</td>
+              <td className="px-[20px] py-sm">{s.vendors}</td>
+              <td className="px-[20px] py-sm">{s.followers}</td>
+              <td className="px-[20px] py-sm">{`${s.adoption_pct}%`}</td>
             </tr>
           ))}
         </Table>

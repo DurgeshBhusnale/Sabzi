@@ -9,7 +9,7 @@ export function ArriveFab({ onPress, disabled }: { onPress: () => void; disabled
   const t = useTheme();
   return (
     <View pointerEvents="box-none" style={[styles.wrap, { bottom: t.spacing.md, paddingHorizontal: t.spacing.screen }]}>
-      <Button label={en.nav.arrived} size="fab" icon={MapPin} onPress={onPress} disabled={disabled} testID="arrive-fab" />
+      <Button label={en.nav.arrived} size="fab" variant="accent" icon={MapPin} onPress={onPress} disabled={disabled} testID="arrive-fab" />
     </View>
   );
 }
