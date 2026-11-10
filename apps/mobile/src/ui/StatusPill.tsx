@@ -10,14 +10,14 @@ export type PillStatus = 'at_gate' | 'expected' | 'leaving_soon' | 'left' | 'not
 
 type K = keyof ColorTokens;
 const STYLE: Record<PillStatus, { bg: K; fg: K; dot?: K }> = {
-  at_gate: { bg: 'primaryTint', fg: 'onPrimaryTint', dot: 'brandLeaf' },
+  at_gate: { bg: 'primaryTint', fg: 'onPrimaryTint', dot: 'accent' },
   expected: { bg: 'surface2', fg: 'textSecondary' },
   leaving_soon: { bg: 'dealAmberTint', fg: 'dealAmberText' },
   left: { bg: 'surface2', fg: 'textMuted' },
   not_coming: { bg: 'errorTint', fg: 'onErrorTint' },
   verified: { bg: 'primaryTint', fg: 'onPrimaryTint' },
   sold_out: { bg: 'errorTint', fg: 'onErrorTint' },
-  deal: { bg: 'dealAmber', fg: 'onDealAmber' },
+  deal: { bg: 'dealAmberTint', fg: 'dealAmberText' },
   waiting: { bg: 'surface2', fg: 'textSecondary' },
   will_bring: { bg: 'primaryTint', fg: 'onPrimaryTint' },
   cant_bring: { bg: 'errorTint', fg: 'onErrorTint' },
@@ -38,7 +38,7 @@ function PulseDot({ color, large }: { color: string; large: boolean }) {
     loop.start();
     return () => loop.stop();
   }, [scale, t.motion.pulseMs]);
-  const size = large ? 10 : 8;
+  const size = large ? 8 : 6;
   return (
     <View style={{ width: size, height: size }} testID="pulse-dot">
       <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: size, backgroundColor: color, opacity: 0.35, transform: [{ scale }] }]} />
@@ -63,15 +63,15 @@ export function StatusPill({ status, label, large = false }: { status: PillStatu
         {
           backgroundColor: bg,
           borderRadius: t.radius.pill,
-          paddingHorizontal: large ? t.spacing.md : t.spacing.sm,
-          paddingVertical: large ? t.spacing.xs : t.spacing.xxs,
+          paddingHorizontal: large ? t.spacing.md : 10,
+          minHeight: large ? 32 : 22,
           gap: t.spacing.xs - 2,
         },
       ]}
     >
-      {s.dot ? <PulseDot color={large ? t.colors.onPrimary : t.colors[s.dot]} large={large} /> : null}
+      {s.dot ? <PulseDot color={large ? t.colors.mint : t.colors[s.dot]} large={large} /> : null}
       {status === 'verified' ? <Icon icon={BadgeCheck} size={16} color="onPrimaryTint" /> : null}
-      <Text variant={large ? 'button' : 'caption'} weight="600" color={fg}>
+      <Text variant={large ? 'label' : 'caption'} weight={large ? '600' : '500'} color={fg}>
         {label}
       </Text>
     </View>

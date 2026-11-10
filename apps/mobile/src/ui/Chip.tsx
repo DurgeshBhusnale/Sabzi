@@ -24,8 +24,9 @@ export function Chip({
   const c = t.colors;
   const unit = kind === 'unit';
   const height = unit ? t.heights.unitChip : t.heights.chip;
-  const bg = unit ? (selected ? c.primary : c.surface2) : selected ? c.primaryTint : c.surface;
-  const fg = disabled ? 'textMuted' : unit ? (selected ? 'onPrimary' : 'textPrimary') : selected ? 'onPrimaryTint' : 'textPrimary';
+  // v4: selected chips are solid forest with white text; idle chips are soft cream-grey
+  const bg = selected ? c.primary : unit ? c.surface2 : c.surface;
+  const fg = disabled ? 'textMuted' : selected ? 'onPrimary' : 'textPrimary';
   return (
     <Pressable
       testID={testID}
@@ -39,15 +40,15 @@ export function Chip({
         styles.chip,
         {
           minHeight: height,
-          paddingHorizontal: unit ? t.spacing.md : t.spacing.sm,
-          borderRadius: t.radius.chip,
+          paddingHorizontal: unit ? t.spacing.md : 14,
+          borderRadius: unit ? t.radius.input : t.radius.pill,
           backgroundColor: bg,
-          borderColor: unit ? bg : selected ? c.primary : c.border,
+          borderColor: selected ? c.primary : unit ? c.surface2 : c.border,
           opacity: disabled ? 0.6 : 1,
         },
       ]}
     >
-      <Text variant={unit ? 'button' : 'bodySmall'} weight={selected ? '600' : '500'} color={fg}>
+      <Text variant={unit ? 'button' : 'caption'} weight={selected ? '600' : '500'} color={fg}>
         {label}
       </Text>
     </Pressable>

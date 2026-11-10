@@ -37,12 +37,12 @@ export function Dialog({
           testID={`dialog-${kind}`}
           accessibilityViewIsModal
           accessibilityRole="alert"
-          style={{ backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, padding: t.spacing.xl, gap: t.spacing.sm, width: '100%' }}
+          style={{ backgroundColor: t.colors.bg, borderRadius: t.radius.dialog, padding: t.spacing.xl, gap: t.spacing.sm, width: '100%' }}
           onPress={() => undefined}
         >
           {illustration ? <View style={styles.center}>{illustration}</View> : null}
-          <Text variant="h2">{title}</Text>
-          {body ? <Text color="textSecondary">{body}</Text> : null}
+          <Text variant="h1" style={{ fontSize: t.type.h1.fontSize - 4, lineHeight: t.type.h1.lineHeight - 4 }}>{title}</Text>
+          {body ? <Text variant="bodySmall" color="textSecondary">{body}</Text> : null}
           <View style={[styles.actions, { gap: t.spacing.xs, marginTop: t.spacing.xs }]}>
             {kind === 'permission' ? (
               <View style={{ flex: 1, gap: t.spacing.xs }}>
@@ -51,8 +51,12 @@ export function Dialog({
               </View>
             ) : (
               <>
-                <Button label={cancelLabel} variant="tertiary" fullWidth={false} onPress={onCancel} />
-                <Button label={confirmLabel} variant={kind === 'destructive' ? 'destructive' : 'primary'} fullWidth={false} loading={loading} onPress={onConfirm} />
+                <View style={{ flex: 1 }}>
+                  <Button label={cancelLabel} variant="secondary" onPress={onCancel} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button label={confirmLabel} variant={kind === 'destructive' ? 'destructive' : 'primary'} loading={loading} onPress={onConfirm} />
+                </View>
               </>
             )}
           </View>

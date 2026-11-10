@@ -24,7 +24,7 @@ describe('B-03 Home states', () => {
   it('morning with one vendor at the gate', async () => {
     await renderUi(<HomeView vendors={[hv({ status: 'at_gate', status_at: '2026-11-05T02:35:00Z' }), imran]} loading={false} now={morning} actions={homeActions} />);
     expect(screen.getByText('At the gate now')).toBeTruthy();
-    expect(screen.getByText('At Gate 1 now')).toBeTruthy();
+    expect(screen.getByText('At Gate 1 now · 4.4 ★')).toBeTruthy();
     expect(screen.getByText('View menu · 3 items')).toBeTruthy();
     expect(screen.getByText('Coming today')).toBeTruthy();
   });
@@ -78,7 +78,7 @@ describe('B-05 vendor page', () => {
     await renderUi(<VendorPageView page={page()} loading={false} societyName="Green Park Residency" actions={pageActions} />);
     expect(screen.getByText('At Gate 1 now')).toBeTruthy();
     expect(screen.getByText('Sold out')).toBeTruthy();
-    expect(screen.getByText('₹25 / kg')).toBeTruthy();
+    expect(screen.getByText('₹25 /kg')).toBeTruthy();
     expect(screen.getByText('Updated 6:42 AM')).toBeTruthy();
     expect(screen.getByText('Home delivery available')).toBeTruthy();
   });

@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { ItemArt } from './Avatar';
+import { ItemArt } from './Art';
 import { Card } from './Card';
 import { StatusPill } from './StatusPill';
 import { Text } from './Text';
@@ -31,9 +31,9 @@ export function RequestCard({
   return (
     <Card testID={`request-${status}`}>
       <View style={[styles.row, { gap: t.spacing.sm }]}>
-        <ItemArt name={item} size={44} />
+        <ItemArt name={item} size={40} />
         <View style={[styles.flex, { gap: 2 }]}>
-          <Text weight="600">{qty ? `${item} · ${qty}` : item}</Text>
+          <Text variant="label">{qty ? `${item} · ${qty}` : item}</Text>
           {sub ? <Text variant="bodySmall" color="textSecondary">{sub}</Text> : null}
         </View>
         <StatusPill status={status === 'cancelled' ? 'left' : pill} label={en.requests.status[status]} />

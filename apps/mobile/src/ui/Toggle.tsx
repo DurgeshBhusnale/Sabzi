@@ -18,15 +18,15 @@ export function Toggle({ label, description, value, onChange, disabled = false, 
       style={[styles.row, { minHeight: t.layout.minTouch + 8, gap: t.spacing.sm }]}
     >
       <View style={styles.flex}>
-        <Text color={disabled ? 'textMuted' : 'textPrimary'}>{label}</Text>
-        {description ? <Text variant="bodySmall" color="textSecondary">{description}</Text> : null}
+        <Text variant="label" color={disabled ? 'textMuted' : 'textPrimary'}>{label}</Text>
+        {description ? <Text variant="caption" weight="400" color="textSecondary">{description}</Text> : null}
       </View>
       <Switch
         value={value}
         disabled={disabled}
         onValueChange={onChange}
         importantForAccessibility="no"
-        trackColor={{ true: t.colors.primary, false: t.colors.disabled }}
+        trackColor={{ true: t.colors.primary, false: t.scheme === 'dark' ? t.colors.border : '#CFCDBF' }}
         thumbColor={t.colors.surface}
       />
     </Pressable>

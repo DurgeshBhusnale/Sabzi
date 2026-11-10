@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { View } from 'react-native';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Screen, TopAppBar } from '../../src/ui';
@@ -26,12 +27,15 @@ export default function BuyerHome() {
   const firstGate = home.data?.[0]?.gate_name;
   return (
     <Screen
-      header={<TopAppBar society={current ? `${current.name.replace(' Residency', '')}${firstGate ? `, ${firstGate}` : ''}` : '…'} onSocietyPress={() => setSwitcher(true)} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
+      tone="forest"
+      header={<TopAppBar tone="forest" society={current ? `${current.name.replace(' Residency', '')}${firstGate ? `, ${firstGate}` : ''}` : '…'} onSocietyPress={() => setSwitcher(true)} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
       refreshing={home.isRefetching}
       onRefresh={() => home.refetch()}
     >
-      <NetworkBanner dataUpdatedAt={home.dataUpdatedAt || undefined} />
-      <NotificationsBlockedBanner role="buyer" />
+      <View style={{ paddingHorizontal: 16, gap: 8 }}>
+        <NetworkBanner dataUpdatedAt={home.dataUpdatedAt || undefined} />
+        <NotificationsBlockedBanner role="buyer" />
+      </View>
       <HomeView
         vendors={home.data}
         loading={home.isLoading}

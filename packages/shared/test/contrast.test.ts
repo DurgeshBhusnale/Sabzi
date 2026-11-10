@@ -22,6 +22,7 @@ const PAIRS: [keyof ColorTokens, keyof ColorTokens][] = [
   ['onPrimary', 'primary'], ['primary', 'surface'], ['onPrimaryTint', 'primaryTint'], ['onPrimaryTint', 'primaryTintStrong'],
   ['error', 'surface'], ['onErrorTint', 'errorTint'], ['dealAmberText', 'dealAmberTint'], ['onDealAmber', 'dealAmber'],
   ['warning', 'warningTint'], ['onInfoTint', 'infoTint'], ['textPrimary', 'primaryTintStrong'],
+  ['onForest', 'forest'], ['mint', 'forest'], ['onCream', 'cream'], ['onAccent', 'accent'], ['textPrimary', 'sage'],
 ];
 
 describe('WCAG AA contrast of token pairs', () => {

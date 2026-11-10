@@ -29,3 +29,5 @@ export * from './TextInput';
 export * from './Toggle';
 export * from './TopAppBar';
 export * from './VendorCard';
+export * from './Art';
+export * from './Layout';

@@ -5,7 +5,7 @@ import { Text } from './Text';
 export function SegmentedControl<T extends string>({ options, value, onChange, testID = 'segmented' }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void; testID?: string }) {
   const t = useTheme();
   return (
-    <View testID={testID} accessibilityRole="tablist" style={[styles.row, { backgroundColor: t.colors.surface2, borderRadius: t.radius.card, padding: t.spacing.xxs }]}>
+    <View testID={testID} accessibilityRole="tablist" style={[styles.row, { backgroundColor: t.colors.surface2, borderRadius: t.radius.input, padding: 3, gap: 2 }]}>
       {options.map((o) => {
         const selected = o.value === value;
         return (
@@ -15,7 +15,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, t
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             onPress={() => onChange(o.value)}
-            style={[styles.seg, { minHeight: t.layout.minTouch - 4, borderRadius: t.radius.input, backgroundColor: selected ? t.colors.surface : 'transparent' }]}
+            style={[styles.seg, { minHeight: t.layout.minTouch - 6, borderRadius: t.radius.input - 2, backgroundColor: selected ? t.colors.surface : 'transparent' }]}
           >
             <Text variant="bodySmall" weight={selected ? '600' : '500'} color={selected ? 'textPrimary' : 'textSecondary'}>
               {o.label}

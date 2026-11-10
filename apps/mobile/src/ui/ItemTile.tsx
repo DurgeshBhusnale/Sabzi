@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { formatPrice, type PriceUnit } from '@sabzi/shared';
 import { useTheme } from '../theme/ThemeProvider';
-import { ItemArt } from './Avatar';
+import { ItemArt } from './Art';
 import { Icon } from './Icon';
 import { Text } from './Text';
 import { en } from '../i18n/en';

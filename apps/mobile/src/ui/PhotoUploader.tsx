@@ -60,10 +60,10 @@ export function PhotoUploader({
       accessibilityLabel={en.photo.add}
       onPress={onPress}
       disabled={state === 'capturing'}
-      style={[base, { borderWidth: 2, borderStyle: 'dashed', borderColor: c.primary, backgroundColor: c.primaryTint, gap: t.spacing.xxs }]}
+      style={[base, { borderWidth: 1.5, borderStyle: 'dashed', borderColor: c.accent, backgroundColor: c.surface, gap: t.spacing.xxs }]}
     >
-      <Icon icon={Camera} color="primary" />
-      <Text weight="600" color="primary">{state === 'capturing' ? en.photo.capturing : en.photo.add}</Text>
+      <Icon icon={Camera} color="accent" />
+      <Text variant="label" color="primary">{state === 'capturing' ? en.photo.capturing : en.photo.add}</Text>
     </Pressable>
   );
 }

@@ -25,7 +25,7 @@ export function QrCard({ name, code, onShare, size = 'default' }: { name: string
         <QRCode value={vendorQrUrl(code)} size={qr} color={qrColors.fg} backgroundColor={qrColors.bg} />
       </View>
       <View style={[size === 'large' ? { alignItems: 'center' } : styles.flex, { gap: t.spacing.xxs }]}>
-        <Text variant={size === 'large' ? 'h1' : 'h2'}>{name}</Text>
+        <Text variant="h1" style={size === 'large' ? null : { fontSize: 22, lineHeight: 26 }}>{name}</Text>
         <Text color="textSecondary">{en.qr.scanToFollow}</Text>
         <Text variant="caption" color="textMuted">{en.qr.code(code)}</Text>
         {onShare ? <Button label={en.qr.share} variant="secondary" onPress={onShare} /> : null}

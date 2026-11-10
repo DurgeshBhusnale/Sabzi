@@ -14,7 +14,7 @@ export function BottomNav({ items, selected, onSelect }: { items: NavItem[]; sel
     <View
       testID="bottom-nav"
       accessibilityRole="tablist"
-      style={[styles.bar, { minHeight: t.layout.bottomNav + insets.bottom, paddingBottom: insets.bottom, backgroundColor: t.colors.surface, borderTopColor: t.colors.border }]}
+      style={[styles.bar, { minHeight: t.layout.bottomNav + insets.bottom, paddingBottom: insets.bottom, backgroundColor: t.colors.bg, borderTopColor: t.colors.border }]}
     >
       {items.map((it) => {
         const on = it.key === selected;
@@ -28,15 +28,15 @@ export function BottomNav({ items, selected, onSelect }: { items: NavItem[]; sel
             onPress={() => onSelect(it.key)}
             style={[styles.tab, { minHeight: t.layout.bottomNav, gap: t.spacing.xxs }]}
           >
-            <View style={{ backgroundColor: on ? t.colors.primaryTint : 'transparent', borderRadius: t.radius.pill, paddingHorizontal: t.spacing.md, paddingVertical: 2 }}>
-              <Icon icon={it.icon} color={on ? 'primary' : 'textSecondary'} filled={on} />
+            <View style={{ paddingHorizontal: t.spacing.md, paddingVertical: 2 }}>
+              <Icon icon={it.icon} color={on ? 'primary' : 'textMuted'} filled={on} />
               {it.badge ? (
                 <View style={[styles.badge, { backgroundColor: t.colors.error, borderRadius: t.radius.pill }]}>
                   <Text variant="caption" weight="700" color="onError">{String(it.badge)}</Text>
                 </View>
               ) : null}
             </View>
-            <Text variant="caption" weight={on ? '700' : '500'} color={on ? 'primary' : 'textSecondary'}>{it.label}</Text>
+            <Text variant="caption" weight={on ? '600' : '500'} color={on ? 'primary' : 'textMuted'} style={{ fontSize: 11 }}>{it.label}</Text>
           </Pressable>
         );
       })}

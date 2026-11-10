@@ -18,8 +18,8 @@ export function StatTile({ value, label, trend, zeroHint, loading = false }: { v
   return (
     <Card style={{ flex: 1, gap: 2 }} testID={`stat-${label}`}>
       <View accessible accessibilityLabel={`${value} ${label}`}>
-        <Text variant="display" color={zero ? 'textMuted' : 'textPrimary'}>{String(value)}</Text>
-        <Text color="textSecondary">{label}</Text>
+        <Text variant="h1" color={zero ? 'textMuted' : 'textPrimary'}>{String(value)}</Text>
+        <Text variant="caption" weight="400" color="textSecondary">{label}</Text>
       </View>
       {zero && zeroHint ? <Text variant="caption" color="textSecondary">{zeroHint}</Text> : trend ? <Text variant="caption" weight="600" color="primary">{trend}</Text> : null}
     </Card>

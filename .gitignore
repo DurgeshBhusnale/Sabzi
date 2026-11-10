@@ -37,3 +37,4 @@ coverage/
 .vscode/
 .idea/
 *.tsbuildinfo
+design-import/
