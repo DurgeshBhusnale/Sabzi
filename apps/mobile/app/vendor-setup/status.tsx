@@ -35,7 +35,7 @@ export default function VerificationStatus() {
         }
       >
         <View style={{ flex: 1, justifyContent: 'center' }}>
-          <EmptyState illustration="handshake" title={en.vendor.verifiedTitle} body={en.vendor.verifiedBody} testID="v03-verified" />
+          <EmptyState art="success" title={en.vendor.verifiedTitle} body={en.vendor.verifiedBody} testID="v03-verified" />
         </View>
       </Screen>
     );

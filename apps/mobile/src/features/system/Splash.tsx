@@ -1,30 +1,26 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { MapPin, Leaf } from 'lucide-react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import Constants from 'expo-constants';
 import { APP_NAME } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Icon } from '../../ui/Icon';
+import { APP_ICON, ILLUSTRATION_ART } from '../../ui/Art';
 import { Text } from '../../ui/Text';
 import { en } from '../../i18n/en';
 
-/** Leaf + pin mark with a replaceable wordmark (design brief §2.7). */
-export function Logo({ size = 40 }: { size?: number }) {
+/** v4 wordmark: app icon (D01) + "Pheri" in Newsreader. */
+export function Logo({ size = 28, onDark = false }: { size?: number; onDark?: boolean }) {
   const t = useTheme();
   return (
     <View style={[styles.row, { gap: t.spacing.xs }]} accessible accessibilityLabel={APP_NAME}>
-      <View style={{ width: size, height: size }}>
-        <Icon icon={MapPin} size={size} color="brandLeaf" />
-        <View style={[StyleSheet.absoluteFill, styles.center, { paddingBottom: size * 0.2 }]}>
-          <Icon icon={Leaf} size={size * 0.38} color="brandLeaf" filled />
-        </View>
-      </View>
-      <Text variant="display" color="textPrimary">{APP_NAME}</Text>
+      <Image source={APP_ICON} style={{ width: size, height: size, borderRadius: Math.round(size * 0.28) }} />
+      <Text variant="h1" color={onDark ? 'onForest' : 'primary'} style={{ fontSize: Math.round(size * 0.8), lineHeight: Math.round(size * 1.05), fontStyle: 'normal' }}>
+        {APP_NAME}
+      </Text>
     </View>
   );
 }
 
-/** S-01: shown while fonts and the session load; after 3 s shows the slow-start line. */
+/** S-01: launch illustration (C15) and the wordmark; after 3 s shows the slow-start line. */
 export function Splash() {
   const t = useTheme();
   const [slow, setSlow] = useState(false);
@@ -33,10 +29,11 @@ export function Splash() {
     return () => clearTimeout(id);
   }, []);
   return (
-    <View testID="splash" style={[styles.fill, styles.center, { backgroundColor: t.colors.bg, gap: t.spacing.md }]}>
-      <Logo size={56} />
-      {slow ? <Text color="textSecondary">{en.splash.slow}</Text> : null}
-      <Text variant="caption" color="textMuted" style={[styles.version, { bottom: t.spacing.xxl }]}>
+    <View testID="splash" style={[styles.fill, styles.center, { backgroundColor: t.colors.bg, gap: t.spacing.xs }]}>
+      <Image source={ILLUSTRATION_ART.splash} resizeMode="contain" style={{ width: 280, height: 280, borderRadius: t.radius.dialog }} accessible={false} />
+      <Text variant="display" color="primary" style={{ fontSize: 40, lineHeight: 46 }}>{APP_NAME}</Text>
+      {slow ? <Text variant="bodySmall" color="textSecondary">{en.splash.slow}</Text> : null}
+      <Text variant="caption" weight="400" color="textSecondary" style={[styles.version, { bottom: t.spacing.xxl }]}>
         {`v${Constants.expoConfig?.version ?? '0.0.0'}`}
       </Text>
     </View>

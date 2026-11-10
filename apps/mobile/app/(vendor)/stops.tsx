@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
+import { Linking, Switch, View } from 'react-native';
 import { formatTimeWindow, SUPPORT_PHONE } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, Card, Dialog, EmptyState, Screen, SegmentedControl, SkeletonBlock, Snackbar, StopRow, Text, Toggle, TopAppBar } from '../../src/ui';
+import { Button, Dialog, EmptyState, Screen, SegmentedControl, SheetBody, SkeletonBlock, Snackbar, Text, TopAppBar } from '../../src/ui';
 import { stopPhase, type TodayStop } from '../../src/features/vendor/arrival';
 import { skipStop, unskipStop } from '../../src/features/vendor/api';
 import { useInvalidateVendor, useStopsToday, useStopsWeek, vendorKeys } from '../../src/features/vendor/hooks';
@@ -17,6 +17,11 @@ function daysLabel(days: number[]): string {
   return sorted.map((d) => names[d - 1]).join(', ');
 }
 
+const clockShort = (hhmm: string) => {
+  const [h, m] = hhmm.split(':').map(Number);
+  return `${h! % 12 === 0 ? 12 : h! % 12}:${String(m).padStart(2, '0')}`;
+};
+
 /** V-12: Today / This week; "Not going today" with confirm; empty before verification. */
 export default function VendorStops() {
   const t = useTheme();
@@ -29,7 +34,8 @@ export default function VendorStops() {
 
   const hasNoStops = !week.isLoading && (week.data ?? []).length === 0;
   return (
-    <Screen header={<TopAppBar title={en.vendor.myStops} />} refreshing={today.isRefetching} onRefresh={() => invalidate(vendorKeys.stops, vendorKeys.week)}>
+    <Screen tone="forest" header={<TopAppBar tone="forest" title={en.vendor.myStops} />} refreshing={today.isRefetching} onRefresh={() => invalidate(vendorKeys.stops, vendorKeys.week)}>
+      <SheetBody>
       {hasNoStops ? (
         <EmptyState illustration="pin" title={en.vendor.noStopsTitle} body={en.vendor.noStopsBody} actionLabel={en.common.callSupport} onAction={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} testID="no-stops" />
       ) : (
@@ -39,36 +45,48 @@ export default function VendorStops() {
             today.isLoading ? (
               <SkeletonBlock kind="list" count={2} />
             ) : (
-              (today.data ?? []).map((s) => (
-                <Card key={s.stopId} style={{ padding: 0, overflow: 'hidden' }}>
-                  <StopRow society={s.societyName} gate={s.gateName} windowStart={s.windowStart} windowEnd={s.windowEnd} followers={s.followers} state={stopPhase(s)} />
-                  <View style={{ paddingHorizontal: t.spacing.md }}>
-                    <Toggle
-                      testID={`skip-${s.stopId}`}
-                      label={s.skipped ? en.stops.notGoing : en.vendor.notGoingToday}
-                      value={s.skipped}
-                      disabled={!!s.arrivedAt}
-                      onChange={async (v) => {
-                        if (v) setConfirm(s);
-                        else {
-                          await unskipStop(s.stopId);
-                          await invalidate(vendorKeys.stops);
-                        }
-                      }}
-                    />
+              (today.data ?? []).map((s, i, all) => {
+                const phase = stopPhase(s);
+                return (
+                  <View key={s.stopId} testID={`stop-row-${phase}`} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: 72, borderBottomWidth: i === all.length - 1 ? 0 : 1, borderBottomColor: t.colors.border, opacity: phase === 'done' ? 0.6 : 1 }}>
+                    <Text variant="price" color="textSecondary" style={{ width: 64 }}>{clockShort(s.windowStart)}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text variant="label">{s.societyName}</Text>
+                      <Text variant="caption" weight="400" color={s.skipped ? 'error' : 'textSecondary'}>
+                        {s.skipped ? en.stops.notGoing : `${s.gateName} · ${en.stops.followers(s.followers)}`}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                      <Text variant="caption" weight="400" color="textSecondary">{en.vendor.notGoingToday}</Text>
+                      <Switch
+                        testID={`skip-${s.stopId}`}
+                        accessibilityLabel={`${en.vendor.notGoingToday}, ${s.societyName}`}
+                        value={s.skipped}
+                        disabled={!!s.arrivedAt}
+                        trackColor={{ true: t.colors.error, false: t.scheme === 'dark' ? t.colors.border : '#CFCDBF' }}
+                        thumbColor={t.colors.surface}
+                        onValueChange={async (v) => {
+                          if (v) setConfirm(s);
+                          else {
+                            await unskipStop(s.stopId);
+                            await invalidate(vendorKeys.stops);
+                          }
+                        }}
+                      />
+                    </View>
                   </View>
-                </Card>
-              ))
+                );
+              })
             )
           ) : (
-            (week.data ?? []).map((w) => (
-              <Card key={w.stopId} style={{ flexDirection: 'row', gap: t.spacing.md, alignItems: 'center' }}>
-                <Text weight="700" color="primary" style={{ width: 88 }}>{daysLabel(w.days)}</Text>
+            (week.data ?? []).map((w, i, all) => (
+              <View key={w.stopId} style={{ flexDirection: 'row', gap: t.spacing.sm, alignItems: 'center', minHeight: 64, borderBottomWidth: i === all.length - 1 ? 0 : 1, borderBottomColor: t.colors.border }}>
+                <Text variant="label" color="accent" style={{ width: 88 }}>{daysLabel(w.days)}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text weight="600">{`${w.societyName} · ${w.gateName}`}</Text>
-                  <Text variant="bodySmall" color="textSecondary">{formatTimeWindow(w.windowStart, w.windowEnd)}</Text>
+                  <Text variant="label">{`${w.societyName} · ${w.gateName}`}</Text>
+                  <Text variant="caption" weight="400" color="textSecondary">{formatTimeWindow(w.windowStart, w.windowEnd)}</Text>
                 </View>
-              </Card>
+              </View>
             ))
           )}
           <Button label={en.vendor.askChange} variant="secondary" onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} />
@@ -89,6 +107,7 @@ export default function VendorStops() {
         />
       ) : null}
       <View style={{ height: t.heights.fab + t.spacing.xl }} />
+      </SheetBody>
       <Dialog
         visible={!!confirm}
         kind="destructive"

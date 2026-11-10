@@ -1,10 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { CheckCircle2 } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, Icon, Screen, SkeletonBlock, Text, TopAppBar } from '../../src/ui';
+import { Button, IllustrationImage, Screen, SkeletonBlock, Text, TopAppBar } from '../../src/ui';
 import { DealComposer } from '../../src/features/engagement/DealComposer';
 import { myDealToday, sendDeal } from '../../src/features/engagement/api';
 import { useMyVendor, useStopsToday, useTodayMenu, useInvalidateVendor, vendorKeys } from '../../src/features/vendor/hooks';
@@ -32,7 +31,7 @@ export default function EveningDeal() {
     return (
       <Screen header={<TopAppBar title={en.eng.dealTitle} />}>
         <View style={{ alignItems: 'center', gap: t.spacing.sm, paddingVertical: t.spacing.huge }} testID="deal-sent">
-          <Icon icon={CheckCircle2} size={80} color="dealAmber" />
+          <IllustrationImage art="success" size={200} />
           <Text variant="h1" align="center">{en.eng.dealSent(sent.followers)}</Text>
           <Text color="textSecondary" align="center">{sent.summary}</Text>
         </View>

@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Screen, Snackbar } from '../../src/ui';
+import { IllustrationImage, Screen, Snackbar } from '../../src/ui';
 import { en } from '../../src/i18n/en';
 import { useSession } from '../../src/features/auth/session';
 import { PendingActionsChip } from '../../src/features/system/PendingActions';
@@ -33,10 +33,12 @@ export default function VendorToday() {
     return () => clearTimeout(id);
   }, [published]);
   return (
-    <Screen refreshing={refreshing} onRefresh={() => invalidate(vendorKeys.today, vendorKeys.stops, vendorKeys.stats, vendorKeys.me)}>
-      <NetworkBanner dataUpdatedAt={menu.dataUpdatedAt || undefined} />
-      <PendingActionsChip />
-      <NotificationsBlockedBanner role="vendor" />
+    <Screen tone="forest" refreshing={refreshing} onRefresh={() => invalidate(vendorKeys.today, vendorKeys.stops, vendorKeys.stats, vendorKeys.me)}>
+      <View style={{ paddingHorizontal: 16, gap: 8 }}>
+        <NetworkBanner dataUpdatedAt={menu.dataUpdatedAt || undefined} />
+        <PendingActionsChip />
+        <NotificationsBlockedBanner role="vendor" />
+      </View>
       <TodayView
         vendor={vendor.data}
         name={account?.name ?? ''}
@@ -50,11 +52,15 @@ export default function VendorToday() {
           onAddPhoto: () => router.push('/vendor/photo'),
           onOpenLive: () => router.push('/vendor/live'),
           onSendDeal: () => router.push('/vendor/deal'),
+          onNotifications: () => router.push('/(vendor)/requests'),
         }}
       />
       {toast ? (
-        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 96 }}>
-          <Snackbar kind="success" message={toast} />
+        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 96, alignItems: 'center', gap: 12 }} testID="menu-published">
+          <IllustrationImage art="menuPublished" size={160} />
+          <View style={{ alignSelf: 'stretch' }}>
+            <Snackbar kind="success" message={toast} />
+          </View>
         </View>
       ) : null}
     </Screen>

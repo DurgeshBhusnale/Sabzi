@@ -32,7 +32,7 @@ export function WriteReviewView({
   const [busy, setBusy] = useState(false);
 
   if (!eligibility) return <SkeletonBlock kind="list" count={2} />;
-  if (submitted) return <EmptyState illustration="star" title={en.eng.thanksTitle} body={en.eng.thanksBody} testID="review-thanks" />;
+  if (submitted) return <EmptyState illustration="star" art="success" title={en.eng.thanksTitle} body={en.eng.thanksBody} testID="review-thanks" />;
 
   const blocked = eligibility.state === 'too_soon' || eligibility.state === 'not_following' || eligibility.state === 'locked';
   return (

@@ -27,7 +27,7 @@ export default function BuyerRequests() {
       {q.isLoading ? (
         <SkeletonBlock kind="list" count={3} />
       ) : !q.data?.length ? (
-        <EmptyState illustration="list" title={en.eng.noRequestsTitle} body={en.eng.noRequestsBody} actionLabel={en.eng.requestItem} onAction={() => router.push('/(buyer)/following')} testID="requests-empty" />
+        <EmptyState illustration="list" art="noRequests" title={en.eng.noRequestsTitle} body={en.eng.noRequestsBody} actionLabel={en.eng.requestItem} onAction={() => router.push('/(buyer)/following')} testID="requests-empty" />
       ) : (
         [...groups.entries()].map(([date, rs]) => (
           <View key={date} style={{ gap: t.spacing.xs }}>

@@ -20,7 +20,7 @@ export default function Notifications() {
       {list.isLoading ? (
         <SkeletonBlock kind="list" count={4} />
       ) : !list.data?.length ? (
-        <EmptyState illustration="bell" title={en.buyer.nothingNew} testID="notif-empty" />
+        <EmptyState illustration="bell" art="noNotifications" title={en.buyer.nothingNew} testID="notif-empty" />
       ) : (
         list.data.map((n) => {
           const txt = notificationText(n);

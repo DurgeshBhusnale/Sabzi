@@ -4,7 +4,7 @@ import { Image, Pressable, View } from 'react-native';
 import { Truck, ShoppingCart } from 'lucide-react-native';
 import { vendorProfileSchema } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, Card, Checkbox, Icon, PhotoUploader, Screen, SkeletonBlock, Text, TextInput, Toggle, TopAppBar, type PhotoUploaderState } from '../../src/ui';
+import { Button, Card, Checkbox, Icon, PhotoUploader, Screen, SkeletonBlock, Text, TextInput, Toggle, TopAppBar, VENDOR_ART, type PhotoUploaderState } from '../../src/ui';
 import { useMyVendor, useInvalidateVendor, vendorKeys } from '../../src/features/vendor/hooks';
 import { saveVendorProfile, type MyVendor } from '../../src/features/vendor/api';
 import { captureCompressed } from '../../src/features/vendor/photos';
@@ -88,10 +88,10 @@ function DetailsForm({ v }: { v: MyVendor | null }) {
         accessibilityState={{ selected: on }}
         accessibilityLabel={label}
         onPress={() => setVehicle(kind)}
-        style={{ flex: 1, alignItems: 'center', gap: t.spacing.xs, padding: t.spacing.md, borderRadius: t.radius.card, borderWidth: 2, borderColor: on ? t.colors.primary : t.colors.border, backgroundColor: on ? t.colors.primaryTint : t.colors.surface }}
+        style={{ flex: 1, alignItems: 'center', gap: t.spacing.xs, padding: t.spacing.md, borderRadius: t.radius.card, borderWidth: on ? 2 : 1, borderColor: on ? t.colors.primary : t.colors.border, backgroundColor: t.colors.surface }}
       >
-        <Icon icon={icon} size={40} color={on ? 'primary' : 'textSecondary'} />
-        <Text weight="700">{label}</Text>
+        {kind === 'thela' ? <Image source={VENDOR_ART.thela} resizeMode="contain" style={{ width: 56, height: 44 }} /> : <Icon icon={icon} size={40} color={on ? 'primary' : 'textSecondary'} />}
+        <Text variant="label" weight="600">{label}</Text>
       </Pressable>
     );
   };

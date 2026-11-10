@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { CheckCircle2 } from 'lucide-react-native';
-import { formatDistance, formatIstTime } from '@sabzi/shared';
+import { ChevronRight, MapPin } from 'lucide-react-native';
+import { formatDistance, formatIstTime, formatTimeWindow } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
 import { ActivityIndicatorBlock } from './ActivityIndicatorBlock';
-import { Banner, BottomSheet, Button, Icon, Text } from '../../ui';
+import { Banner, BottomSheet, Button, Icon, IllustrationImage, SectionHeader, Text } from '../../ui';
 import { cooldownUntil, suggestStop, type ArrivalSuggestion, type TodayStop } from './arrival';
 import { en } from '../../i18n/en';
 import { AppErrorException } from '../../lib/errors';
@@ -99,14 +99,28 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
       accessibilityRole="radio"
       accessibilityState={{ selected: highlight }}
       onPress={() => setSelected(s)}
-      style={{ padding: t.spacing.md, borderRadius: t.radius.card, borderWidth: highlight ? 2 : 1, borderColor: highlight ? t.colors.primary : t.colors.border, backgroundColor: highlight ? t.colors.primaryTint : t.colors.surface, minHeight: t.heights.vendorXL }}
+      style={
+        highlight
+          ? { padding: t.spacing.lg, borderRadius: t.radius.card, backgroundColor: t.colors.forest, gap: t.spacing.xxs }
+          : { flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: t.heights.vendorXL, borderBottomWidth: 1, borderBottomColor: t.colors.border }
+      }
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text weight="700">{`${s.societyName} · ${s.gateName}`}</Text>
-        {!highlight ? <Text weight="600">{String(s.followers)}</Text> : null}
-      </View>
-      {highlight && distance != null ? <Text color="textSecondary">{en.vendor.away(formatDistance(distance))}</Text> : null}
-      {highlight ? <Text weight="600" color="primary">{en.vendor.willBeTold(s.followers)}</Text> : null}
+      {highlight ? (
+        <>
+          <Text variant="h1" color="onForest" style={{ fontSize: 26, lineHeight: 30 }}>{`${s.societyName} · ${s.gateName}`}</Text>
+          {distance != null ? <Text variant="bodySmall" color="onForestMuted">{en.vendor.away(formatDistance(distance))}</Text> : null}
+          <Text variant="label" color="mint">{en.vendor.willBeTold(s.followers)}</Text>
+        </>
+      ) : (
+        <>
+          <Icon icon={MapPin} size={20} color="textSecondary" />
+          <View style={{ flex: 1 }}>
+            <Text variant="label">{`${s.societyName} · ${s.gateName}`}</Text>
+            <Text variant="caption" weight="400" color="textSecondary">{formatTimeWindow(s.windowStart, s.windowEnd)}</Text>
+          </View>
+          <Icon icon={ChevronRight} size={16} color="textSecondary" />
+        </>
+      )}
     </Pressable>
   );
 
@@ -143,8 +157,8 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
       {phase === 'sending' ? <ActivityIndicatorBlock label={en.vendor.sending(selected?.followers ?? 0)} /> : null}
       {phase === 'sent' && sent ? (
         <View style={{ alignItems: 'center', gap: t.spacing.xs, paddingVertical: t.spacing.lg }} testID="arrival-sent">
-          <Icon icon={CheckCircle2} size={80} color="brandLeaf" />
-          <Text variant="h1">{en.vendor.sentTo(sent.followers)}</Text>
+          <IllustrationImage art="arrived" size={180} />
+          <Text variant="h1" align="center">{en.vendor.sentTo(sent.followers)}</Text>
           <Text color="textSecondary">{selected ? `${selected.societyName} · ${selected.gateName}` : ''}</Text>
         </View>
       ) : null}
@@ -163,8 +177,8 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
               message={en.vendor.alreadyAlerted(selected.followers, formatIstTime(selected.lastArrivalAt!), formatIstTime(lockUntil))}
             />
           ) : null}
-          {others.length ? <Text variant="bodySmall" color="textSecondary">{en.vendor.otherStops}</Text> : null}
-          {others.map((s) => stopOption(s, false))}
+          {others.length ? <SectionHeader title={en.vendor.otherStops} /> : null}
+          <View>{others.map((s) => stopOption(s, false))}</View>
           {error ? <Text color="error">{error}</Text> : null}
         </>
       ) : null}

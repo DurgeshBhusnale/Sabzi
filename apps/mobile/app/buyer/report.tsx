@@ -23,7 +23,7 @@ export default function ReportVendor() {
   if (done) {
     return (
       <Screen header={<TopAppBar onBack={() => router.back()} />}>
-        <EmptyState illustration="handshake" title={en.eng.reportSentTitle} body={en.eng.reportSentBody} actionLabel={en.common.done} onAction={() => router.back()} testID="report-sent" />
+        <EmptyState illustration="handshake" art="success" title={en.eng.reportSentTitle} body={en.eng.reportSentBody} actionLabel={en.common.done} onAction={() => router.back()} testID="report-sent" />
       </Screen>
     );
   }

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { formatPrice, UNIT_LABELS, type PriceUnit } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Banner, BottomSheet, Button, ItemArt, ItemTile, PriceStepper, Snackbar, Text, TextInput, isValidPrice } from '../../ui';
+import { Banner, BottomSheet, Button, Chip, ItemArt, ItemTile, PriceStepper, Snackbar, Text, TextInput, isValidPrice } from '../../ui';
 import { canPublish, copyYesterday, missingPrices, selectedItems, setPrice, toggleItem, toPublishItems, type Draft, type MenuLine } from './menuLogic';
 import { en } from '../../i18n/en';
 
@@ -50,12 +50,10 @@ export function MenuEditor({
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm }}>
-        <Text color="textSecondary">{en.vendor.usualCount(selected.length, all.length)}</Text>
+        <Text variant="bodySmall" color="textSecondary">{en.vendor.usualCount(selected.length, all.length)}</Text>
         {yesterday?.length ? (
-          <Button
+          <Chip
             label={en.vendor.yesterday}
-            variant="secondary"
-            fullWidth={false}
             testID="same-as-yesterday"
             onPress={() => {
               const r = copyYesterday(draft, yesterday);
@@ -132,8 +130,8 @@ export function MenuEditor({
         {cur ? (
           <View style={{ gap: t.spacing.md }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-              <ItemArt name={cur.name} size={40} />
-              <Text variant="h2">{cur.name}</Text>
+              <ItemArt name={cur.name} size={48} />
+              <Text variant="h1" style={{ fontSize: 24, lineHeight: 28 }}>{cur.name}</Text>
             </View>
             {typing ? (
               <TextInput kind="price" label={en.vendor.perUnit(UNIT_LABELS[unit])} value={price ? String(price) : ''} onChangeText={(v) => setPriceState(Number(v.replace(/\D/g, '')) || 0)} autoFocus testID="price-typing" />
