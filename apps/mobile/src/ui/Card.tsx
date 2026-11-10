@@ -2,7 +2,7 @@ import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import type { ReactNode } from 'react';
 
-/** Full width, 12 dp radius, 1 px border, 16 dp padding (design brief §3). */
+/** v4 card: white, 14 dp radius, hairline border, 16 dp padding. */
 export function Card({
   children,
   onPress,

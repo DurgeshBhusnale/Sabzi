@@ -90,8 +90,8 @@ describe('V-04 Today states', () => {
   });
   it('at a stop (live banner)', async () => {
     await renderUi(<TodayView vendor={vendor} name="Ramesh" menu={menu} stops={[stop({ arrivedAt: '2026-11-05T02:35:00Z' })]} stats={stats} loading={false} now={now} openCount={18} actions={actions} />);
-    expect(screen.getByText('Live at Green Park, Gate 1')).toBeTruthy();
-    expect(screen.getByText('since 8:05 AM · 18 opened')).toBeTruthy();
+    expect(screen.getByText("You're at Green Park, Gate 1")).toBeTruthy();
+    expect(screen.getByText('Since 8:05 AM · 18 opened your alert')).toBeTruthy();
   });
   it('after all stops', async () => {
     await renderUi(<TodayView vendor={vendor} name="Ramesh" menu={menu} stops={[stop({ arrivedAt: '2026-11-05T02:00:00Z', leftAt: '2026-11-05T02:30:00Z' })]} stats={stats} loading={false} now={now} actions={actions} />);

@@ -60,7 +60,7 @@ function SettingsForm({ initial, onSaved }: { initial: Settings; onSaved: () => 
       {msg ? <p role="status" className="mb-md">{msg}</p> : null}
       <div className="grid grid-cols-2 gap-lg">
         <Card className="flex flex-col gap-md">
-          <h2 className="font-heading text-lg font-semibold">Login and alerts</h2>
+          <h2 className="font-heading text-xl italic">Login and alerts</h2>
           <Field label="Wrong OTPs before block"><Input inputMode="numeric" value={f.otp_max_failures} onChange={set('otp_max_failures')} /></Field>
           <Field label="Block for (minutes)"><Input inputMode="numeric" value={f.otp_block_minutes} onChange={set('otp_block_minutes')} /></Field>
           <Field label="Hours between arrival alerts at one stop"><Input inputMode="numeric" value={f.arrival_cooldown_hours} onChange={set('arrival_cooldown_hours')} /></Field>
@@ -70,7 +70,7 @@ function SettingsForm({ initial, onSaved }: { initial: Settings; onSaved: () => 
           </div>
         </Card>
         <Card className="flex flex-col gap-md">
-          <h2 className="font-heading text-lg font-semibold">App versions and maintenance</h2>
+          <h2 className="font-heading text-xl italic">App versions and maintenance</h2>
           <Field label="Minimum app version (older apps must update)"><Input value={f.min_app_version} onChange={set('min_app_version')} /></Field>
           <Field label="Latest app version (older apps see an update banner)"><Input value={f.latest_app_version} onChange={set('latest_app_version')} /></Field>
           <Field label="Maintenance: back by (shown to users)"><Input placeholder="6:00 AM" value={f.maintenance_until} onChange={set('maintenance_until')} /></Field>

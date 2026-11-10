@@ -28,28 +28,13 @@ export function Avatar({ name, uri, size = 48, loading = false }: { name: string
     );
   }
   return (
-    <View testID="avatar-initial" accessibilityLabel={name} style={[base, styles.center, { backgroundColor: t.colors.primaryTint }]}>
-      <Text variant={size >= 48 ? 'h2' : 'bodySmall'} weight="700" color="primary">
+    <View testID="avatar-initial" accessibilityLabel={name} style={[base, styles.center, { backgroundColor: t.colors.surface2 }]}>
+      <Text variant="h2" color="primary" style={{ fontSize: Math.round(size * 0.45), lineHeight: Math.round(size * 0.55) }}>
         {initials(name)}
       </Text>
     </View>
   );
 }
 
-/** Vegetable placeholder: first two letters on a tinted circle (TECH_SPEC §9). */
-export function ItemArt({ name, size = 48, muted = false }: { name: string; size?: number; muted?: boolean }) {
-  const t = useTheme();
-  const label = name.replace(/\(.*\)/, '').trim().slice(0, 2);
-  return (
-    <View
-      accessible={false}
-      style={[styles.center, { width: size, height: size, borderRadius: size / 2, backgroundColor: muted ? t.colors.surface2 : t.colors.artTint }]}
-    >
-      <Text variant={size >= 48 ? 'h2' : 'bodySmall'} weight="700" color={muted ? 'textMuted' : 'artText'}>
-        {label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()}
-      </Text>
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({ center: { alignItems: 'center', justifyContent: 'center' } });

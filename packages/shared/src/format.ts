@@ -13,6 +13,11 @@ export function formatPrice(amount: number, unit: PriceUnit): string {
   return `₹${trimPrice(amount)} / ${UNIT_LABELS[unit]}`;
 }
 
+/** Amount only: formatAmount(40) → "₹40" (v4 shows the unit as a small suffix) */
+export function formatAmount(amount: number): string {
+  return `₹${trimPrice(amount)}`;
+}
+
 /** Compact form used in push copy: "₹40/kg" */
 export function formatPriceCompact(amount: number, unit: PriceUnit): string {
   return `₹${trimPrice(amount)}/${UNIT_LABELS[unit]}`;

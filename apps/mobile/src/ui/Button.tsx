@@ -4,7 +4,8 @@ import { useTheme } from '../theme/ThemeProvider';
 import { Text } from './Text';
 import { Icon, type LucideIcon } from './Icon';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive';
+/** v4: primary forest, secondary outline, tertiary link, destructive red outline, accent green ("I've arrived"), light cream on forest, outlineOnDark */
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'accent' | 'light' | 'outlineOnDark';
 export type ButtonSize = 'default' | 'xl' | 'fab';
 
 export type ButtonProps = {
@@ -44,29 +45,49 @@ export function Button({
   const height = size === 'fab' ? t.heights.fab : size === 'xl' ? t.heights.vendorXL : t.heights.buyer;
   const inactive = disabled || loading;
 
-  const palette = (pressed: boolean) => {
+  type Fg = 'onDisabled' | 'textMuted' | 'primary' | 'error' | 'onPrimary' | 'accent' | 'onAccent' | 'onCream' | 'onForest';
+  const palette = (pressed: boolean): { bg: string; border: string } => {
     if (disabled) {
-      if (variant === 'secondary') return { bg: c.surface, fg: c.textMuted, border: c.border };
-      if (variant === 'tertiary') return { bg: 'transparent', fg: c.textMuted, border: 'transparent' };
-      return { bg: c.disabled, fg: c.onDisabled, border: c.disabled };
+      if (variant === 'tertiary' || variant === 'outlineOnDark') return { bg: 'transparent', border: 'transparent' };
+      return { bg: c.disabled, border: c.disabled };
     }
     switch (variant) {
       case 'secondary':
-        return { bg: pressed ? c.primaryTint : c.surface, fg: c.primary, border: c.primary };
+        return { bg: pressed ? c.primaryTint : 'transparent', border: c.primary };
       case 'tertiary':
-        return { bg: pressed ? c.primaryTint : 'transparent', fg: c.primary, border: 'transparent' };
+        return { bg: pressed ? c.primaryTint : 'transparent', border: 'transparent' };
       case 'destructive':
-        return { bg: pressed ? c.textPrimary : c.error, fg: c.onError, border: pressed ? c.textPrimary : c.error };
+        return { bg: pressed ? c.errorTint : 'transparent', border: c.error };
+      case 'accent':
+        return { bg: pressed ? c.primaryPressed : c.accent, border: pressed ? c.primaryPressed : c.accent };
+      case 'light':
+        return { bg: pressed ? c.surface2 : c.cream, border: pressed ? c.surface2 : c.cream };
+      case 'outlineOnDark':
+        return { bg: pressed ? c.forestRaised : 'transparent', border: 'rgba(255,255,255,0.4)' };
       default:
-        return { bg: pressed ? c.primaryPressed : c.primary, fg: c.onPrimary, border: pressed ? c.primaryPressed : c.primary };
+        return { bg: pressed ? c.primaryPressed : c.primary, border: pressed ? c.primaryPressed : c.primary };
     }
   };
 
-  const fgKey = (() => {
-    if (disabled) return variant === 'primary' || variant === 'destructive' ? 'onDisabled' : 'textMuted';
-    if (variant === 'secondary' || variant === 'tertiary') return 'primary';
-    return variant === 'destructive' ? 'onError' : 'onPrimary';
-  })() as 'onDisabled' | 'textMuted' | 'primary' | 'onError' | 'onPrimary';
+  const fgKey: Fg = (() => {
+    if (disabled) return variant === 'tertiary' || variant === 'outlineOnDark' ? 'textMuted' : 'onDisabled';
+    switch (variant) {
+      case 'secondary':
+        return 'primary';
+      case 'tertiary':
+        return 'accent';
+      case 'destructive':
+        return 'error';
+      case 'accent':
+        return 'onAccent';
+      case 'light':
+        return 'onCream';
+      case 'outlineOnDark':
+        return 'onForest';
+      default:
+        return 'onPrimary';
+    }
+  })();
 
   const shown = successLabel ?? label;
   return (
@@ -86,7 +107,7 @@ export function Button({
           {
             minHeight: height,
             minWidth: t.layout.minTouch,
-            borderRadius: size === 'fab' ? t.radius.pill : t.radius.card,
+            borderRadius: size === 'fab' ? t.radius.pill : t.radius.button,
             backgroundColor: p.bg,
             borderColor: p.border,
             paddingHorizontal: size === 'fab' ? t.spacing.xxl : t.spacing.md,
@@ -94,7 +115,7 @@ export function Button({
           },
           size === 'fab' && !disabled
             ? {
-                shadowColor: c.shadow,
+                shadowColor: c.forest,
                 shadowOpacity: t.elevation.raised.shadowOpacity,
                 shadowRadius: t.elevation.raised.shadowRadius,
                 shadowOffset: { width: 0, height: t.elevation.raised.shadowOffsetY },
@@ -107,9 +128,9 @@ export function Button({
     >
       <View style={[styles.row, { gap: t.spacing.xs }]}>
         {loading ? <ActivityIndicator testID={testID ? `${testID}-spinner` : 'button-spinner'} color={c[fgKey]} /> : null}
-        {!loading && successLabel ? <Icon icon={Check} color={fgKey} /> : null}
-        {!loading && !successLabel && icon ? <Icon icon={icon} color={fgKey} /> : null}
-        <Text variant="button" color={fgKey} style={size !== 'default' ? { fontSize: t.type.button.fontSize + 2 } : null}>
+        {!loading && successLabel ? <Icon icon={Check} size={18} color={fgKey} /> : null}
+        {!loading && !successLabel && icon ? <Icon icon={icon} size={18} color={fgKey} /> : null}
+        <Text variant="button" color={fgKey} style={size === 'fab' ? { fontSize: t.type.button.fontSize + 1 } : null}>
           {shown}
         </Text>
       </View>
@@ -118,6 +139,6 @@ export function Button({
 }
 
 const styles = StyleSheet.create({
-  base: { justifyContent: 'center', alignItems: 'center', borderWidth: 1.5 },
+  base: { justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
 });

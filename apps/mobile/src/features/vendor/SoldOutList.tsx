@@ -11,8 +11,8 @@ export function SoldOutList({ menu, onToggle }: { menu: DayMenu; onToggle: (item
   return (
     <View>
       {menu.lines.map((l) => (
-        <View key={l.itemId} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: t.layout.listRowWithImage }}>
-          <ItemArt name={l.name} size={40} muted={l.soldOut} />
+        <View key={l.itemId} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: t.layout.listRowWithImage, borderBottomWidth: 1, borderBottomColor: t.colors.border }}>
+          <ItemArt name={l.name} size={36} muted={l.soldOut} />
           <View style={{ flex: 1 }}>
             <Toggle
               testID={`soldout-${l.name}`}

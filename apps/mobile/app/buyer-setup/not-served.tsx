@@ -40,7 +40,7 @@ export default function NotServed() {
         </View>
       }
     >
-      <EmptyState illustration="pin" title={en.buyer.notServedTitle(name || '…')} body={en.buyer.notServedBody} testID="b02" />
+      <EmptyState illustration="door" title={en.buyer.notServedTitle(name || '…')} body={en.buyer.notServedBody} testID="b02" />
       {!params.id ? <TextInput label={en.buyer.yourSocietyName} value={name} onChangeText={setName} /> : null}
       <TextInput label={en.buyer.vendorHint} value={vendor} onChangeText={setVendor} />
     </Screen>

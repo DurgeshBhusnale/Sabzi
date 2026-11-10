@@ -212,17 +212,18 @@ describe('VendorCard', () => {
 describe('MenuItemRow', () => {
   it('normal', async () => {
     await renderUi(<MenuItemRow name="Tomato" price={40} unit="kg" />);
-    expect(screen.getByText('₹40 / kg')).toBeTruthy();
+    expect(screen.getByText('₹40 /kg')).toBeTruthy();
+    expect(screen.getByTestId('item-art-image')).toBeTruthy();
   });
   it('sold out', async () => {
     await renderUi(<MenuItemRow name="Coriander" price={10} unit="bunch" soldOut />);
     expect(screen.getByText('Sold out')).toBeTruthy();
-    expect(screen.getByText('₹10 / bunch')).toBeTruthy();
+    expect(screen.getByText('₹10 /bunch')).toBeTruthy();
   });
   it('deal', async () => {
     await renderUi(<MenuItemRow name="Tomato" price={40} unit="kg" dealPrice={30} />);
-    expect(screen.getByText('₹30 / kg')).toBeTruthy();
-    expect(screen.getByText('₹40 / kg')).toBeTruthy();
+    expect(screen.getByText('₹30 /kg')).toBeTruthy();
+    expect(screen.getByText('Evening deal · was ₹40')).toBeTruthy();
   });
 });
 
@@ -485,6 +486,6 @@ describe('Dark mode', () => {
   });
   it('vendor mode uses the larger type scale', async () => {
     await renderUi(<Button label="Publish" />, { mode: 'vendor' });
-    expect(flat(screen.getByText('Publish').props.style).fontSize).toBe(18);
+    expect(flat(screen.getByText('Publish').props.style).fontSize).toBe(17);
   });
 });

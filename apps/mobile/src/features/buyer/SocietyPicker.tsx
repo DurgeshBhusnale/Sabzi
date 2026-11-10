@@ -42,7 +42,7 @@ export function SocietyPicker({
       {loading ? (
         <SkeletonBlock kind="list" count={4} />
       ) : list.length === 0 ? (
-        <EmptyState illustration="search" title={en.buyer.noSearchResults(q)} actionLabel={en.buyer.notListed} onAction={() => onNotListed(q)} testID="no-society" />
+        <EmptyState illustration="search" art="noResults" title={en.buyer.noSearchResults(q)} actionLabel={en.buyer.notListed} onAction={() => onNotListed(q)} testID="no-society" />
       ) : (
         <>
           <Text variant="h2">{position ? en.buyer.nearYou : en.buyer.allSocieties}</Text>

@@ -1,3 +1,4 @@
+import { CircleCheck } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
@@ -50,7 +51,7 @@ export function Snackbar({
         styles.bar,
         {
           backgroundColor: t.colors.snackbarBg,
-          borderRadius: t.radius.card,
+          borderRadius: t.radius.button,
           paddingHorizontal: t.spacing.md,
           minHeight: t.layout.minTouch + 8,
           gap: t.spacing.sm,
@@ -61,7 +62,8 @@ export function Snackbar({
         },
       ]}
     >
-      <Text style={[styles.flex, { color: t.colors.snackbarText }]}>{message}</Text>
+      {kind === 'success' ? <CircleCheck size={18} color={t.colors.mint} fill={t.colors.mint} stroke={t.colors.snackbarBg} /> : null}
+      <Text variant="bodySmall" weight="500" style={[styles.flex, { color: t.colors.snackbarText }]}>{message}</Text>
       {actionLabel && (!undoSeconds || left > 0) ? (
         <Pressable
           testID={`${testID}-action`}

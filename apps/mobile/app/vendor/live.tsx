@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { formatIstTime } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, Card, EmptyState, Screen, Snackbar, Text, TopAppBar } from '../../src/ui';
+import { Button, EmptyState, Eyebrow, Screen, SectionHeader, Snackbar, Text, TopAppBar } from '../../src/ui';
 import { SoldOutList } from '../../src/features/vendor/SoldOutList';
 import { currentStop } from '../../src/features/vendor/arrival';
 import { eventOpenCount, leavingSoon, left } from '../../src/features/vendor/api';
@@ -33,57 +33,61 @@ export default function AtTheStop() {
     );
   }
   return (
-    <Screen header={<TopAppBar onBack={() => router.back()} />}>
-      <View style={{ backgroundColor: t.colors.primary, borderRadius: t.radius.card, padding: t.spacing.lg, gap: t.spacing.xxs }} testID="live-mode">
-        <Text variant="caption" color="onPrimary">{en.vendor.liveAtGate}</Text>
-        <Text variant="h1" color="onPrimary">{en.vendor.youreAt(live.societyName, live.gateName)}</Text>
-        <Text color="onPrimary">{en.vendor.sinceTime(formatIstTime(live.arrivedAt!))}</Text>
-      </View>
-      <Card>
-        <Text variant="h2">{en.vendor.openedAlert(opens.data ?? 0)}</Text>
-      </Card>
-      <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-        <View style={{ flex: 1 }}>
-          <Button
-            size="xl"
-            label={live.leavingAt ? en.vendor.toldLeaving : en.vendor.leaving10}
-            disabled={!!live.leavingAt}
-            loading={busy === 'leaving'}
-            testID="leaving-soon"
-            onPress={async () => {
-              setBusy('leaving');
-              try {
-                const r = await offline.runOrQueue('vendor_leaving_soon', { gate_id: live.gateId }, 'leaving', (cid) => leavingSoon(live.gateId, cid));
-                setToast(r.queued ? en.system.queuedAction : en.vendor.toldLeavingSnack(live.followers));
-                await invalidate(vendorKeys.stops);
-              } finally {
-                setBusy(null);
-              }
-            }}
-          />
+    <Screen
+      tone="forest"
+      header={<TopAppBar tone="forest" title={en.vendor.live} compact onBack={() => router.back()} />}
+      footer={
+        <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <Button
+              size="xl"
+              variant="secondary"
+              label={live.leavingAt ? en.vendor.toldLeaving : en.vendor.leaving10}
+              disabled={!!live.leavingAt}
+              loading={busy === 'leaving'}
+              testID="leaving-soon"
+              onPress={async () => {
+                setBusy('leaving');
+                try {
+                  const r = await offline.runOrQueue('vendor_leaving_soon', { gate_id: live.gateId }, 'leaving', (cid) => leavingSoon(live.gateId, cid));
+                  setToast(r.queued ? en.system.queuedAction : en.vendor.toldLeavingSnack(live.followers));
+                  await invalidate(vendorKeys.stops);
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button
+              size="xl"
+              label={en.vendor.iveLeft}
+              loading={busy === 'left'}
+              testID="ive-left"
+              onPress={async () => {
+                setBusy('left');
+                try {
+                  await offline.runOrQueue('vendor_left', { gate_id: live.gateId }, 'left', (cid) => left(live.gateId, cid));
+                  await invalidate(vendorKeys.stops);
+                  router.replace('/(vendor)/today');
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            />
+          </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <Button
-            size="xl"
-            variant="secondary"
-            label={en.vendor.iveLeft}
-            loading={busy === 'left'}
-            testID="ive-left"
-            onPress={async () => {
-              setBusy('left');
-              try {
-                await offline.runOrQueue('vendor_left', { gate_id: live.gateId }, 'left', (cid) => left(live.gateId, cid));
-                await invalidate(vendorKeys.stops);
-                router.replace('/(vendor)/today');
-              } finally {
-                setBusy(null);
-              }
-            }}
-          />
+      }
+      hero={
+        <View style={{ gap: 14 }} testID="live-mode">
+          <Eyebrow live onDark>{en.vendor.live}</Eyebrow>
+          <Text variant="h1" color="onForest">{`${en.vendor.youreAt(live.societyName, live.gateName)} ${en.vendor.sinceTime(formatIstTime(live.arrivedAt!))}`}</Text>
+          <Text variant="bodySmall" color="onForestMuted">{en.vendor.openedAlert(opens.data ?? 0)}</Text>
         </View>
-      </View>
+      }
+    >
       {toast ? <Snackbar kind="success" message={toast} /> : null}
-      <Text variant="h2">{en.vendor.soldOutQ}</Text>
+      <SectionHeader title={en.vendor.soldOutQ} />
       {menu.data ? <SoldOutList menu={menu.data} onToggle={(itemId, soldOut) => sold.mutate({ itemId, soldOut })} /> : null}
     </Screen>
   );

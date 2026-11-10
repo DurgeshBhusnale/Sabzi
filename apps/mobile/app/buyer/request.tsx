@@ -34,7 +34,7 @@ export default function RequestTomorrow() {
   if (state === 'sent') {
     return (
       <Screen header={<TopAppBar onBack={() => router.back()} />}>
-        <EmptyState illustration="list" title={en.eng.sentTitle} body={en.eng.sentBody(first)} actionLabel={en.common.done} onAction={() => router.back()} testID="request-sent" />
+        <EmptyState illustration="list" art="success" title={en.eng.sentTitle} body={en.eng.sentBody(first)} actionLabel={en.common.done} onAction={() => router.back()} testID="request-sent" />
       </Screen>
     );
   }

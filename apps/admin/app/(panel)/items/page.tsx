@@ -1,4 +1,5 @@
 'use client';
+import { produceArtKey, produceTileGround } from '@sabzi/shared/produce';
 import { useState } from 'react';
 import { PRICE_UNITS, UNIT_LABELS, type PriceUnit } from '@sabzi/shared/constants';
 import { itemSchema } from '@sabzi/shared/schemas';
@@ -44,7 +45,7 @@ export default function Items() {
       <PageTitle title="Items" />
       {pending.length ? (
         <Card className="mb-lg flex flex-col gap-xs">
-          <h2 className="font-heading text-lg font-semibold">{`Custom items waiting (${pending.length})`}</h2>
+          <h2 className="font-heading text-xl italic">{`Custom items waiting (${pending.length})`}</h2>
           {pending.map((i) => (
             <div key={i.id} className="flex items-center justify-between gap-md">
               <span>{`${i.name} · ${UNIT_LABELS[i.default_unit]} · added by ${i.created_by_name ?? 'a vendor'}`}</span>
@@ -62,11 +63,22 @@ export default function Items() {
       <Table head={['Picture', 'Name', 'Default unit', 'Used by', '']}>
         {master.map((i) => (
           <tr key={i.id}>
-            <td className="px-sm py-xs">{i.image_path ? <Badge tone="green">Picture</Badge> : <Badge>Placeholder</Badge>}</td>
-            <td className="px-sm py-xs font-medium">{i.name}</td>
-            <td className="px-sm py-xs">{UNIT_LABELS[i.default_unit]}</td>
-            <td className="px-sm py-xs">{`${i.used_by} vendors`}</td>
-            <td className="px-sm py-xs"><Button variant="tertiary" onClick={() => { setEditing(i.id); setName(i.name); setUnit(i.default_unit); }}>Edit</Button></td>
+            <td className="px-[20px] py-sm">{i.image_path ? <Badge tone="green">Uploaded</Badge> : produceArtKey(i.name) ? <Badge tone="green">Built-in</Badge> : <Badge>Letter tile</Badge>}</td>
+            <td className="px-[20px] py-sm font-medium">
+              <span className="flex items-center gap-sm">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]" style={{ background: produceTileGround(i.name) }}>
+                  {produceArtKey(i.name) ? (
+                    <img src={`/images/produce/${produceArtKey(i.name)}.webp`} alt="" width={30} height={30} />
+                  ) : (
+                    <span className="font-heading text-lg text-primary">{i.name.charAt(0)}</span>
+                  )}
+                </span>
+                {i.name}
+              </span>
+            </td>
+            <td className="px-[20px] py-sm">{UNIT_LABELS[i.default_unit]}</td>
+            <td className="px-[20px] py-sm">{`${i.used_by} vendors`}</td>
+            <td className="px-[20px] py-sm"><Button variant="tertiary" onClick={() => { setEditing(i.id); setName(i.name); setUnit(i.default_unit); }}>Edit</Button></td>
           </tr>
         ))}
       </Table>

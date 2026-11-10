@@ -35,7 +35,7 @@ export function VendorRequestsView({
         <Text color="textSecondary">{dateLabel}</Text>
       </View>
       {groups.length === 0 ? (
-        <EmptyState illustration="list" title={en.eng.vrNone} body={en.eng.vrNoneBody} actionLabel={en.eng.vrShareQr} onAction={onShareQr} testID="vr-empty" />
+        <EmptyState illustration="list" art="noRequests" title={en.eng.vrNone} body={en.eng.vrNoneBody} actionLabel={en.eng.vrShareQr} onAction={onShareQr} testID="vr-empty" />
       ) : (
         <>
           {before4 ? <Banner kind="info" message={en.eng.vrBefore4} testID="vr-before-4" /> : null}

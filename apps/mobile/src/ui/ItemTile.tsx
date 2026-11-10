@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Check } from 'lucide-react-native';
-import { formatPrice, type PriceUnit } from '@sabzi/shared';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { CircleCheck } from 'lucide-react-native';
+import { formatPrice, produceTileGround, type PriceUnit } from '@sabzi/shared';
 import { useTheme } from '../theme/ThemeProvider';
-import { ItemArt } from './Avatar';
+import { ItemArt, produceSource } from './Art';
 import { Icon } from './Icon';
 import { Text } from './Text';
 import { en } from '../i18n/en';
@@ -35,7 +35,6 @@ export function ItemTile({
   const t = useTheme();
   const c = t.colors;
   const selected = state === 'selected' || state === 'priced';
-  const border = missingPrice ? c.error : selected ? c.primary : c.border;
   const label =
     state === 'sold_out'
       ? `${name}, ${en.menu.soldOut}`
@@ -44,6 +43,8 @@ export function ItemTile({
         : selected && showSetPrice
           ? `${name}, ${en.menu.setPrice}`
           : name;
+  const src = produceSource(name);
+  const ground = t.scheme === 'dark' ? c.surface2 : produceTileGround(name);
   return (
     <Pressable
       testID={testID ?? `tile-${name}`}
@@ -54,40 +55,39 @@ export function ItemTile({
       style={({ pressed }) => [
         styles.tile,
         {
-          minHeight: 112,
-          borderRadius: t.radius.card,
-          borderColor: border,
-          borderWidth: selected || missingPrice ? 2 : 1,
-          backgroundColor: state === 'sold_out' ? c.surface2 : selected ? c.primaryTintStrong : c.surface,
+          minHeight: 96,
+          borderRadius: t.radius.button,
+          borderColor: missingPrice ? c.error : selected ? c.primary : 'transparent',
+          borderWidth: 2,
+          backgroundColor: ground,
           padding: t.spacing.xs,
-          gap: t.spacing.xxs,
-          opacity: pressed ? 0.85 : 1,
+          gap: 2,
+          opacity: pressed ? 0.85 : state === 'sold_out' ? 0.45 : !selected && showSetPrice ? 0.55 : 1,
         },
       ]}
     >
-      {selected ? (
-        <View style={[styles.check, { backgroundColor: c.primary, borderRadius: t.radius.pill }]}>
-          <Icon icon={Check} size={14} color="onPrimary" />
+      {selected && !showSetPrice ? (
+        <View style={styles.check}>
+          <Icon icon={CircleCheck} size={18} color="primary" filled={false} />
         </View>
       ) : null}
-      <ItemArt name={name} size={44} muted={state === 'sold_out'} />
+      {src ? <Image source={src} resizeMode="contain" style={{ width: 44, height: 44 }} /> : <ItemArt name={name} size={40} />}
+      <Text variant="caption" weight="500" align="center" numberOfLines={1} style={{ fontSize: t.type.label.fontSize }}>{name.replace(/\s*\(.*\)/, '')}</Text>
       {state === 'priced' && price != null && unit ? (
         <>
-          <Text variant="bodySmall" weight="700" align="center">{formatPrice(price, unit)}</Text>
-          {wasPrice != null && wasPrice !== price ? (
-            <Text variant="caption" color="textSecondary">{en.menu.was(wasPrice)}</Text>
-          ) : null}
+          <Text variant="caption" weight="600" align="center" style={{ fontSize: t.type.label.fontSize + 1 }}>{formatPrice(price, unit)}</Text>
+          {wasPrice != null && wasPrice !== price ? <Text variant="caption" weight="400" color="textSecondary" style={{ fontSize: 10 }}>{en.menu.was(wasPrice)}</Text> : null}
         </>
-      ) : (
-        <Text variant="bodySmall" weight="600" align="center" numberOfLines={2}>{name}</Text>
-      )}
-      {state === 'selected' && showSetPrice ? <Text variant="caption" color={missingPrice ? 'error' : 'textSecondary'}>{en.menu.setPrice}</Text> : null}
-      {state === 'sold_out' ? <Text variant="caption" color="error">{en.menu.soldOut}</Text> : null}
+      ) : null}
+      {state === 'selected' && showSetPrice ? (
+        <Text variant="caption" color={missingPrice ? 'error' : 'textSecondary'} style={{ fontSize: 11 }}>{missingPrice ? en.menu.addPrice : en.menu.setPrice}</Text>
+      ) : null}
+      {state === 'sold_out' ? <Text variant="caption" color="error" style={{ fontSize: 11 }}>{en.menu.soldOut}</Text> : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   tile: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  check: { position: 'absolute', top: 6, right: 6, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  check: { position: 'absolute', top: 6, right: 6 },
 });

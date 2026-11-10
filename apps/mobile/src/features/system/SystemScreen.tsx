@@ -1,11 +1,14 @@
 import { View } from 'react-native';
 import { useTheme } from '../../theme/ThemeProvider';
 import { EmptyState, type Illustration } from '../../ui/EmptyState';
+import type { IllustrationArt } from '../../ui/Art';
 import { Screen } from '../../ui/Screen';
 
 /** Full-screen system state: illustration, one-line title, one line of help, one clear action (§8). */
 export function SystemScreen(props: {
   illustration: Illustration;
+  /** Picture from the v4 image pack; replaces the icon circle */
+  art?: IllustrationArt;
   title: string;
   body?: string;
   actionLabel?: string;

@@ -43,11 +43,11 @@ export default function Team() {
       <Table head={['Name', 'Email', 'Role', 'Status', '']}>
         {(d.data ?? []).map((m) => (
           <tr key={m.user_id}>
-            <td className="px-sm py-xs font-medium">{m.name}</td>
-            <td className="px-sm py-xs">{m.email}</td>
-            <td className="px-sm py-xs">{m.admin_level === 'owner' ? 'Owner' : 'Field staff'}</td>
-            <td className="px-sm py-xs">{m.active ? <Badge tone="green">Active</Badge> : <Badge tone="red">Deactivated</Badge>}</td>
-            <td className="px-sm py-xs">{m.user_id !== me?.user_id ? <Button variant="tertiary" onClick={async () => { await rpc('set_admin_active', { p_user_id: m.user_id, p_active: !m.active }); d.reload(); }}>{m.active ? 'Deactivate' : 'Activate'}</Button> : null}</td>
+            <td className="px-[20px] py-sm font-medium">{m.name}</td>
+            <td className="px-[20px] py-sm">{m.email}</td>
+            <td className="px-[20px] py-sm">{m.admin_level === 'owner' ? 'Owner' : 'Field staff'}</td>
+            <td className="px-[20px] py-sm">{m.active ? <Badge tone="green">Active</Badge> : <Badge tone="red">Deactivated</Badge>}</td>
+            <td className="px-[20px] py-sm">{m.user_id !== me?.user_id ? <Button variant="tertiary" onClick={async () => { await rpc('set_admin_active', { p_user_id: m.user_id, p_active: !m.active }); d.reload(); }}>{m.active ? 'Deactivate' : 'Activate'}</Button> : null}</td>
           </tr>
         ))}
       </Table>

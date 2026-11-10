@@ -17,8 +17,8 @@ const config: Config = {
       spacing: Object.fromEntries(Object.entries(spacing).map(([k, v]) => [k, `${v}px`])),
       borderRadius: Object.fromEntries(Object.entries(radius).map(([k, v]) => [k, `${v}px`])),
       fontFamily: {
-        heading: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['Newsreader', 'Georgia', 'serif'],
+        body: ['Figtree', 'system-ui', 'sans-serif'],
       },
     },
   },

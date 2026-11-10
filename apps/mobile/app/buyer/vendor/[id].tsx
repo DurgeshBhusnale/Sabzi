@@ -2,9 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, Share, View } from 'react-native';
-import { Flag, Share2 } from 'lucide-react-native';
+import { ArrowLeft, EllipsisVertical, Flag, Share2 } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Screen, Snackbar, TopAppBar } from '../../../src/ui';
+import { Button, Card, IconCircleButton, ListRow, Icon, Screen, Snackbar } from '../../../src/ui';
 import { VendorPageView } from '../../../src/features/buyer/VendorPageView';
 import { FollowSheet } from '../../../src/features/buyer/FollowSheet';
 import { useBuyerHome, useMySocieties, usePrimarySociety, useVendorPage } from '../../../src/features/buyer/hooks';
@@ -30,6 +30,8 @@ export default function VendorPageScreen() {
   const [blocked, setBlocked] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [coach, setCoach] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(buyer)/home'));
 
   useEffect(() => {
     recordView(id).catch(() => undefined);
@@ -45,25 +47,19 @@ export default function VendorPageScreen() {
 
   return (
     <Screen
-      header={
-        <TopAppBar
-          onBack={() => (router.canGoBack() ? router.back() : router.replace('/(buyer)/home'))}
-          actions={
-            data?.available
-              ? [
-                  { icon: Share2, label: en.buyer.share, onPress: () => Share.share({ message: en.vendor.shareText(name, vendorQrUrl(data.vendor.code)) }) },
-                  { icon: Flag, label: en.buyer.report, onPress: () => router.push({ pathname: '/buyer/report', params: { vendorId: id, name } }) },
-                ]
-              : []
-          }
-        />
-      }
+      padded={false}
       footer={data?.available ? <Button label={en.buyer.requestTomorrow} onPress={() => router.push({ pathname: '/buyer/request', params: { vendorId: id, name } })} testID="request-tomorrow" /> : undefined}
       refreshing={page.isRefetching}
       onRefresh={() => page.refetch()}
     >
       <NetworkBanner dataUpdatedAt={page.dataUpdatedAt || undefined} />
       <VendorPageView
+        topBar={
+          <>
+            <IconCircleButton icon={ArrowLeft} label={en.nav.back} onPress={goBack} testID="app-bar-back" />
+            {data?.available ? <IconCircleButton icon={EllipsisVertical} label={en.buyer.moreOptions} onPress={() => setMenu((m) => !m)} testID="overflow" /> : null}
+          </>
+        }
         page={data}
         loading={page.isLoading}
         societyName={mine.data?.find((s) => s.id === societyId)?.name}
@@ -90,6 +86,27 @@ export default function VendorPageScreen() {
           openVendor: (vid) => router.push({ pathname: '/buyer/vendor/[id]', params: { id: vid } }),
         }}
       />
+      {menu && data?.available ? (
+        <Card style={{ position: 'absolute', top: 52, right: 16, padding: 0, paddingHorizontal: 16, minWidth: 200 }} testID="overflow-menu">
+          <ListRow
+            title={en.buyer.report}
+            left={<Icon icon={Flag} size={18} />}
+            onPress={() => {
+              setMenu(false);
+              router.push({ pathname: '/buyer/report', params: { vendorId: id, name } });
+            }}
+          />
+          <ListRow
+            title={en.buyer.share}
+            last
+            left={<Icon icon={Share2} size={18} />}
+            onPress={() => {
+              setMenu(false);
+              Share.share({ message: en.vendor.shareText(name, vendorQrUrl(data.vendor.code)) });
+            }}
+          />
+        </Card>
+      ) : null}
       {toast ? <Snackbar kind="success" message={toast} /> : null}
       <View />
       {data?.available ? (

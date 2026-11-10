@@ -1,5 +1,20 @@
 # Design files
 
+**Current design: Pheri v4** (Claude Design project "Sabzi phase 1: design system",
+https://claude.ai/design/p/f5d0031e-39c1-4c6a-b5e8-8bb7bcd086f5). The older "Sabzi …" v1 files were removed in the
+v4 redesign.
+
+v4 notes:
+
+- `Pheri v4 Buyer Screens` and `Pheri v4 Vendor Screens` are **cut off** after B-09 and V-12: the design download
+  stops at 256 KB per file. B-10–B-16 and V-13–V-16 follow the same v4 components; open the Claude Design project for
+  the full frames. The Website, Website Mobile and "Not in spec – for review" files also live only in the project.
+- The frames reference `uploads/A01-tomato.png` and so on. Those are the image pack (A produce, B photos, C
+  illustrations, D brand). The originals are not committed (≈60 MB); `node scripts/process-design-images.mjs <folder>`
+  resizes them into `apps/mobile/assets/images` and `apps/admin/public/images`.
+- Look and palette: `v4lib.js` in the project → `packages/shared/src/tokens.ts` (forest #0F3D2A, cream #F6F5EF,
+  accent #178046, Newsreader + Figtree).
+
 The screens from Claude Design are in `screens/` as `.dc.html` files (one per screen or flow). They are the visual source of truth for layout, spacing, colours and copy.
 
 How to use them (for Claude):

@@ -6,7 +6,7 @@ import { Text } from './Text';
 import { en } from '../i18n/en';
 
 /** Display (small, half stars) */
-export function RatingDisplay({ value, count, size = 16 }: { value: number; count?: number; size?: number }) {
+export function RatingDisplay({ value, count, size = 16, hideNumber = false }: { value: number; count?: number; size?: number; hideNumber?: boolean }) {
   const t = useTheme();
   const full = Math.floor(value);
   const half = value - full >= 0.5;
@@ -15,15 +15,15 @@ export function RatingDisplay({ value, count, size = 16 }: { value: number; coun
       <View style={styles.row}>
         {Array.from({ length: 5 }).map((_, i) =>
           i < full ? (
-            <Icon key={i} icon={Star} size={size} color="dealAmber" filled />
+            <Icon key={i} icon={Star} size={size} color="star" filled />
           ) : i === full && half ? (
-            <Icon key={i} icon={StarHalf} size={size} color="dealAmber" filled />
+            <Icon key={i} icon={StarHalf} size={size} color="star" filled />
           ) : (
-            <Icon key={i} icon={Star} size={size} color="disabled" />
+            <Icon key={i} icon={Star} size={size} color="border" filled />
           ),
         )}
       </View>
-      <Text variant="bodySmall" weight="700">{value.toFixed(1)}</Text>
+      {hideNumber ? null : <Text variant="bodySmall" weight="600">{value.toFixed(1)}</Text>}
       {count != null ? <Text variant="bodySmall" color="textSecondary">{en.rating.count(count)}</Text> : null}
     </View>
   );
@@ -46,7 +46,7 @@ export function RatingInput({ value, onChange, disabled = false }: { value: numb
             onPress={() => onChange(i + 1)}
             style={{ minWidth: t.layout.minTouch, minHeight: t.layout.minTouch, alignItems: 'center', justifyContent: 'center' }}
           >
-            <Icon icon={Star} size={t.layout.starInputSize} color={disabled ? 'disabled' : i < value ? 'dealAmber' : 'disabled'} filled={!disabled && i < value} />
+            <Icon icon={Star} size={t.layout.starInputSize} color={!disabled && i < value ? 'star' : 'border'} filled />
           </Pressable>
         ))}
       </View>

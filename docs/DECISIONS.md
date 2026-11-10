@@ -122,3 +122,15 @@ Simpler than calling FCM directly; uses FCM underneath on Android.
 - **2026-11-09 — Admin: no Tailwind sizing classes named after spacing tokens.** Our spacing tokens (xs, sm, md, …, screen) are mapped into Tailwind's `spacing`, which in v4 also drives `max-w-*`/`min-h-*`, so `max-w-sm` became 12px and squashed the login card on Vercel. Use `max-w-[24rem]`, `max-w-[28rem]`, `min-h-dvh`; `apps/admin/test/tailwind-collisions.test.ts` enforces it.
 
 - **2026-11-09 — Mobile: EAS Update (`expo-updates`) is on.** `eas.json` already gave the preview and production profiles their own channels and `runtimeVersion` was `appVersion`, but `expo-updates` was missing, so `eas build` stopped. Added it with `updates.url` in `app.json`, so JavaScript-only fixes during the pilot can go out with `eas update --channel preview|production` without a new APK. Builds of one app `version` share a runtime; bump `version` for any native change.
+
+## 2026-11-11 — Pheri v4 redesign (owner request)
+
+- **Look:** v4 tokens replace v1: forest `#0F3D2A` primary and header bands, cream `#F6F5EF` ground, mid green `#178046` as accent (links, live dots, "I've arrived"), Newsreader (headings, prices) + Figtree (body) from `@expo-google-fonts`. Token keys kept and extended (`accent`, `forest`, `mint`, `cream`, `sage`, `plum`, `blush`, `star`), so screens moved without rewiring. All text/background pairs still pass WCAG AA (contrast test extended).
+- **Icons:** kept Lucide (mobile and admin) instead of adding Phosphor, which the design files use; every Phosphor icon in the frames has a close Lucide match.
+- **Images:** the image pack is resized by `scripts/process-design-images.mjs` (≈1.2 MB in the app as WebP, ≈3.4 MB on the website). Produce pictures are matched to items by name (`packages/shared/src/produce.ts`); items without a picture keep the initial-letter tile. The source pack (`design-import/`) is git-ignored.
+- **Website:** added to `apps/admin` (owner's choice) at `/`, `/for-societies`, `/for-vendors`, `/contact`. `/societies` and `/vendors` were already admin pages, hence the `for-` paths. `/` no longer redirects to the dashboard; the team signs in at `/login` (linked in the footer).
+- **Contact form:** v1 has no server inbox for website messages, so "Send message" opens the visitor's email app with the message filled in, and the page shows email and WhatsApp links. A stored inbox needs a table and an admin page — later.
+- **Following tab:** the design shows swipe to unfollow; we use press-and-hold (and a screen-reader action) with a confirm dialog, which needs no gesture library.
+- **Vendor bell (V-04):** v1 has no vendor notification list, so the bell opens Requests.
+- **"Not in spec – for review" frames** (lock-screen notifications, QR sticker/poster restyle, "Tell us your vendor's name" form): not built, per owner; listed in QUESTIONS.
+

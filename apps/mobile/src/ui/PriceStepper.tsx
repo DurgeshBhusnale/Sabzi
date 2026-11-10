@@ -36,7 +36,7 @@ export function PriceStepper({
   return (
     <View style={{ gap: t.spacing.md }} testID="price-stepper">
       <Pressable onPress={onEditNumber} accessibilityRole="button" accessibilityLabel={`Price ₹${price} per ${UNIT_LABELS[unit]}. Tap to type`} style={styles.center}>
-        <Text variant="display" color={invalid ? 'error' : 'textPrimary'} style={{ fontSize: t.type.display.fontSize * 1.6, lineHeight: t.type.display.lineHeight * 1.6 }} testID="price-value">
+        <Text variant="display" color={invalid ? 'error' : 'textPrimary'} style={{ fontSize: 56, lineHeight: 62 }} testID="price-value">
           {`₹${price}`}
         </Text>
         <View style={[styles.row, { gap: t.spacing.xs }]}>
@@ -61,7 +61,7 @@ export function PriceStepper({
             onPress={() => onChange(stepPrice(price, d))}
             style={({ pressed }) => [
               styles.step,
-              { minHeight: t.heights.vendorXL, borderRadius: t.radius.card, backgroundColor: pressed ? t.colors.primaryTint : t.colors.surface2 },
+              { minHeight: t.heights.vendorXL, borderRadius: t.radius.button, backgroundColor: pressed ? t.colors.primaryTint : t.colors.surface, borderWidth: 1, borderColor: t.colors.border },
             ]}
           >
             <Text variant="button" weight="700">{d > 0 ? `+${d}` : `−${-d}`}</Text>

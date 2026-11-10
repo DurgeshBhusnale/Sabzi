@@ -35,9 +35,8 @@ export function OtpInput({
     <View style={{ gap: t.spacing.xs }}>
       <Pressable onPress={() => ref.current?.focus()} accessibilityLabel="Enter the 6-digit code" style={[styles.row, { gap: t.spacing.xs }]}>
         {Array.from({ length }).map((_, i) => {
-          const filled = digits[i] !== undefined;
           const active = i === digits.length && state === 'default';
-          const border = state === 'error' ? c.error : state === 'success' ? c.primary : active ? c.primary : filled ? c.border : c.surface2;
+          const border = state === 'error' ? c.error : state === 'success' ? c.accent : active ? c.accent : c.border;
           return (
             <View
               key={i}
@@ -47,13 +46,14 @@ export function OtpInput({
                 {
                   borderRadius: t.radius.input,
                   borderColor: border,
-                  borderWidth: active || state !== 'default' ? 2 : 1,
-                  backgroundColor: state === 'error' ? c.errorTint : filled || active ? c.surface : c.surface2,
+                  borderWidth: 1,
+                  backgroundColor: c.surface,
+                  ...(active ? { shadowColor: c.accent, shadowOpacity: 0.25, shadowRadius: 3, elevation: 1 } : null),
                   minHeight: t.layout.minTouch + 6,
                 },
               ]}
             >
-              <Text variant="h1" color={state === 'error' ? 'error' : state === 'success' ? 'primary' : 'textPrimary'}>
+              <Text variant="h1" style={{ fontSize: 24 }} color={state === 'error' ? 'error' : 'textPrimary'}>
                 {digits[i] ?? ''}
               </Text>
             </View>
@@ -74,7 +74,7 @@ export function OtpInput({
         caretHidden
       />
       {message ? (
-        <Text variant="bodySmall" color={state === 'error' ? 'error' : state === 'success' ? 'primary' : 'textMuted'} accessibilityLiveRegion="polite">
+        <Text variant="bodySmall" color={state === 'error' ? 'error' : state === 'success' ? 'accent' : 'textSecondary'} accessibilityLiveRegion="polite">
           {message}
         </Text>
       ) : null}
@@ -84,6 +84,6 @@ export function OtpInput({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row' },
-  box: { flex: 1, aspectRatio: 0.85, alignItems: 'center', justifyContent: 'center' },
+  box: { flex: 1, height: 56, alignItems: 'center', justifyContent: 'center' },
   hidden: { position: 'absolute', opacity: 0, height: 1, width: 1 },
 });

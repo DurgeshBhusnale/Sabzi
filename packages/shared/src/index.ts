@@ -8,3 +8,4 @@ export type { Database, Json, Tables, TablesInsert, TablesUpdate, Enums } from '
 export * from './notifications.ts';
 export * from './requests.ts';
 export * from './stops.ts';
+export * from './produce.ts';

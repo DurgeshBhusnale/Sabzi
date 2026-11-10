@@ -2,7 +2,6 @@ import { StyleSheet, View } from 'react-native';
 import { REVIEW_TAG_LABELS, type ReviewTag } from '@sabzi/shared';
 import { useTheme } from '../theme/ThemeProvider';
 import { Avatar } from './Avatar';
-import { Card } from './Card';
 import { RatingDisplay } from './RatingStars';
 import { Text } from './Text';
 import { en } from '../i18n/en';
@@ -25,11 +24,11 @@ export function ReviewCard({ review, footer }: { review: ReviewCardData; footer?
   const t = useTheme();
   return (
     <View style={{ gap: t.spacing.xs }}>
-      <Card testID={`review-${review.id}`} style={{ gap: t.spacing.xs, opacity: review.hidden ? 0.75 : 1 }}>
+      <View testID={`review-${review.id}`} style={{ gap: t.spacing.xs, paddingVertical: t.spacing.md, borderBottomWidth: 1, borderBottomColor: t.colors.border, opacity: review.hidden ? 0.75 : 1 }}>
         <View style={[styles.row, { gap: t.spacing.sm }]}>
           <Avatar name={review.reviewerName} size={36} />
           <View style={styles.flex}>
-            <Text weight="600">{review.reviewerName}</Text>
+            <Text variant="label">{review.reviewerName}</Text>
             <Text variant="caption" color="textSecondary">
               {[review.societyName, review.date].filter(Boolean).join(' · ')}
             </Text>
@@ -39,21 +38,21 @@ export function ReviewCard({ review, footer }: { review: ReviewCardData; footer?
         {review.tags.length ? (
           <View style={[styles.row, styles.wrap, { gap: t.spacing.xs }]}>
             {review.tags.map((tag) => (
-              <View key={tag} style={{ backgroundColor: t.colors.surface2, borderRadius: t.radius.chip, paddingHorizontal: t.spacing.xs, paddingVertical: 2 }}>
-                <Text variant="caption" color="textSecondary">{REVIEW_TAG_LABELS[tag as ReviewTag] ?? tag}</Text>
+              <View key={tag} style={{ backgroundColor: t.colors.primaryTint, borderRadius: t.radius.pill, paddingHorizontal: 10, minHeight: 22, justifyContent: 'center' }}>
+                <Text variant="caption" color="onPrimaryTint">{REVIEW_TAG_LABELS[tag as ReviewTag] ?? tag}</Text>
               </View>
             ))}
           </View>
         ) : null}
-        {review.text ? <Text>{review.text}</Text> : null}
+        {review.text ? <Text variant="bodySmall">{review.text}</Text> : null}
         {review.vendorReply ? (
-          <View testID="vendor-reply" style={{ backgroundColor: t.colors.surface2, borderRadius: t.radius.input, padding: t.spacing.sm }}>
+          <View testID="vendor-reply" style={{ borderLeftWidth: 2, borderLeftColor: t.colors.accent, paddingLeft: t.spacing.sm, paddingVertical: 2 }}>
             <Text variant="caption" weight="600">{en.reviews.replyFrom(review.vendorName ?? '')}</Text>
             <Text variant="bodySmall">{review.vendorReply}</Text>
           </View>
         ) : null}
         {footer}
-      </Card>
+      </View>
       {review.hidden ? (
         <View testID="review-hidden-note" style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: t.colors.border, borderRadius: t.radius.card, padding: t.spacing.sm, backgroundColor: t.colors.surface2 }}>
           <Text variant="bodySmall" color="textSecondary">{en.reviews.hidden(review.hiddenReason)}</Text>

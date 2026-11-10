@@ -12,12 +12,12 @@ export default async function SocietyLanding({ params }: { params: Promise<{ id:
   const s = data as Society | null;
   return (
     <main className="mx-auto flex min-h-dvh max-w-[28rem] flex-col gap-md bg-bg p-md">
-      <p className="font-heading text-lg font-bold text-brand-leaf">{APP_NAME}</p>
+      <p className="font-heading text-xl text-brand-leaf">{APP_NAME}</p>
       {!s ? (
-        <h1 className="font-heading text-xl font-bold">We couldn&apos;t find this society.</h1>
+        <h1 className="font-heading text-2xl">We couldn&apos;t find this society.</h1>
       ) : (
         <>
-          <h1 className="font-heading text-2xl font-bold">{`Vendors at ${s.name}`}</h1>
+          <h1 className="font-heading text-[30px] leading-[34px]">{`Vendors at ${s.name}`}</h1>
           <ul className="flex flex-col gap-xs">
             {s.vendors.map((v) => (
               <li key={v.code}>

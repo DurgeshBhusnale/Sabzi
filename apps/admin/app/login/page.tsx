@@ -68,16 +68,25 @@ export default function Login() {
   };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-md">
-      <Card className="w-full max-w-[24rem]">
-        <h1 className="font-heading text-2xl font-bold text-text-primary">{APP_NAME} Admin</h1>
-        <p className="mb-lg text-text-secondary">{step === 'password' ? 'Field team login' : '2-step verification'}</p>
+    <main
+      className="flex min-h-dvh items-center justify-center p-md"
+      style={{ background: 'linear-gradient(rgba(15,61,42,.88),rgba(15,61,42,.88)), url(/images/photos/cta-band-texture.jpg) center/cover' }}
+    >
+      <Card className="flex w-full max-w-[400px] flex-col gap-lg rounded-[16px] p-xxl shadow-[0_24px_48px_-12px_rgba(0,0,0,.4)]">
+        <span className="flex items-center gap-xs font-heading text-xl">
+          <img src="/images/brand/app-icon.png" alt="" width={28} height={28} className="rounded-[8px]" />
+          {APP_NAME}
+        </span>
+        <div className="flex flex-col gap-[6px]">
+          <h1 className="font-heading text-[28px] leading-[32px] text-text-primary">{step === 'password' ? 'Welcome back' : '2-step verification'}</h1>
+          <p className="text-[13px] text-text-secondary">{step === 'password' ? `Sign in to the ${APP_NAME} admin console.` : 'Enter the code from your authenticator app.'}</p>
+        </div>
         {step === 'password' ? (
           <form onSubmit={submitPassword} className="flex flex-col gap-md" aria-label="Admin login">
             <Field label="Email"><Input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required /></Field>
             <Field label="Password"><Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></Field>
             {error ? <p role="alert" className="text-sm text-error">{error}</p> : null}
-            <Button type="submit" loading={busy}>Continue</Button>
+            <Button type="submit" loading={busy} className="min-h-12">Sign in</Button>
           </form>
         ) : (
           <form onSubmit={submitCode} className="flex flex-col gap-md" aria-label="Enter code">

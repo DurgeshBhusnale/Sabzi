@@ -1,8 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import { formatPrice, type PriceUnit } from '@sabzi/shared';
+import { formatAmount, formatPrice, UNIT_LABELS, type PriceUnit } from '@sabzi/shared';
 import { useTheme } from '../theme/ThemeProvider';
-import { ItemArt } from './Avatar';
-import { StatusPill } from './StatusPill';
+import { ItemArt } from './Art';
 import { Text } from './Text';
 import { en } from '../i18n/en';
 
@@ -13,36 +12,38 @@ export function MenuItemRow({
   unit,
   soldOut = false,
   dealPrice,
+  last = false,
 }: {
   name: string;
   price: number;
   unit: PriceUnit;
   soldOut?: boolean;
   dealPrice?: number | null;
+  last?: boolean;
 }) {
   const t = useTheme();
   const deal = !soldOut && dealPrice != null && dealPrice < price;
   const a11y = soldOut ? `${name}, ${en.menu.soldOut}` : deal ? `${name}, ${formatPrice(dealPrice!, unit)}, was ${formatPrice(price, unit)}` : `${name}, ${formatPrice(price, unit)}`;
   return (
-    <View accessible accessibilityLabel={a11y} testID={`menu-row-${name}`} style={[styles.row, { minHeight: t.layout.listRowWithImage, gap: t.spacing.sm, opacity: soldOut ? 0.7 : 1 }]}>
-      <ItemArt name={name} size={40} muted={soldOut} />
+    <View
+      accessible
+      accessibilityLabel={a11y}
+      testID={`menu-row-${name}`}
+      style={[styles.row, { minHeight: t.layout.listRowWithImage, gap: t.spacing.sm, borderBottomWidth: last ? 0 : 1, borderBottomColor: t.colors.border, opacity: soldOut ? 0.55 : 1 }]}
+    >
+      <ItemArt name={name} size={36} />
       <View style={styles.flex}>
-        <Text color={soldOut ? 'textSecondary' : 'textPrimary'}>{name}</Text>
-        {soldOut || deal ? (
-          <Text variant="caption" color="textMuted" strike>
-            {formatPrice(price, unit)}
-          </Text>
+        <Text variant="label">{name}</Text>
+        {soldOut ? (
+          <Text variant="caption" weight="400" color="error">{en.menu.soldOut}</Text>
+        ) : deal ? (
+          <Text variant="caption" weight="400" color="dealAmberText">{en.menu.dealWas(formatAmount(price))}</Text>
         ) : null}
       </View>
-      {soldOut ? (
-        <StatusPill status="sold_out" label={en.menu.soldOut} />
-      ) : deal ? (
-        <View style={{ backgroundColor: t.colors.dealAmber, borderRadius: t.radius.chip, paddingHorizontal: t.spacing.xs, paddingVertical: t.spacing.xxs }}>
-          <Text variant="price" color="onDealAmber">{formatPrice(dealPrice!, unit)}</Text>
-        </View>
-      ) : (
-        <Text variant="price">{formatPrice(price, unit)}</Text>
-      )}
+      <Text variant="price" strike={soldOut}>
+        {formatAmount(deal ? dealPrice! : price)}
+        <Text variant="caption" weight="400" color="textSecondary">{` /${UNIT_LABELS[unit]}`}</Text>
+      </Text>
     </View>
   );
 }

@@ -30,7 +30,7 @@ export type SkeletonKind = 'vendorCard' | 'menuRow' | 'statTile' | 'list';
 
 export function SkeletonBlock({ kind, count = 1 }: { kind: SkeletonKind; count?: number }) {
   const t = useTheme();
-  const card = { borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.card, padding: t.spacing.md, backgroundColor: t.colors.surface };
+  const card = { borderRadius: t.radius.button, padding: t.spacing.sm, backgroundColor: t.colors.bg };
   return (
     <View accessibilityLabel="Loading" accessibilityRole="progressbar" testID={`skeleton-${kind}`} style={{ gap: t.spacing.sm }}>
       {Array.from({ length: count }).map((_, i) => {
@@ -44,7 +44,7 @@ export function SkeletonBlock({ kind, count = 1 }: { kind: SkeletonKind; count?:
         }
         return (
           <View key={i} style={[card, styles.row, { gap: t.spacing.sm }]}>
-            <Skeleton width={kind === 'menuRow' ? 40 : 48} height={kind === 'menuRow' ? 40 : 48} round />
+            <Skeleton width={kind === 'menuRow' ? 36 : 48} height={kind === 'menuRow' ? 36 : 48} round={kind !== 'menuRow'} />
             <View style={[styles.flex, { gap: t.spacing.xs }]}>
               <Skeleton width="60%" height={14} />
               <Skeleton width="85%" height={12} />

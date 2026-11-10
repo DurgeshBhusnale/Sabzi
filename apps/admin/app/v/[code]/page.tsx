@@ -31,7 +31,7 @@ export default async function VendorLanding({ params }: { params: Promise<{ code
   if (!card) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-[28rem] flex-col items-center justify-center gap-sm p-md text-center">
-        <h1 className="font-heading text-xl font-bold">This vendor isn&apos;t available any more.</h1>
+        <h1 className="font-heading text-2xl">This vendor isn&apos;t available any more.</h1>
         <a className="text-primary underline" href={PLAY_STORE_URL}>{`Get ${APP_NAME} to find vendors near you`}</a>
       </main>
     );
@@ -42,14 +42,14 @@ export default async function VendorLanding({ params }: { params: Promise<{ code
   const items = (card.menu?.items ?? []).slice(0, 6);
   return (
     <main className="mx-auto flex min-h-dvh max-w-[28rem] flex-col gap-md bg-bg p-md">
-      <p className="font-heading text-lg font-bold text-brand-leaf">{APP_NAME}</p>
+      <p className="font-heading text-xl text-brand-leaf">{APP_NAME}</p>
       <section className="overflow-hidden rounded-card border border-border bg-surface">
         {photo ? <img src={photo} alt="Today's stock photo" className="aspect-video w-full object-cover" /> : null}
         <div className="flex flex-col gap-xs p-md">
           <div className="flex items-center gap-sm">
             {avatar ? <img src={avatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-tint font-bold text-primary">{first?.[0]}</div>}
             <div>
-              <h1 className="font-heading text-xl font-bold">{card.display_name}</h1>
+              <h1 className="font-heading text-2xl">{card.display_name}</h1>
               <p className="text-sm text-text-secondary">
                 {card.rating_count ? `${Number(card.avg_rating).toFixed(1)} ★ (${card.rating_count})` : 'New'} · {card.vehicle === 'tempo' ? 'Tempo' : 'Thela'} · {card.delivery_available ? 'Home delivery' : 'Pickup at gate'}
               </p>

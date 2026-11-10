@@ -99,7 +99,7 @@ function SocietyForm({ society, onSaved }: { society: SocietyRow | null; onSaved
           {errors.form ? <p role="alert" className="text-error">{errors.form}</p> : null}
         </Card>
         <Card className="flex flex-col gap-md">
-          <h2 className="font-heading text-lg font-semibold">Gates</h2>
+          <h2 className="font-heading text-xl italic">Gates</h2>
           {gates.length === 0 ? <p className="text-text-secondary">Add at least one gate. Vendors arrive at a gate.</p> : null}
           {gates.map((g) => (
             <div key={g.id} className="flex items-center justify-between rounded-input bg-surface-2 px-sm py-xs">
