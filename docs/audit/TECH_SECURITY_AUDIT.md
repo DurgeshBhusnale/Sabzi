@@ -20,6 +20,10 @@ Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR
     on conflict (key) do update set value = excluded.value;
   ```
   Check: `curl -s -o /dev/null -w '%{http_code}' -X POST https://<ref>.supabase.co/functions/v1/notify -d '{}'` prints `403`; a real "I've arrived" still pushes.
+- [ ] **Email code length = 6 on hosted** (TECH-01): Authentication → Sign In / Providers → Email → *Email OTP Length* `6`, *Email OTP Expiration* `600` → Save. The app now reads the length from `LIMITS.emailOtpLength` (`packages/shared/src/constants.ts`); a test keeps it equal to `supabase/config.toml`. If you ever change the dashboard value, change both and ship an OTA.
+- [ ] **Custom SMTP** (SEC-01): Authentication → Emails → SMTP Settings → enable custom SMTP (Resend/Brevo/ZeptoMail, sender on `anchorlit.in`, SPF+DKIM). Then Authentication → Rate Limits → emails ≈ 30/hour. Test from a Gmail that is not on the Supabase team.
+- [ ] **Google sign-in for outside testers** (SEC-03): Google Cloud → OAuth consent screen → *Publish app* (or add each tester under Test users). Supabase → Authentication → URL Configuration: Site URL `https://pheri.anchorlit.in`; Redirect URLs include `pheri://auth/callback`; remove unused localhost/wildcards.
+- [ ] **EAS environment variables** (TECH-03): `cd apps/mobile && eas env:list --environment preview` must show `EXPO_PUBLIC_SUPABASE_URL` (`https://<ref>.supabase.co`), `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_BASE_URL` (and optional `EXPO_PUBLIC_POSTHOG_*`, `GOOGLE_SERVICES_JSON`), nothing secret. `eas.json` now pins `environment` per build profile. Publish OTA only with `pnpm --filter mobile update:preview -- --message "…"` (adds `--environment preview`). A release bundle without the URL now shows "This build isn't set up right" instead of hanging.
 - [ ] `send-sms-hook` now rejects every call without `SEND_SMS_HOOK_SECRET`. Phone OTP is off, so nothing to do until SMS is turned on; then set the secret from Auth → Hooks.
 
 ---
@@ -56,11 +60,11 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 
 | ID | Severity | Area | Flow | File:line | Status |
 | --- | --- | --- | --- | --- | --- |
-| TECH-01 | P0 | Auth | Email sign-in/up, add email | `apps/mobile/app/(auth)/email.tsx:46`, `apps/mobile/src/ui/OtpInput.tsx:18,68,72`, `apps/mobile/app/account/email.tsx:46` | Open |
-| TECH-03 | P0 | EAS / config | Build, OTA | `apps/mobile/eas.json:9-18`, `apps/mobile/src/lib/supabase.ts:7-8` | Open (Needs check) |
-| SEC-01 | P0 | Auth / email | Email sign-in/up | Hosted dashboard (Auth → SMTP) | Open (Needs check) |
+| TECH-01 | P0 | Auth | Email sign-in/up, add email | `apps/mobile/app/(auth)/email.tsx:46`, `apps/mobile/src/ui/OtpInput.tsx:18,68,72`, `apps/mobile/app/account/email.tsx:46` | Fixed in code (branch `fix/tech-01-03`); owner: set hosted OTP length 6 |
+| TECH-03 | P0 | EAS / config | Build, OTA | `apps/mobile/eas.json:9-18`, `apps/mobile/src/lib/supabase.ts:7-8` | Fixed (branch `fix/tech-01-03`); owner: check EAS env vars |
+| SEC-01 | P0 | Auth / email | Email sign-in/up | Hosted dashboard (Auth → SMTP) | Blocked: dashboard only (owner action) |
 | SEC-02 | P0 | Edge function | Push notifications | `supabase/functions/notify/handler.ts:136-137`, `supabase/migrations/20261105000900_notifications.sql:22,30` | Fixed in code (branch `fix/sec-02-12-16`); owner: set secret, deploy |
-| SEC-03 | P0 | Auth / Google | Google sign-in/up | Google Cloud console, Supabase Auth → URL config | Open (Needs check) |
+| SEC-03 | P0 | Auth / Google | Google sign-in/up | Google Cloud console, Supabase Auth → URL config | Blocked: Google/Supabase console only (owner action) |
 | TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Open |
 | TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Open |
 | TECH-05 | P1 | Sign-out | Account → Log out / delete | `apps/mobile/src/features/auth/api.ts:186-195`, `apps/mobile/app/account/settings.tsx:62-67` | Open |
@@ -86,7 +90,7 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Open |
 | TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Open |
 | TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Open |
-| TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Open |
+| TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Fixed (branch `fix/tech-01-03`) |
 
 ---
 

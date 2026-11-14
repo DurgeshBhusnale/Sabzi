@@ -1,4 +1,4 @@
-import { APP_NAME } from '@sabzi/shared';
+import { APP_NAME, LIMITS } from '@sabzi/shared';
 
 /** All user-facing strings. Short, friendly Indian English (design brief §2.8). */
 export const en = {
@@ -65,13 +65,13 @@ export const en = {
     verified: 'Verified',
     attemptsLeft: (n: number) => `${n} ${n === 1 ? 'try' : 'tries'} left.`,
     emailTitle: 'Continue with email',
-    emailBody: "We'll send a 6-digit code to your email. New here? This creates your account.",
+    emailBody: `We'll send a ${LIMITS.emailOtpLength}-digit code to your email. New here? This creates your account.`,
     continueEmail: 'Continue with email',
     or: 'or',
     checkSpam: "Can't find it? Check your spam folder.",
     emailLabel: 'Email',
     sendCode: 'Send code',
-    codeSentTo: (e: string) => `We sent a 6-digit code to ${e}`,
+    codeSentTo: (e: string) => `We sent a ${LIMITS.emailOtpLength}-digit code to ${e}`,
     usePhone: 'Use phone number instead',
     roleTitle: `How will you use ${APP_NAME}?`,
     roleBody: 'You can choose only once for this number.',
@@ -600,6 +600,8 @@ export const en = {
     view: 'View',
   },
   system: {
+    misconfiguredTitle: "This build isn't set up right",
+    misconfiguredBody: 'Please install the latest test version from the link we sent you.',
     notFound: "This vendor isn't available any more.",
     offlineTitle: "You're offline",
     offlineBody: 'Check your mobile data or Wi-Fi.',

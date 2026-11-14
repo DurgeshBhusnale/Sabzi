@@ -7,7 +7,7 @@ import { Text } from './Text';
 export type OtpState = 'default' | 'error' | 'success';
 
 /**
- * 6 boxes over one hidden input: typing auto-advances and pasting fills all six.
+ * `length` boxes (default 6) over one hidden input: typing auto-advances and pasting fills them all.
  * Android SMS auto-fill works through textContentType/autoComplete "sms-otp".
  */
 export function OtpInput({
@@ -33,7 +33,7 @@ export function OtpInput({
   const digits = value.split('');
   return (
     <View style={{ gap: t.spacing.xs }}>
-      <Pressable onPress={() => ref.current?.focus()} accessibilityLabel="Enter the 6-digit code" style={[styles.row, { gap: t.spacing.xs }]}>
+      <Pressable onPress={() => ref.current?.focus()} accessibilityLabel={`Enter the ${length}-digit code`} style={[styles.row, { gap: t.spacing.xs }]}>
         {Array.from({ length }).map((_, i) => {
           const active = i === digits.length && state === 'default';
           const border = state === 'error' ? c.error : state === 'success' ? c.accent : active ? c.accent : c.border;

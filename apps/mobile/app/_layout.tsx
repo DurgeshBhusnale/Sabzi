@@ -15,7 +15,8 @@ import { AppStatusGate } from '../src/features/system/AppStatusGate';
 import { PERSIST_MAX_AGE, queryPersister } from '../src/lib/persist';
 import { setAnalyticsSink, track } from '../src/lib/analytics';
 import { createPosthogSink } from '../src/lib/posthog';
-import { getSupabase } from '../src/lib/supabase';
+import { configProblem, getSupabase } from '../src/lib/supabase';
+import { MisconfiguredBuild } from '../src/features/system/MisconfiguredBuild';
 import { SessionProvider, useSession } from '../src/features/auth/session';
 import { AppState } from 'react-native';
 
@@ -59,6 +60,15 @@ function Root() {
 
 export default function RootLayout() {
   const [queryClient] = useState(makeQueryClient);
+  if (configProblem()) {
+    return (
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <MisconfiguredBuild />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    );
+  }
   return (
     <SafeAreaProvider>
       <ThemeProvider>
