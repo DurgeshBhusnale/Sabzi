@@ -16,6 +16,8 @@ Code fixes land through `fix/<ids>` branches; each row's Status in §2 says Fixe
 4. `fix/tech-02-04-05-13`: TECH-02, TECH-04, TECH-05, TECH-13 (back stack, weak-network start, sign-out cleanup)
 5. `fix/tech-06-07-08-09`: TECH-06, TECH-07, TECH-08, TECH-09, SEC-13 (error boundaries, fingerprint runtime, update link, push taps, no backup). New migration
 
+Branch 2 onwards also carries commit `e408ce5` (`docs/audit/UX_AUDIT.md`, from a parallel UX-audit session that shared this working folder), so merging PR 2 also brings the UX audit doc to `main`; `audit/ux` then has nothing left to merge.
+
 Verified locally on each branch: `pnpm verify` green (mobile 278 tests at the end), Deno function tests 22/22. **Not run locally:** `npx supabase test db` (Docker would not start on this machine), so CI's `database` job on PRs 3 and 5 is the first pgTAP run of the new migrations; don't merge those if it fails.
 
 Still open (P2): SEC-08, SEC-10, SEC-11, SEC-14, SEC-15, TECH-10, TECH-11, TECH-12; SEC-13's SecureStore half. The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
