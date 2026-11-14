@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, ILLUSTRATION_ART, Text } from '../../src/ui';
 import { en } from '../../src/i18n/en';
+import { useSession } from '../../src/features/auth/session';
 
 /** Slide art from the v4 image pack, in the order the welcome frames use. */
 const ART = [ILLUSTRATION_ART.getAlert, ILLUSTRATION_ART.shopDoorstep, ILLUSTRATION_ART.pickSociety];
@@ -12,7 +13,14 @@ const ART = [ILLUSTRATION_ART.getAlert, ILLUSTRATION_ART.shopDoorstep, ILLUSTRAT
 /** S-02: three slides — illustration panel on top, title, dots, Get started / Log in. Skip on slides 1 and 2. */
 export default function Welcome() {
   const t = useTheme();
+  const { markSeen } = useSession();
   const [i, setI] = useState(0);
+  // TECH-02: sign-in replaces the slides, so Android back from sign-in leaves the app instead of returning here,
+  // and later signed-out starts skip the slides.
+  const toSignIn = () => {
+    markSeen();
+    router.replace('/(auth)/signin');
+  };
   const slide = en.welcome.slides[i]!;
   const last = i === en.welcome.slides.length - 1;
   return (
@@ -39,8 +47,8 @@ export default function Welcome() {
         </View>
         <View style={{ flex: 1 }} />
         <View style={{ gap: t.spacing.xs }}>
-          <Button label={last ? en.welcome.getStarted : en.welcome.next} onPress={() => (last ? router.push('/(auth)/signin') : setI(i + 1))} testID="welcome-next" />
-          <Button label={en.welcome.logIn} variant="tertiary" onPress={() => router.push('/(auth)/signin')} />
+          <Button label={last ? en.welcome.getStarted : en.welcome.next} onPress={() => (last ? toSignIn() : setI(i + 1))} testID="welcome-next" />
+          <Button label={en.welcome.logIn} variant="tertiary" onPress={toSignIn} />
         </View>
       </View>
     </View>

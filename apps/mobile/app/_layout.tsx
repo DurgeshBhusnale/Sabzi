@@ -18,6 +18,7 @@ import { createPosthogSink } from '../src/lib/posthog';
 import { configProblem, getSupabase } from '../src/lib/supabase';
 import { MisconfiguredBuild } from '../src/features/system/MisconfiguredBuild';
 import { SessionProvider, useSession } from '../src/features/auth/session';
+import { onSignOut } from '../src/lib/signOutCleanup';
 import { AppState } from 'react-native';
 
 const posthog = createPosthogSink({ key: process.env.EXPO_PUBLIC_POSTHOG_KEY, host: process.env.EXPO_PUBLIC_POSTHOG_HOST });
@@ -60,6 +61,7 @@ function Root() {
 
 export default function RootLayout() {
   const [queryClient] = useState(makeQueryClient);
+  useEffect(() => onSignOut(() => queryClient.clear()), [queryClient]);
   if (configProblem()) {
     return (
       <SafeAreaProvider>

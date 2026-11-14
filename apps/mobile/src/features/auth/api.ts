@@ -211,8 +211,14 @@ export async function deleteAccount(c: Client = getSupabase()): Promise<void> {
   await c.auth.signOut({ scope: 'local' });
 }
 
-/** S-15 */
+/** S-15. TECH-05: the push token is cleared first (needs the JWT), so this device stops getting the old account's alerts. */
 export async function signOut(c: Client = getSupabase()): Promise<void> {
+  try {
+    const { data } = await c.auth.getUser();
+    if (data?.user?.id) await c.from('profiles').update({ push_token: null }).eq('user_id', data.user.id);
+  } catch {
+    // offline: still sign out locally; the next login on this device takes the token over (save_push_token)
+  }
   await c.auth.signOut({ scope: 'local' });
 }
 

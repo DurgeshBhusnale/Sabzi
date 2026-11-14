@@ -63,6 +63,8 @@ export default function Settings() {
           setLogout(false);
           await signOut();
           await refresh();
+          // TECH-13: drop the signed-in screens underneath, then let index route (sign-in).
+          if (router.canDismiss()) router.dismissAll();
           router.replace('/');
         }}
       />

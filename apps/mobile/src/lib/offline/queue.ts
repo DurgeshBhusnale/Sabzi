@@ -125,6 +125,12 @@ export class ActionQueue {
     await this.persist();
   }
 
+  /** TECH-05: sign-out drops everything so another account never replays this user's actions. */
+  async clear(): Promise<void> {
+    this.items = [];
+    await this.persist();
+  }
+
   /** Drops sent items older than a day so the list stays short. */
   async prune(): Promise<void> {
     const cutoff = this.now() - 86_400_000;

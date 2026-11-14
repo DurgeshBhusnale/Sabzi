@@ -70,7 +70,8 @@ function ArriveLayer() {
 export default function VendorLayout() {
   const { status, step } = useSession();
   const vendor = useMyVendor();
-  if (status === 'signedOut') return <Redirect href="/(auth)/welcome" />;
+  // index decides between welcome and sign-in (TECH-02, TECH-13)
+  if (status === 'signedOut') return <Redirect href="/" />;
   if (status === 'signedIn' && step !== 'vendor') return <Redirect href="/" />;
   if (vendor.isLoading) return <Screen><SkeletonBlock kind="vendorCard" count={3} /></Screen>;
   if (vendor.isSuccess && !vendor.data) return <Redirect href="/vendor-setup/details" />;

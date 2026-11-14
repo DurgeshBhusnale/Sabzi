@@ -45,7 +45,14 @@ describe('S-02 welcome', () => {
     expect(screen.getByText("See today's vegetables and prices")).toBeTruthy();
     await fireEvent.press(screen.getByText('Skip'));
     await fireEvent.press(screen.getByText('Get started'));
-    expect(mockRouter.push).toHaveBeenCalledWith('/(auth)/signin');
+    // TECH-02: replace, so Android back from sign-in does not return to the slides
+    expect(mockRouter.replace).toHaveBeenCalledWith('/(auth)/signin');
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+  it('Log in on any slide also replaces with sign-in', async () => {
+    await renderUi(<Welcome />);
+    await fireEvent.press(screen.getByText('Log in'));
+    expect(mockRouter.replace).toHaveBeenCalledWith('/(auth)/signin');
   });
 });
 
