@@ -59,14 +59,14 @@ export function ItemTile({
           borderRadius: t.radius.button,
           borderColor: missingPrice ? c.error : selected ? c.primary : 'transparent',
           borderWidth: 2,
-          backgroundColor: ground,
+          backgroundColor: selected ? c.primaryTintStrong : ground,
           padding: t.spacing.xs,
           gap: 2,
           opacity: pressed ? 0.85 : state === 'sold_out' ? 0.45 : !selected && showSetPrice ? 0.55 : 1,
         },
       ]}
     >
-      {selected && !showSetPrice ? (
+      {selected ? (
         <View style={styles.check}>
           <Icon icon={CircleCheck} size={18} color="primary" filled={false} />
         </View>
@@ -75,7 +75,7 @@ export function ItemTile({
       <Text variant="caption" weight="500" align="center" numberOfLines={1} style={{ fontSize: t.type.label.fontSize }}>{name.replace(/\s*\(.*\)/, '')}</Text>
       {state === 'priced' && price != null && unit ? (
         <>
-          <Text variant="caption" weight="600" align="center" style={{ fontSize: t.type.label.fontSize + 1 }}>{formatPrice(price, unit)}</Text>
+          <Text variant="price" align="center" testID="tile-price">{formatPrice(price, unit)}</Text>
           {wasPrice != null && wasPrice !== price ? <Text variant="tiny" weight="400" color="textSecondary">{en.menu.was(wasPrice)}</Text> : null}
         </>
       ) : null}

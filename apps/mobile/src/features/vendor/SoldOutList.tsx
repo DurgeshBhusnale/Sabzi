@@ -1,25 +1,28 @@
 import { View } from 'react-native';
 import { formatPrice } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { ItemArt, Toggle } from '../../ui';
+import { ItemArt, ToggleRow } from '../../ui';
 import type { DayMenu } from './api';
 import { en } from '../../i18n/en';
 
-/** Today's items with big sold-out toggles (V-09 quick list, V-10). */
+/** Today's items; the whole 56 dp row toggles sold out and keeps full contrast (V-09 quick list, V-10, UX-37). */
 export function SoldOutList({ menu, onToggle }: { menu: DayMenu; onToggle: (itemId: string, soldOut: boolean) => void }) {
   const t = useTheme();
   return (
     <View>
-      {menu.lines.map((l) => (
-        <View key={l.itemId} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: t.layout.listRowWithImage, borderBottomWidth: 1, borderBottomColor: t.colors.border }}>
-          <ItemArt name={l.name} size={36} muted={l.soldOut} />
+      {menu.lines.map((l, i) => (
+        <View key={l.itemId} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
+          <ItemArt name={l.name} size={36} />
           <View style={{ flex: 1 }}>
-            <Toggle
+            <ToggleRow
               testID={`soldout-${l.name}`}
               label={l.name}
-              description={l.soldOut ? en.menu.soldOut : formatPrice(l.price, l.unit)}
+              sub={formatPrice(l.price, l.unit)}
               value={!!l.soldOut}
               onChange={(v) => onToggle(l.itemId, v)}
+              onLabel={en.menu.soldOut}
+              offLabel={en.vendor.tapIfFinished}
+              last={i === menu.lines.length - 1}
             />
           </View>
         </View>

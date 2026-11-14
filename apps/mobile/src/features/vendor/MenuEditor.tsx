@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { formatPrice, UNIT_LABELS, type PriceUnit } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Banner, BottomSheet, Button, Chip, ItemArt, ItemTile, PriceStepper, Snackbar, Text, TextInput, isValidPrice } from '../../ui';
+import { Banner, BottomSheet, Button, ItemArt, ItemTile, PriceStepper, Snackbar, Text, TextInput, isValidPrice } from '../../ui';
 import { canPublish, copyYesterday, missingPrices, selectedItems, setPrice, toggleItem, toPublishItems, type Draft, type MenuLine } from './menuLogic';
 import { en } from '../../i18n/en';
 
@@ -49,11 +49,14 @@ export function MenuEditor({
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm }}>
+      <View style={{ gap: t.spacing.sm, marginBottom: t.spacing.sm }}>
         <Text variant="bodySmall" color="textSecondary">{en.vendor.usualCount(selected.length, all.length)}</Text>
-        {yesterday?.length ? (
-          <Chip
-            label={en.vendor.yesterday}
+        {/* UX-34: the fastest path to the 60-second menu, full width until something is picked */}
+        {yesterday?.length && selected.length === 0 ? (
+          <Button
+            size="xl"
+            variant="secondary"
+            label={en.vendor.copyYesterday(yesterday.length)}
             testID="same-as-yesterday"
             onPress={() => {
               const r = copyYesterday(draft, yesterday);

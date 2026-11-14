@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
-import { HelpCircle, ListChecks, QrCode, Settings, Star, Store } from 'lucide-react-native';
+import { ListChecks, QrCode, Settings, Star, Store, UserRound } from 'lucide-react-native';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, Card, Screen, SkeletonBlock, StatTile, Text, TopAppBar } from '../../src/ui';
 import { LinkRow } from '../../src/features/account/ProfileScreen';
@@ -35,7 +35,7 @@ export default function VendorMe() {
             <StatTile value={stats.data!.rating_count ? Number(stats.data!.avg_rating).toFixed(1) : '–'} label={en.vendor.avgRating} />
           </View>
           <Card style={{ gap: t.spacing.sm }}>
-            <Text variant="h2">{en.vendor.followersByStop}</Text>
+            <Text variant="sectionTitle">{en.vendor.followersByStop}</Text>
             {(counts.data ?? []).map((c) => (
               <View key={c.society_id} style={{ gap: t.spacing.xxs }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -50,13 +50,13 @@ export default function VendorMe() {
           </Card>
         </>
       )}
+      {zero ? null : <Button size="xl" icon={QrCode} label={en.vendor.myQr} onPress={() => router.push('/vendor/qr')} testID="me-qr" />}
       <Card>
-        <LinkRow icon={QrCode} label={en.vendor.myQr} onPress={() => router.push('/vendor/qr')} />
         <LinkRow icon={Star} label={en.vendor.myReviews} onPress={() => router.push('/vendor/reviews')} />
         <LinkRow icon={Store} label={en.vendor.businessDetails} onPress={() => router.push('/vendor-setup/details')} />
         <LinkRow icon={ListChecks} label={en.vendor.usualItems} onPress={() => router.push('/vendor-setup/items')} />
-        <LinkRow icon={Settings} label={en.profile.settings} onPress={() => router.push('/account/settings')} />
-        <LinkRow icon={HelpCircle} label={en.profile.help} onPress={() => router.push('/account/help')} />
+        <LinkRow icon={UserRound} label={en.vendor.profileLink} onPress={() => router.push('/account/profile')} testID="me-profile" />
+        <LinkRow icon={Settings} label={en.profile.settings} onPress={() => router.push('/account/settings')} last />
       </Card>
     </Screen>
   );

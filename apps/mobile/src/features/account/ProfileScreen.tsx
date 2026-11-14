@@ -11,13 +11,14 @@ import { useMyVendor } from '../vendor/hooks';
 import { useSession } from '../auth/session';
 import { en } from '../../i18n/en';
 
-export function LinkRow({ icon, label, onPress, sub, last, danger, chevron = !danger }: { icon: LucideIcon; label: string; onPress: () => void; sub?: string; last?: boolean; danger?: boolean; chevron?: boolean }) {
+export function LinkRow({ icon, label, onPress, sub, last, danger, chevron = !danger, testID }: { icon: LucideIcon; label: string; onPress: () => void; sub?: string; last?: boolean; danger?: boolean; chevron?: boolean; testID?: string }) {
   const t = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      testID={testID}
       style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', minHeight: 60, gap: t.spacing.sm, borderBottomWidth: last ? 0 : 1, borderBottomColor: t.colors.divider, opacity: pressed ? 0.7 : 1 })}
     >
       <Icon icon={icon} size={20} color={danger ? 'error' : 'primary'} />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Linking, Switch, View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { formatTimeWindow, SUPPORT_PHONE } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, Dialog, EmptyState, Screen, SegmentedControl, SheetBody, SkeletonBlock, Snackbar, Text, TopAppBar } from '../../src/ui';
@@ -56,24 +56,22 @@ export default function VendorStops() {
                         {s.skipped ? en.stops.notGoing : `${s.gateName} · ${en.stops.followers(s.followers)}`}
                       </Text>
                     </View>
-                    <View style={{ alignItems: 'flex-end', gap: 2 }}>
-                      <Text variant="caption" weight="400" color="textSecondary">{en.vendor.notGoingToday}</Text>
-                      <Switch
+                    {s.arrivedAt ? null : (
+                      <Button
+                        label={s.skipped ? en.vendor.skippedUndo : en.vendor.skipTodayShort}
+                        variant={s.skipped ? 'tertiary' : 'secondary'}
+                        fullWidth={false}
                         testID={`skip-${s.stopId}`}
-                        accessibilityLabel={`${en.vendor.notGoingToday}, ${s.societyName}`}
-                        value={s.skipped}
-                        disabled={!!s.arrivedAt}
-                        trackColor={{ true: t.colors.error, false: t.colors.switchTrackOff }}
-                        thumbColor={t.colors.surface}
-                        onValueChange={async (v) => {
-                          if (v) setConfirm(s);
+                        accessibilityLabel={`${s.skipped ? en.vendor.skippedUndo : en.vendor.skipTodayShort}, ${s.societyName}`}
+                        onPress={async () => {
+                          if (!s.skipped) setConfirm(s);
                           else {
                             await unskipStop(s.stopId);
                             await invalidate(vendorKeys.stops);
                           }
                         }}
                       />
-                    </View>
+                    )}
                   </View>
                 );
               })
@@ -89,7 +87,8 @@ export default function VendorStops() {
               </View>
             ))
           )}
-          <Button label={en.vendor.askChange} variant="secondary" onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} />
+          <Button label={en.vendor.askChange} variant="tertiary" onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} testID="ask-change" />
+          <View style={{ height: t.heights.fab + t.spacing.xl }} />
         </>
       )}
       {toast ? (

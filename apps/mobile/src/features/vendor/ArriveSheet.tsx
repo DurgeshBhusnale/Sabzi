@@ -116,7 +116,7 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
           <Icon icon={MapPin} size={20} color="textSecondary" />
           <View style={{ flex: 1 }}>
             <Text variant="label">{`${s.societyName} · ${s.gateName}`}</Text>
-            <Text variant="caption" weight="400" color="textSecondary">{formatTimeWindow(s.windowStart, s.windowEnd)}</Text>
+            <Text variant="caption" weight="400" color="textSecondary">{`${formatTimeWindow(s.windowStart, s.windowEnd)} · ${en.vendor.willBeTold(s.followers)}`}</Text>
           </View>
           <Icon icon={ChevronRight} size={16} color="textSecondary" />
         </>
