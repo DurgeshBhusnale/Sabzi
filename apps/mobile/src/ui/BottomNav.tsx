@@ -36,7 +36,7 @@ export function BottomNav({ items, selected, onSelect }: { items: NavItem[]; sel
                 </View>
               ) : null}
             </View>
-            <Text variant="caption" weight={on ? '600' : '500'} color={on ? 'primary' : 'textMuted'} style={{ fontSize: 11 }}>{it.label}</Text>
+            <Text variant="caption" weight={on ? '600' : '500'} color={on ? 'primary' : 'textMuted'} style={{ fontSize: t.type.tiny.fontSize, lineHeight: t.type.tiny.lineHeight }}>{it.label}</Text>
           </Pressable>
         );
       })}

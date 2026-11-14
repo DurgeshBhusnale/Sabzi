@@ -63,7 +63,7 @@ export function Button({
       case 'light':
         return { bg: pressed ? c.surface2 : c.cream, border: pressed ? c.surface2 : c.cream };
       case 'outlineOnDark':
-        return { bg: pressed ? c.forestRaised : 'transparent', border: 'rgba(255,255,255,0.4)' };
+        return { bg: pressed ? c.forestRaised : 'transparent', border: c.onForestOutline };
       default:
         return { bg: pressed ? c.primaryPressed : c.primary, border: pressed ? c.primaryPressed : c.primary };
     }

@@ -79,7 +79,7 @@ export default function AtTheStop() {
         </View>
       }
       hero={
-        <View style={{ gap: 14 }} testID="live-mode">
+        <View style={{ gap: t.spacing.sm }} testID="live-mode">
           <Eyebrow live onDark>{en.vendor.live}</Eyebrow>
           <Text variant="h1" color="onForest">{`${en.vendor.youreAt(live.societyName, live.gateName)} ${en.vendor.sinceTime(formatIstTime(live.arrivedAt!))}`}</Text>
           <Text variant="bodySmall" color="onForestMuted">{en.vendor.openedAlert(opens.data ?? 0)}</Text>

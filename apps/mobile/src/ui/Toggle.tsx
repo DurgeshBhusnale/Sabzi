@@ -26,7 +26,7 @@ export function Toggle({ label, description, value, onChange, disabled = false, 
         disabled={disabled}
         onValueChange={onChange}
         importantForAccessibility="no"
-        trackColor={{ true: t.colors.primary, false: t.scheme === 'dark' ? t.colors.border : '#CFCDBF' }}
+        trackColor={{ true: t.colors.primary, false: t.colors.switchTrackOff }}
         thumbColor={t.colors.surface}
       />
     </Pressable>

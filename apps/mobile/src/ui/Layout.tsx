@@ -72,18 +72,19 @@ export function Eyebrow({ children, live = false, onDark = false, testID }: { ch
 }
 
 /** Italic Newsreader section title with an optional caption or link on the right. */
+/** UX-52: section header in `sectionTitle` (bold sans). `right` is meta text, or a link when `onRightPress` is set. */
 export function SectionHeader({ title, right, onRightPress, testID }: { title: string; right?: string; onRightPress?: () => void; testID?: string }) {
   const t = useTheme();
   return (
-    <View testID={testID} style={[styles.row, { justifyContent: 'space-between', alignItems: 'baseline', gap: t.spacing.sm }]}>
-      <Text variant="h2" accessibilityRole="header" style={styles.flex}>{title}</Text>
+    <View testID={testID} style={[styles.row, { justifyContent: 'space-between', alignItems: 'center', gap: t.spacing.sm }]}>
+      <Text variant="sectionTitle" accessibilityRole="header" style={styles.flex}>{title}</Text>
       {right ? (
         onRightPress ? (
-          <Pressable accessibilityRole="button" onPress={onRightPress} hitSlop={12}>
-            <Text variant="caption" color="accent">{right}</Text>
+          <Pressable accessibilityRole="button" onPress={onRightPress} hitSlop={12} style={{ minHeight: t.layout.minTouch, justifyContent: 'center' }}>
+            <Text variant="label" color="accent">{right}</Text>
           </Pressable>
         ) : (
-          <Text variant="caption" color="textSecondary">{right}</Text>
+          <Text variant="caption" color="textMuted">{right}</Text>
         )
       ) : null}
     </View>
@@ -182,7 +183,7 @@ export function IconCircleButton({
         height: size,
         borderRadius: size / 2,
         borderWidth: 1,
-        borderColor: onDark ? 'rgba(255,255,255,0.3)' : t.colors.border,
+        borderColor: onDark ? t.colors.onForestOutline : t.colors.border,
         backgroundColor: onDark ? 'transparent' : t.colors.surface,
         alignItems: 'center',
         justifyContent: 'center',

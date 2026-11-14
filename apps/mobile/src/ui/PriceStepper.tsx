@@ -36,7 +36,7 @@ export function PriceStepper({
   return (
     <View style={{ gap: t.spacing.md }} testID="price-stepper">
       <Pressable onPress={onEditNumber} accessibilityRole="button" accessibilityLabel={`Price ₹${price} per ${UNIT_LABELS[unit]}. Tap to type`} style={styles.center}>
-        <Text variant="display" color={invalid ? 'error' : 'textPrimary'} style={{ fontSize: 56, lineHeight: 62 }} testID="price-value">
+        <Text variant="priceHero" color={invalid ? 'error' : 'textPrimary'} testID="price-value">
           {`₹${price}`}
         </Text>
         <View style={[styles.row, { gap: t.spacing.xs }]}>

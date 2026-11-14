@@ -131,7 +131,7 @@ export function MenuEditor({
           <View style={{ gap: t.spacing.md }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
               <ItemArt name={cur.name} size={48} />
-              <Text variant="h1" style={{ fontSize: 24, lineHeight: 28 }}>{cur.name}</Text>
+              <Text variant="cardTitle">{cur.name}</Text>
             </View>
             {typing ? (
               <TextInput kind="price" label={en.vendor.perUnit(UNIT_LABELS[unit])} value={price ? String(price) : ''} onChangeText={(v) => setPriceState(Number(v.replace(/\D/g, '')) || 0)} autoFocus testID="price-typing" />

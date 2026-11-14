@@ -36,7 +36,7 @@ export function ProfileScreen({ onBack }: { onBack?: () => void }) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.md, paddingTop: t.spacing.xs }}>
         <Avatar name={account.name ?? '?'} size={72} />
         <View style={{ flex: 1, gap: 6 }}>
-          <Text variant="h1" style={{ fontSize: 26, lineHeight: 30 }}>{account.name}</Text>
+          <Text variant="h1">{account.name}</Text>
           {account.email ? <Text variant="caption" weight="400" color="textSecondary">{account.email}</Text> : null}
           <StatusPill status="verified" label={account.role === 'vendor' ? en.profile.vendorBadge : en.profile.buyerBadge} />
         </View>

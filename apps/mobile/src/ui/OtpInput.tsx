@@ -53,7 +53,7 @@ export function OtpInput({
                 },
               ]}
             >
-              <Text variant="h1" style={{ fontSize: 24 }} color={state === 'error' ? 'error' : 'textPrimary'}>
+              <Text variant="cardTitle" color={state === 'error' ? 'error' : 'textPrimary'}>
                 {digits[i] ?? ''}
               </Text>
             </View>

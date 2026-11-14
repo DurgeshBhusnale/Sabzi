@@ -31,3 +31,5 @@ export * from './TopAppBar';
 export * from './VendorCard';
 export * from './Art';
 export * from './Layout';
+export * from './Section';
+export * from './ToggleRow';

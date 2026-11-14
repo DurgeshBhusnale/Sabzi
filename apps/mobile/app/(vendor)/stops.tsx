@@ -63,7 +63,7 @@ export default function VendorStops() {
                         accessibilityLabel={`${en.vendor.notGoingToday}, ${s.societyName}`}
                         value={s.skipped}
                         disabled={!!s.arrivedAt}
-                        trackColor={{ true: t.colors.error, false: t.scheme === 'dark' ? t.colors.border : '#CFCDBF' }}
+                        trackColor={{ true: t.colors.error, false: t.colors.switchTrackOff }}
                         thumbColor={t.colors.surface}
                         onValueChange={async (v) => {
                           if (v) setConfirm(s);

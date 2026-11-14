@@ -23,7 +23,8 @@ export function Chip({
   const t = useTheme();
   const c = t.colors;
   const unit = kind === 'unit';
-  const height = unit ? t.heights.unitChip : t.heights.chip;
+  // UX-44: 40 dp buyer / 48 dp vendor, always a 48 dp hit area
+  const height = unit ? t.heights.unitChip : t.mode === 'vendor' ? t.heights.vendorChip : t.heights.chip;
   // v4: selected chips are solid forest with white text; idle chips are soft cream-grey
   const bg = selected ? c.primary : unit ? c.surface2 : c.surface;
   const fg = disabled ? 'textMuted' : selected ? 'onPrimary' : 'textPrimary';
@@ -35,12 +36,12 @@ export function Chip({
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      hitSlop={{ top: (t.layout.minTouch - height) / 2, bottom: (t.layout.minTouch - height) / 2 }}
+      hitSlop={{ top: Math.max(0, (t.layout.minTouch - height) / 2), bottom: Math.max(0, (t.layout.minTouch - height) / 2) }}
       style={[
         styles.chip,
         {
           minHeight: height,
-          paddingHorizontal: unit ? t.spacing.md : 14,
+          paddingHorizontal: unit ? t.spacing.md : t.spacing.sm,
           borderRadius: unit ? t.radius.input : t.radius.pill,
           backgroundColor: bg,
           borderColor: selected ? c.primary : unit ? c.surface2 : c.border,

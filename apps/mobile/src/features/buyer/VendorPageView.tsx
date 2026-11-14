@@ -215,7 +215,7 @@ export function VendorPageView({
             <>
               <View style={[styles.row, { gap: t.spacing.lg, alignItems: 'flex-start' }]}>
                 <View style={{ alignItems: 'flex-start', gap: t.spacing.xxs }}>
-                  <Text variant="display" style={{ fontSize: 44, lineHeight: 48 }}>{avg.toFixed(1)}</Text>
+                  <Text variant="numberLarge">{avg.toFixed(1)}</Text>
                   <RatingDisplay value={avg} size={14} hideNumber />
                   <Text variant="caption" weight="400" color="textSecondary">{en.buyer.ratingsCount(v.rating_count)}</Text>
                 </View>

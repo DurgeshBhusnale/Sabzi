@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import type { ReactNode } from 'react';
 import { useTheme } from '../theme/ThemeProvider';
-import { ForestHero, SectionHeader, SheetBody } from './Layout';
+import { ForestHero, SheetBody } from './Layout';
 
 /**
  * Screen frame: background, safe area, optional scroll + pull to refresh, 24 dp side gutter.
@@ -78,22 +78,3 @@ export function Screen({
   );
 }
 
-/** Titled group: v4 italic Newsreader heading with an optional right caption/node. */
-export function Section({ title, children, right }: { title?: string; children: ReactNode; right?: ReactNode }) {
-  const t = useTheme();
-  return (
-    <View style={{ gap: t.spacing.sm }}>
-      {title ? (
-        typeof right === 'string' || right == null ? (
-          <SectionHeader title={title} right={right as string | undefined} />
-        ) : (
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <SectionHeader title={title} />
-            {right}
-          </View>
-        )
-      ) : null}
-      {children}
-    </View>
-  );
-}

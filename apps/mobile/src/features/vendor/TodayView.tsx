@@ -26,7 +26,7 @@ const DAY_FMT = (d: Date) => {
 function HeroStat({ value, label }: { value: string; label: string }) {
   return (
     <View accessible accessibilityLabel={`${value} ${label}`} style={{ gap: 2 }}>
-      <Text variant="body" weight="500" color="onForest" style={{ fontSize: 18 }}>{value}</Text>
+      <Text variant="label" color="onForest">{value}</Text>
       <Text variant="caption" weight="400" color="onForest" style={{ opacity: 0.7 }}>{label}</Text>
     </View>
   );

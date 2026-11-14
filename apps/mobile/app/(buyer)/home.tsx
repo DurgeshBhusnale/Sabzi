@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/theme/ThemeProvider';
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useState } from 'react';
@@ -15,6 +16,7 @@ import { removeSociety, setPrimarySociety } from '../../src/features/buyer/api';
 
 /** B-03 + B-04 */
 export default function BuyerHome() {
+  const t = useTheme();
   const { societyId, setSocietyId } = useBuyer();
   const mine = useMySocieties();
   const home = useBuyerHome(societyId);
@@ -32,7 +34,7 @@ export default function BuyerHome() {
       refreshing={home.isRefetching}
       onRefresh={() => home.refetch()}
     >
-      <View style={{ paddingHorizontal: 16, gap: 8 }}>
+      <View style={{ paddingHorizontal: t.spacing.screen, gap: t.spacing.xs }}>
         <NetworkBanner dataUpdatedAt={home.dataUpdatedAt || undefined} />
         <NotificationsBlockedBanner role="buyer" />
       </View>

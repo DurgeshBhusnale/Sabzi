@@ -25,7 +25,7 @@ export default function Welcome() {
   const last = i === en.welcome.slides.length - 1;
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
-      <View style={{ height: 440, backgroundColor: t.scheme === 'dark' ? t.colors.surface2 : '#F3F2E6', borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
+      <View style={{ height: 440, backgroundColor: t.colors.artPanel, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: 'hidden' }}>
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
           <View style={{ height: 48, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: t.spacing.screen }}>
             {!last ? (
@@ -38,7 +38,7 @@ export default function Welcome() {
         </SafeAreaView>
       </View>
       <View style={{ flex: 1, paddingHorizontal: t.spacing.screen, paddingTop: 28, paddingBottom: t.spacing.xl, gap: t.spacing.lg }}>
-        <Text variant="h1" accessibilityRole="header" style={{ fontSize: 30, lineHeight: 34 }}>{slide.title}</Text>
+        <Text variant="display" accessibilityRole="header">{slide.title}</Text>
         {slide.body ? <Text variant="bodySmall" color="textSecondary">{slide.body}</Text> : null}
         <View style={{ flexDirection: 'row', gap: 6 }} accessibilityLabel={`Slide ${i + 1} of 3`}>
           {en.welcome.slides.map((_, k) => (

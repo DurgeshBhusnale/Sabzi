@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/theme/ThemeProvider';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -15,6 +16,7 @@ import { eventOpenCount } from '../../src/features/vendor/api';
 
 /** V-04 */
 export default function VendorToday() {
+  const t = useTheme();
   const { account } = useSession();
   const vendor = useMyVendor();
   const menu = useTodayMenu();
@@ -34,7 +36,7 @@ export default function VendorToday() {
   }, [published]);
   return (
     <Screen tone="forest" refreshing={refreshing} onRefresh={() => invalidate(vendorKeys.today, vendorKeys.stops, vendorKeys.stats, vendorKeys.me)}>
-      <View style={{ paddingHorizontal: 16, gap: 8 }}>
+      <View style={{ paddingHorizontal: t.spacing.screen, gap: t.spacing.xs }}>
         <NetworkBanner dataUpdatedAt={menu.dataUpdatedAt || undefined} />
         <PendingActionsChip />
         <NotificationsBlockedBanner role="vendor" />
