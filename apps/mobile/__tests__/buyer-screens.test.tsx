@@ -18,13 +18,14 @@ const hv = (o: Partial<HomeVendor>): HomeVendor => ({
 const imran = hv({ vendor_id: 'i', display_name: 'Imran Vegetables', window_start: '18:00:00', window_end: '18:45:00', avg_rating: 3.9, rating_count: 41 });
 const morning = new Date('2026-11-05T02:40:00Z');
 const evening = new Date('2026-11-05T12:40:00Z');
-const homeActions = { openVendor: jest.fn(), openDeals: jest.fn(), requestTomorrow: jest.fn(), tellUs: jest.fn(), switchSociety: jest.fn() };
+const homeActions = { openVendor: jest.fn(), follow: jest.fn(), openDeals: jest.fn(), requestTomorrow: jest.fn(), tellUs: jest.fn(), switchSociety: jest.fn() };
 
 describe('B-03 Home states', () => {
   it('morning with one vendor at the gate', async () => {
     await renderUi(<HomeView vendors={[hv({ status: 'at_gate', status_at: '2026-11-05T02:35:00Z' }), imran]} loading={false} now={morning} actions={homeActions} />);
     expect(screen.getByText('At the gate now')).toBeTruthy();
-    expect(screen.getByText('At Gate 1 now · 4.4 ★')).toBeTruthy();
+    expect(screen.getByText('At Gate 1 now')).toBeTruthy();
+    expect(screen.getByText('4.4 ★ (128) · Gate 1')).toBeTruthy();
     expect(screen.getByText('View menu · 3 items')).toBeTruthy();
     expect(screen.getByText('Coming today')).toBeTruthy();
   });
@@ -52,6 +53,40 @@ describe('B-03 Home states', () => {
     expect(screen.queryByText('Imran Vegetables')).toBeNull();
     await fireEvent.press(screen.getByTestId('not-coming-toggle'));
     expect(screen.getByText('Imran Vegetables')).toBeTruthy();
+  });
+  it('UX-03: every vendor at the gate gets an equal live card', async () => {
+    await renderUi(<HomeView vendors={[hv({ status: 'at_gate' }), { ...imran, status: 'at_gate' }]} loading={false} now={morning} actions={homeActions} />);
+    expect(screen.getByTestId('vendor-card-large-r')).toBeTruthy();
+    expect(screen.getByTestId('vendor-card-large-i')).toBeTruthy();
+    expect(screen.queryByText('Also at the gate')).toBeNull();
+  });
+  it('UX-04: in the evening, deals come before who is at the gate', async () => {
+    await renderUi(<HomeView vendors={[hv({ status: 'left', menu: menu([item('Tomato', { deal_price: 30 })]) }), { ...imran, status: 'at_gate' }]} loading={false} now={evening} actions={homeActions} />);
+    const order = screen.toJSON() ? JSON.stringify(screen.toJSON()) : '';
+    expect(order.indexOf('deals-strip')).toBeLessThan(order.indexOf('vendor-card-large-i'));
+  });
+  it('UX-05/06: rows show rating with count; Follow is a real button that opens the follow flow', async () => {
+    homeActions.follow.mockClear();
+    await renderUi(<HomeView vendors={[{ ...imran, is_following: false }]} loading={false} now={morning} actions={homeActions} />);
+    expect(screen.getByText('3.9 ★ (41) · Gate 1')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('follow-i'));
+    expect(homeActions.follow).toHaveBeenCalledWith('i');
+    expect(homeActions.openVendor).not.toHaveBeenCalledWith('i');
+  });
+  it('UX-07: Request for tomorrow (all left) opens the vendor picker, not the Following tab', async () => {
+    homeActions.requestTomorrow.mockClear();
+    await renderUi(<HomeView vendors={[hv({ status: 'left' })]} loading={false} now={evening} actions={homeActions} />);
+    await fireEvent.press(screen.getByTestId('request-tomorrow-home'));
+    expect(homeActions.requestTomorrow).toHaveBeenCalled();
+  });
+  it('UX-08: "Updated" shows when the data was fetched, not the current time', async () => {
+    await renderUi(<HomeView vendors={[hv({})]} loading={false} now={morning} updatedAt={Date.parse('2026-11-05T01:12:00Z')} actions={homeActions} />);
+    expect(screen.getByText('Updated 6:42 AM')).toBeTruthy();
+  });
+  it('UX-09: empty society uses the standard empty state with both actions', async () => {
+    await renderUi(<HomeView vendors={[]} loading={false} now={morning} actions={homeActions} />);
+    expect(screen.getByText("Tell us your vendor's name")).toBeTruthy();
+    expect(screen.getByText('Pick another society')).toBeTruthy();
   });
   it('loading skeleton', async () => {
     await renderUi(<HomeView vendors={undefined} loading now={morning} actions={homeActions} />);
@@ -190,5 +225,14 @@ describe('B-01 society picker', () => {
   it('loading nearby', async () => {
     await renderUi(<SocietyPicker societies={[]} loading position={null} locating locationOff={false} onPick={jest.fn()} onNotListed={jest.fn()} />);
     expect(screen.getByText('Finding societies near you…')).toBeTruthy();
+  });
+});
+
+describe('UX-07 vendor picker', () => {
+  it('one row per vendor, followed first', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { pickableVendors } = require('../src/features/engagement/VendorPickerSheet') as typeof import('../src/features/engagement/VendorPickerSheet');
+    const list = pickableVendors([{ ...imran, is_following: false }, hv({}), hv({ stop_id: 's2', gate_name: 'Gate 2' })]);
+    expect(list.map((v) => v.id)).toEqual(['r', 'i']);
   });
 });

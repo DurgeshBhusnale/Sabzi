@@ -19,7 +19,7 @@ const COACH_KEY = 'sabzi.coach.follow';
 
 /** B-05 vendor page + B-07 follow sheet. */
 export default function VendorPageScreen() {
-  const { id, society: societyParam } = useLocalSearchParams<{ id: string; society?: string }>();
+  const { id, society: societyParam, follow: followParam } = useLocalSearchParams<{ id: string; society?: string; follow?: string }>();
   const { primary } = usePrimarySociety();
   const mine = useMySocieties();
   const societyId = societyParam ?? primary?.id ?? null;
@@ -44,6 +44,9 @@ export default function VendorPageScreen() {
   const served = data && data.available ? [...new Set(data.stops.map((s) => s.society_id))] : [];
   const following = data && data.available ? data.following : [];
   const alternatives = (home.data ?? []).filter((v) => v.vendor_id !== id && v.status !== 'not_coming' && v.status !== 'left');
+  // UX-06: "Follow" on a Home row lands here with the follow sheet already open.
+  const [autoDismissed, setAutoDismissed] = useState(false);
+  const autoFollow = followParam === '1' && !!data?.available && following.length === 0 && !autoDismissed;
 
   return (
     <Screen
@@ -111,7 +114,7 @@ export default function VendorPageScreen() {
       <View />
       {data?.available ? (
         <FollowSheet
-          visible={sheet}
+          visible={sheet || autoFollow}
           vendorName={name}
           societies={mine.data ?? []}
           servedSocietyIds={served}
@@ -120,7 +123,10 @@ export default function VendorPageScreen() {
           following={following.length > 0}
           notificationsBlocked={blocked}
           onTurnOn={openAppSettings}
-          onClose={() => setSheet(false)}
+          onClose={() => {
+            setSheet(false);
+            setAutoDismissed(true);
+          }}
           onFollow={async (soc, prefs) => {
             await follow(id, soc, prefs);
             track('vendor_followed');
