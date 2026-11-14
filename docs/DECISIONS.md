@@ -2,6 +2,11 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-15 — UX audit fixes (docs/audit/UX_AUDIT.md)
+- **Owner-decision items use the audit's safe defaults (§6) until the owner decides:** the Home society switcher stays (My societies added to Profile); the ratings bars stay on the vendor page (2 reviews); 4 buyer tabs; forest headers on list tabs follow the v4 design; the vendor stats strip becomes one line under the next action; the "I've arrived" FAB stays visible but secondary until the menu is live.
+- **UX-47 not done (role card auto-advance):** the role is permanent (`set_role` locks it), so one tap must not commit it. The explicit Continue stays.
+- **`textMuted` is #666D65, not the audit's #6A7169:** the proposed value is 4.28:1 on the new `sectionBg`, below WCAG AA.
+
 ## 2026-11-15 — Audit P2 fixes
 - **Re-verification (SEC-10):** a verified vendor who changes the shop name or PMC number/document goes back to `pending` (reason `details_changed`) until an admin approves again. Photo, vehicle and toggles stay live: vendors refresh their photo often, and a name or ID is what buyers trust. The details screen warns before saving.
 - **`email_login_available` no longer callable logged out (SEC-08):** it let anyone test whether an email has an account. The only caller was the old "existing emails only" S-05 rule (`allowSignUp: false`), which is not used. `otp_status` stays public because phone sign-in needs it before login.

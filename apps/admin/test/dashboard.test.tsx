@@ -34,3 +34,18 @@ describe('charts', () => {
     expect(screen.getByText('80')).toBeTruthy();
   });
 });
+
+describe('UX-55: dashboard order', () => {
+  it('"Needs attention" comes right after the six PRD metrics, before the charts', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const src = readFileSync(join(__dirname, '../app/(panel)/dashboard/page.tsx'), 'utf8');
+    const metrics = src.indexOf('Vendors with 10+ ratings');
+    const attention = src.indexOf('needs-attention');
+    const chart = src.indexOf('<LineChart');
+    expect(metrics).toBeGreaterThan(0);
+    expect(attention).toBeGreaterThan(metrics);
+    expect(attention).toBeLessThan(chart);
+    expect(src).not.toContain('Add society');
+  });
+});

@@ -67,6 +67,19 @@ export default function Dashboard() {
             <Metric label="Week-4 retention" value={pct(s!.week4_retention_pct)} target={`${TARGETS.week4_retention_pct}%`} hint={s!.week4_retention_pct == null ? 'After week 4 of the pilot' : `${s!.week4_cohort} buyers in week 1`} />
             <Metric label="Vendors with 10+ ratings" value={pct(s!.vendors_10_ratings_pct)} target={`${TARGETS.vendors_10_ratings_pct}% of active`} hint={`${s!.vendors_10_ratings} vendors`} />
           </div>
+          <section data-testid="needs-attention">
+            <h2 className="mb-sm font-heading text-xl italic">Societies needing attention</h2>
+            <Table head={['Society', 'Why', 'Followers', 'Vendors']} empty={needsAttention(societies.data ?? []).length === 0 ? <Empty title="All societies on track" /> : null}>
+              {needsAttention(societies.data ?? []).map((x) => (
+                <tr key={x.society_id}>
+                  <td className="px-[20px] py-sm font-medium">{x.name}</td>
+                  <td className="px-[20px] py-sm">{x.why}</td>
+                  <td className="px-[20px] py-sm tabular-nums">{x.followers}</td>
+                  <td className="px-[20px] py-sm tabular-nums">{x.vendors}</td>
+                </tr>
+              ))}
+            </Table>
+        </section>
           <div className="grid grid-cols-2 gap-lg">
             <Card>
               <h2 className="mb-sm font-heading text-xl italic">Arrival alerts and opens (within 15 min)</h2>
@@ -77,7 +90,7 @@ export default function Dashboard() {
               <BarChart label="Followers by society" data={(societies.data ?? []).map((x) => ({ label: x.name, value: x.followers, note: `${x.adoption_pct}% of ${x.flats} flats` }))} />
             </Card>
           </div>
-          <div className="grid grid-cols-2 gap-lg">
+          <div className="grid grid-cols-1 gap-lg">
             <div>
               <h2 className="mb-sm font-heading text-xl italic">Top vendors</h2>
               <Table head={['Vendor', 'Followers', 'Menu days', 'Arrivals', 'Rating']}>
@@ -88,19 +101,6 @@ export default function Dashboard() {
                     <td className="px-[20px] py-sm tabular-nums">{v.menu_days}</td>
                     <td className="px-[20px] py-sm tabular-nums">{v.arrivals}</td>
                     <td className="px-[20px] py-sm tabular-nums">{v.rating_count ? `${v.avg_rating} (${v.rating_count})` : 'New'}</td>
-                  </tr>
-                ))}
-              </Table>
-            </div>
-            <div>
-              <h2 className="mb-sm font-heading text-xl italic">Societies needing attention</h2>
-              <Table head={['Society', 'Why', 'Followers', 'Vendors']} empty={needsAttention(societies.data ?? []).length === 0 ? <Empty title="All societies on track" /> : null}>
-                {needsAttention(societies.data ?? []).map((x) => (
-                  <tr key={x.society_id}>
-                    <td className="px-[20px] py-sm font-medium">{x.name}</td>
-                    <td className="px-[20px] py-sm">{x.why}</td>
-                    <td className="px-[20px] py-sm tabular-nums">{x.followers}</td>
-                    <td className="px-[20px] py-sm tabular-nums">{x.vendors}</td>
                   </tr>
                 ))}
               </Table>

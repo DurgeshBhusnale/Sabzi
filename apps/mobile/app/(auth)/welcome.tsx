@@ -48,7 +48,7 @@ export default function Welcome() {
         <View style={{ flex: 1 }} />
         <View style={{ gap: t.spacing.xs }}>
           <Button label={last ? en.welcome.getStarted : en.welcome.next} onPress={() => (last ? toSignIn() : setI(i + 1))} testID="welcome-next" />
-          <Button label={en.welcome.logIn} variant="tertiary" onPress={toSignIn} />
+          <Button label={en.welcome.haveAccount} variant="tertiary" onPress={toSignIn} testID="welcome-login" />
         </View>
       </View>
     </View>
