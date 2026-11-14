@@ -28,10 +28,11 @@ describe('M2 auth against local Supabase', () => {
     expect(error).not.toBeNull();
   });
 
-  it('email login is offered only for verified emails', async () => {
+  it('SEC-08: logged-out callers cannot probe whether an email has an account', async () => {
     const c = anonClient();
-    const { data } = await c.rpc('email_login_available', { p_email: 'nobody@example.com' });
-    expect(data).toBe(false);
+    const { data, error } = await c.rpc('email_login_available', { p_email: 'nobody@example.com' });
+    expect(data).toBeNull();
+    expect(error).not.toBeNull();
   });
 
   it('existing seeded vendor logs in and sees his own vendor row', async () => {
