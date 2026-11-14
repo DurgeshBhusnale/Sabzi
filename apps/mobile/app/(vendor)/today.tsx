@@ -54,7 +54,9 @@ export default function VendorToday() {
           onAddPhoto: () => router.push('/vendor/photo'),
           onOpenLive: () => router.push('/vendor/live'),
           onSendDeal: () => router.push('/vendor/deal'),
-          onNotifications: () => router.push('/(vendor)/requests'),
+          onSoldOut: () => router.push('/vendor/soldout'),
+          onRequests: () => router.push('/(vendor)/requests'),
+          onAllStops: () => router.push('/(vendor)/stops'),
         }}
       />
       {toast ? (

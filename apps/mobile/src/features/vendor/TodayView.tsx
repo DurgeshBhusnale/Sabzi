@@ -1,8 +1,8 @@
 import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
-import { Bell, Camera, ChevronRight, CircleCheck } from 'lucide-react-native';
-import { greetingFor, formatIstTime, IST_OFFSET_MINUTES, SUPPORT_PHONE } from '@sabzi/shared';
+import { Camera, CircleCheck, ClipboardList, PackageX, Tag } from 'lucide-react-native';
+import { greetingFor, formatIstTime, istHour, IST_OFFSET_MINUTES, SUPPORT_PHONE } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Banner, Button, ForestHero, Icon, SectionHeader, SheetBody, Skeleton, SkeletonBlock, StopRow, Text, Eyebrow } from '../../ui';
+import { Banner, Button, Card, Eyebrow, ForestHero, Icon, Section, Sections, SheetBody, Skeleton, SkeletonBlock, StopRow, Text, type LucideIcon } from '../../ui';
 import { allStopsDone, currentStop, stopPhase, type TodayStop } from './arrival';
 import type { DayMenu, MyVendor, VendorStats } from './api';
 import { publicUrl } from '../../lib/storage';
@@ -13,7 +13,11 @@ export type TodayActions = {
   onAddPhoto: () => void;
   onOpenLive: () => void;
   onSendDeal: () => void;
-  onNotifications?: () => void;
+  /** UX-33 quick actions */
+  onSoldOut?: () => void;
+  onRequests?: () => void;
+  /** UX-32: the full list lives on the Stops tab */
+  onAllStops?: () => void;
 };
 
 const DAY_FMT = (d: Date) => {
@@ -23,30 +27,77 @@ const DAY_FMT = (d: Date) => {
   return `${days[ist.getUTCDay()]}, ${ist.getUTCDate()} ${months[ist.getUTCMonth()]}`;
 };
 
-function HeroStat({ value, label }: { value: string; label: string }) {
+/** Evening deal unlocks after 4 PM IST, or once every stop is done (UX-33). */
+const DEAL_FROM_HOUR_IST = 16;
+
+export type NextAction = 'set_menu' | 'live' | 'done' | 'next_stop';
+
+/** UX-31: the one next step for the vendor, by state. Pure for tests. */
+export function nextAction(o: { published: boolean; live: boolean; done: boolean }): NextAction {
+  if (o.live) return 'live';
+  if (!o.published) return 'set_menu';
+  if (o.done) return 'done';
+  return 'next_stop';
+}
+
+/** Checklist row inside the day card: icon, label, optional link on the right. */
+function CheckRow({ icon, done, label, sub, link, onPress, testID, last }: { icon: LucideIcon; done: boolean; label: string; sub?: string; link?: string; onPress?: () => void; testID: string; last?: boolean }) {
+  const t = useTheme();
   return (
-    <View accessible accessibilityLabel={`${value} ${label}`} style={{ gap: 2 }}>
-      <Text variant="label" color="onForest">{value}</Text>
-      <Text variant="caption" weight="400" color="onForest" style={{ opacity: 0.7 }}>{label}</Text>
-    </View>
+    <Pressable
+      testID={testID}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={[label, sub, link].filter(Boolean).join('. ')}
+      onPress={onPress}
+      disabled={!onPress}
+      style={[styles.row, { minHeight: t.layout.vendorPrimaryHeight, gap: t.spacing.sm, borderBottomWidth: last ? 0 : 1, borderBottomColor: t.colors.divider }]}
+    >
+      <Icon icon={done ? CircleCheck : icon} color={done ? 'accent' : 'textSecondary'} />
+      <View style={styles.flex}>
+        <Text variant="label">{label}</Text>
+        {sub ? <Text variant="caption" weight="400" color="textSecondary">{sub}</Text> : null}
+      </View>
+      {link ? <Text variant="label" color="accent">{link}</Text> : null}
+    </Pressable>
   );
 }
 
-/** v4 white step card: icon, title + caption, link on the right. */
-function StepCard({ children, testID, onPress, label }: { children: React.ReactNode; testID: string; onPress?: () => void; label?: string }) {
+/** UX-33: 56 dp tile in the quick actions row. */
+function QuickTile({ icon, label, onPress, disabled, testID }: { icon: LucideIcon; label: string; onPress?: () => void; disabled?: boolean; testID: string }) {
   const t = useTheme();
-  const style = [styles.row, { backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.card, padding: t.spacing.md, gap: t.spacing.sm }];
-  if (onPress) {
-    return (
-      <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [style, pressed ? { opacity: 0.8 } : null]}>
-        {children}
-      </Pressable>
-    );
-  }
-  return <View testID={testID} style={style}>{children}</View>;
+  const c = t.colors;
+  return (
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled || !onPress }}
+      disabled={disabled || !onPress}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        minHeight: t.layout.vendorPrimaryHeight + t.spacing.xl,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: t.spacing.xxs,
+        padding: t.spacing.xs,
+        borderRadius: t.radius.card,
+        borderWidth: t.layout.cardBorderWidth,
+        borderColor: c.border,
+        backgroundColor: pressed ? c.surface2 : c.surface,
+        opacity: disabled ? 0.5 : 1,
+      })}
+    >
+      <Icon icon={icon} color={disabled ? 'textMuted' : 'primary'} />
+      <Text variant="caption" align="center" color={disabled ? 'textMuted' : 'textPrimary'}>{label}</Text>
+    </Pressable>
+  );
 }
 
-/** V-04 Today: forest header (greeting + stats), then step cards, live banner and the stops timeline. Pure view for tests. */
+/**
+ * V-04 Today (UX audit §4): a short header, one Next action card, the day checklist, quick actions, the next stop.
+ * Stats stay as a one-line strip under the next action (safe default for UX-30, §6 #2). Pure view for tests.
+ */
 export function TodayView({
   vendor,
   name,
@@ -70,14 +121,11 @@ export function TodayView({
 }) {
   const t = useTheme();
   const firstName = name.split(' ')[0] ?? name;
-  const hero = (
-    <View style={[styles.row, { minHeight: 44, justifyContent: 'space-between' }]}>
-      <Text variant="label" color="onForest">{DAY_FMT(now)}</Text>
-      {actions.onNotifications ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={en.nav.notifications} onPress={actions.onNotifications} style={{ minWidth: 48, minHeight: 48, alignItems: 'flex-end', justifyContent: 'center' }}>
-          <Icon icon={Bell} color="onForest" />
-        </Pressable>
-      ) : null}
+  // UX-43: no bell; Requests has its own tab
+  const header = (
+    <View style={{ gap: t.spacing.xxs }}>
+      <Text variant="label" color="onForestMuted">{DAY_FMT(now)}</Text>
+      <Text variant="h1" color="onForest" accessibilityRole="header">{en.vendor.greeting(greetingFor(now), firstName)}</Text>
     </View>
   );
 
@@ -85,9 +133,8 @@ export function TodayView({
     return (
       <View testID="today-loading" style={{ flexGrow: 1 }}>
         <ForestHero>
-          {hero}
+          <Skeleton width="40%" height={14} />
           <Skeleton width="70%" height={30} />
-          <Skeleton width="80%" height={36} />
         </ForestHero>
         <SheetBody>
           <SkeletonBlock kind="list" count={1} />
@@ -96,103 +143,111 @@ export function TodayView({
       </View>
     );
   }
-  const live = currentStop(stops ?? [], now);
+  const all = stops ?? [];
+  const live = currentStop(all, now);
   const published = !!menu?.publishedAt && (menu?.lines.length ?? 0) > 0;
-  const done = allStopsDone(stops ?? [], now);
+  const done = allStopsDone(all, now);
   const verified = vendor?.status === 'verified';
   const photoUrl = publicUrl('stock-photos', menu?.stockPhotoPath);
-  const rating = stats?.rating_count ? Number(stats.avg_rating).toFixed(1) : '–';
+  const rating = stats?.rating_count ? `${Number(stats.avg_rating).toFixed(1)} ★` : null;
+  const doneCount = all.filter((s) => ['done', 'skipped'].includes(stopPhase(s, now))).length;
+  const next = all.find((s) => stopPhase(s, now) === 'upcoming') ?? null;
+  const action = nextAction({ published, live: !!live, done });
+  const dealOpen = done || istHour(now) >= DEAL_FROM_HOUR_IST;
+  const statsLine = [en.vendor.followersCount(stats?.followers ?? 0), en.vendor.opensToday(stats?.alert_opens_today ?? 0), rating].filter(Boolean).join(' · ');
 
   return (
     <View testID="today-view" style={{ flexGrow: 1 }}>
-      <ForestHero style={{ paddingBottom: t.spacing.lg }}>
-        {hero}
-        <Text variant="h1" color="onForest" accessibilityRole="header">{en.vendor.greeting(greetingFor(now), firstName)}</Text>
-        <View style={[styles.row, { gap: t.spacing.xl }]}>
-          <HeroStat value={String(stats?.followers ?? 0)} label={en.vendor.followers} />
-          <HeroStat value={String(stats?.alert_opens_today ?? 0)} label={en.vendor.alertOpensToday} />
-          <HeroStat value={rating} label={en.vendor.rating} />
-        </View>
-      </ForestHero>
+      <ForestHero style={{ paddingBottom: t.spacing.lg }}>{header}</ForestHero>
 
-      <SheetBody style={{ gap: t.spacing.sm }}>
-        {!verified ? <Banner kind="info" message={en.vendor.notVerifiedBanner} actionLabel={en.vendor.call} onAction={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} testID="not-verified" /> : null}
-        {live ? (
-          <Pressable onPress={actions.onOpenLive} accessibilityRole="button" testID="live-banner" style={{ backgroundColor: t.colors.accent, borderRadius: t.radius.card, padding: t.spacing.md, gap: 2 }}>
-            <Text variant="label" weight="600" color="onAccent">{en.vendor.liveAt(`${live.societyName}, ${live.gateName}`)}</Text>
-            <Text variant="caption" weight="400" color="onAccent" style={{ opacity: 0.85 }}>{en.vendor.since(formatIstTime(live.arrivedAt!), openCount)}</Text>
-          </Pressable>
-        ) : null}
+      <SheetBody>
+        <Sections>
+          {!verified ? <Banner kind="info" message={en.vendor.notVerifiedBanner} actionLabel={en.vendor.call} onAction={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} testID="not-verified" /> : null}
 
-        {done ? (
-          <View testID="done-today" style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.card, padding: t.spacing.lg, gap: t.spacing.sm }}>
-            <Text variant="h1" style={{ fontSize: t.type.h1.fontSize - 6, lineHeight: t.type.h1.lineHeight - 6 }}>{en.vendor.doneForToday}</Text>
-            <Text variant="bodySmall" color="textSecondary">{en.vendor.doneAsk}</Text>
-            <View style={[styles.row, { gap: t.spacing.xs }]}>
-              <View style={styles.flex}>
-                <Button label={en.vendor.sendADeal} onPress={actions.onSendDeal} />
-              </View>
-            </View>
+          {/* UX-31: one next-action card */}
+          <View style={{ gap: t.spacing.xs }}>
+            {action === 'live' && live ? (
+              <Pressable onPress={actions.onOpenLive} accessibilityRole="button" testID="live-banner" style={{ backgroundColor: t.colors.accent, borderRadius: t.radius.card, padding: t.spacing.md, gap: t.spacing.xxs, minHeight: t.layout.vendorPrimaryHeight }}>
+                <Eyebrow live onDark>{en.vendor.liveAtGate}</Eyebrow>
+                <Text variant="cardTitle" color="onAccent">{en.vendor.liveAt(`${live.societyName}, ${live.gateName}`)}</Text>
+                <Text variant="caption" weight="400" color="onAccent">{en.vendor.since(formatIstTime(live.arrivedAt!), openCount)}</Text>
+              </Pressable>
+            ) : action === 'set_menu' ? (
+              <Card testID="step-menu" style={{ gap: t.spacing.sm }}>
+                <Eyebrow>{en.vendor.nextEyebrow}</Eyebrow>
+                <Text variant="caption" weight="400" color="textSecondary">{en.vendor.followersWaiting(stats?.followers ?? 0)}</Text>
+                <Button size="xl" label={en.vendor.setMenu} onPress={actions.onSetMenu} testID="set-menu" />
+              </Card>
+            ) : action === 'done' ? (
+              <Card testID="done-today" style={{ gap: t.spacing.sm }}>
+                <Text variant="cardTitle">{en.vendor.doneForToday}</Text>
+                <Text variant="bodySmall" color="textSecondary">{en.vendor.doneAsk}</Text>
+                <Button size="xl" label={en.vendor.sendADeal} onPress={actions.onSendDeal} testID="done-send-deal" />
+              </Card>
+            ) : (
+              <Card testID="next-stop-card" style={{ gap: t.spacing.xxs }}>
+                <Eyebrow>{en.vendor.nextEyebrow}</Eyebrow>
+                <Text variant="cardTitle">{next ? en.vendor.nextStopLine(`${next.societyName}, ${next.gateName}`, formatIstTimeOfClock(next.windowStart)) : en.vendor.noMoreStops}</Text>
+                <Text variant="bodySmall" color="textSecondary">{en.vendor.tapArrived}</Text>
+              </Card>
+            )}
+            <Text variant="caption" color="textMuted" testID="stats-line">{statsLine}</Text>
           </View>
-        ) : null}
 
-        {published ? (
-          <StepCard testID="menu-live">
-            <Icon icon={CircleCheck} color="accent" filled={false} />
-            <View style={styles.flex}>
-              <Text variant="label" weight="600">{en.vendor.menuLive(menu!.lines.length)}</Text>
-              <Text variant="caption" weight="400" color="textSecondary">{en.vendor.updatedAt(formatIstTime(menu!.updatedAt))}</Text>
-            </View>
-            <Pressable accessibilityRole="button" onPress={actions.onSetMenu} hitSlop={12} style={{ minHeight: 48, justifyContent: 'center' }}>
-              <Text variant="label" color="accent">{en.common.edit}</Text>
-            </Pressable>
-          </StepCard>
-        ) : (
-          <View testID="step-menu" style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.card, padding: t.spacing.md, gap: t.spacing.sm }}>
-            <Eyebrow>{en.vendor.step1}</Eyebrow>
-            <Text variant="caption" weight="400" color="textSecondary">{en.vendor.followersWaiting(stats?.followers ?? 0)}</Text>
-            <Button size="xl" label={en.vendor.setMenu} onPress={actions.onSetMenu} testID="set-menu" />
-          </View>
-        )}
-
-        {photoUrl ? (
-          <StepCard testID="photo-added">
-            <Image source={{ uri: photoUrl }} style={{ width: 56, height: 56, borderRadius: t.radius.tile, backgroundColor: t.colors.surface2 }} />
-            <View style={styles.flex}>
-              <Text variant="label" weight="600">{en.vendor.photoAdded}</Text>
-              {menu?.stockPhotoAt ? <Text variant="caption" weight="400" color="textSecondary">{formatIstTime(menu.stockPhotoAt)}</Text> : null}
-            </View>
-            <Pressable accessibilityRole="button" onPress={actions.onAddPhoto} hitSlop={12} style={{ minHeight: 48, justifyContent: 'center' }}>
-              <Text variant="label" color="accent">{en.vendor.change}</Text>
-            </Pressable>
-          </StepCard>
-        ) : (
-          <StepCard testID="step-photo" onPress={actions.onAddPhoto} label={`${en.vendor.addTodaysPhoto}. ${en.vendor.photoTrust}`}>
-            <Icon icon={Camera} />
-            <View style={styles.flex}>
-              <Text variant="label" weight="600">{en.vendor.addTodaysPhoto}</Text>
-              <Text variant="caption" weight="400" color="textSecondary">{en.vendor.photoTrust}</Text>
-            </View>
-            <Icon icon={ChevronRight} size={18} color="textSecondary" />
-          </StepCard>
-        )}
-
-        <View style={{ marginTop: t.spacing.sm, gap: t.spacing.sm }}>
-          <SectionHeader title={en.vendor.todaysStops} />
-          {(stops ?? []).length === 0 ? (
-            <Text variant="bodySmall" color="textSecondary">{en.vendor.noStopsToday}</Text>
-          ) : (
+          {/* Day checklist: Menu · Photo · Stops */}
+          <Section title={en.vendor.todayChecklist}>
             <View>
-              {stops!.map((s, i) => (
-                <StopRow key={s.stopId} society={s.societyName} gate={s.gateName} windowStart={s.windowStart} windowEnd={s.windowEnd} followers={s.followers} state={stopPhase(s, now)} last={i === stops!.length - 1} />
-              ))}
+              {published ? (
+                <CheckRow testID="menu-live" icon={CircleCheck} done label={en.vendor.menuLive(menu!.lines.length)} sub={en.vendor.updatedAt(formatIstTime(menu!.updatedAt))} link={en.common.edit} onPress={actions.onSetMenu} />
+              ) : (
+                <CheckRow testID="check-menu" icon={ClipboardList} done={false} label={en.vendor.setMenu} onPress={actions.onSetMenu} link={en.vendor.start} />
+              )}
+              {photoUrl ? (
+                <View testID="photo-added" style={[styles.row, { minHeight: t.layout.vendorPrimaryHeight, gap: t.spacing.sm, borderBottomWidth: 1, borderBottomColor: t.colors.divider }]}>
+                  <Image source={{ uri: photoUrl }} style={{ width: 40, height: 40, borderRadius: t.radius.tile, backgroundColor: t.colors.surface2 }} />
+                  <View style={styles.flex}>
+                    <Text variant="label">{en.vendor.photoAdded}</Text>
+                    {menu?.stockPhotoAt ? <Text variant="caption" weight="400" color="textSecondary">{formatIstTime(menu.stockPhotoAt)}</Text> : null}
+                  </View>
+                  <Pressable accessibilityRole="button" onPress={actions.onAddPhoto} hitSlop={12} style={{ minHeight: t.layout.minTouch, justifyContent: 'center' }}>
+                    <Text variant="label" color="accent">{en.vendor.change}</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <CheckRow testID="step-photo" icon={Camera} done={false} label={en.vendor.addTodaysPhoto} sub={en.vendor.photoOptional} link={en.vendor.add} onPress={actions.onAddPhoto} />
+              )}
+              <CheckRow testID="check-stops" icon={CircleCheck} done={all.length > 0 && done} label={en.vendor.stopsProgress(doneCount, all.length)} last />
             </View>
-          )}
-        </View>
-        <View style={{ height: t.heights.fab + t.spacing.xl }} />
+          </Section>
+
+          {/* UX-33: quick actions */}
+          <View style={[styles.row, { gap: t.spacing.xs, alignItems: 'stretch' }]}>
+            <QuickTile testID="quick-soldout" icon={PackageX} label={en.vendor.markSoldOut} onPress={actions.onSoldOut} disabled={!published} />
+            <QuickTile testID="quick-deal" icon={Tag} label={en.vendor.eveningDealShort} onPress={actions.onSendDeal} disabled={!published || !dealOpen} />
+            <QuickTile testID="quick-requests" icon={ClipboardList} label={en.vendor.requestsShort} onPress={actions.onRequests} />
+          </View>
+
+          {/* UX-32: only the next stop here; the full list is on the Stops tab */}
+          <Section title={en.vendor.nextStopTitle} action={actions.onAllStops ? { label: en.vendor.allStops, onPress: actions.onAllStops } : undefined}>
+            {all.length === 0 ? (
+              <Text variant="bodySmall" color="textSecondary">{en.vendor.noStopsToday}</Text>
+            ) : next ? (
+              <StopRow society={next.societyName} gate={next.gateName} windowStart={next.windowStart} windowEnd={next.windowEnd} followers={next.followers} state="upcoming" last />
+            ) : (
+              <Text variant="bodySmall" color="textSecondary">{en.vendor.noMoreStops}</Text>
+            )}
+          </Section>
+          <View style={{ height: t.heights.fab + t.spacing.xl }} />
+        </Sections>
       </SheetBody>
     </View>
   );
+}
+
+/** "08:00:00" → "8:00 AM" without a date */
+function formatIstTimeOfClock(hhmm: string): string {
+  const [h = 0, m = 0] = hhmm.split(':').map(Number);
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
 }
 
 const styles = StyleSheet.create({ row: { flexDirection: 'row', alignItems: 'center' }, flex: { flex: 1 } });
