@@ -4,7 +4,7 @@ import { Image, Pressable, View } from 'react-native';
 import { Truck, ShoppingCart } from 'lucide-react-native';
 import { vendorProfileSchema } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, Card, Checkbox, Icon, PhotoUploader, Screen, SkeletonBlock, Text, TextInput, Toggle, TopAppBar, VENDOR_ART, type PhotoUploaderState } from '../../src/ui';
+import { Banner, Button, Card, Checkbox, Icon, PhotoUploader, Screen, SkeletonBlock, Text, TextInput, Toggle, TopAppBar, VENDOR_ART, type PhotoUploaderState } from '../../src/ui';
 import { useMyVendor, useInvalidateVendor, vendorKeys } from '../../src/features/vendor/hooks';
 import { saveVendorProfile, type MyVendor } from '../../src/features/vendor/api';
 import { captureCompressed } from '../../src/features/vendor/photos';
@@ -119,6 +119,10 @@ function DetailsForm({ v }: { v: MyVendor | null }) {
           {photoState === 'failed' ? <Text variant="caption" color="textSecondary">{en.vendor.tapToRetry}</Text> : null}
         </View>
       </View>
+      {/* SEC-10: name / PMC changes on a verified profile need a fresh admin check (server trigger). */}
+      {v?.status === 'verified' && (name.trim() !== v.display_name || (pmcId.trim() || null) !== (v.pmc_vendor_id ?? null)) ? (
+        <Banner kind="info" message={en.vendor.recheckWarning} testID="recheck-warning" />
+      ) : null}
       <TextInput label={en.vendor.displayName} placeholder={en.vendor.displayNamePh} value={name} onChangeText={(x) => { setName(x); setNameError(null); }} error={nameError} testID="display-name" />
       <Text weight="600">{en.vendor.sellFrom}</Text>
       <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>

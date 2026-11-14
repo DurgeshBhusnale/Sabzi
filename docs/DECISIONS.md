@@ -2,6 +2,11 @@
 
 Newest first. Short entries: date, decision, why. Do not reverse a decision without adding a new entry that explains why.
 
+## 2026-11-15 — Audit P2 fixes
+- **Re-verification (SEC-10):** a verified vendor who changes the shop name or PMC number/document goes back to `pending` (reason `details_changed`) until an admin approves again. Photo, vehicle and toggles stay live: vendors refresh their photo often, and a name or ID is what buyers trust. The details screen warns before saving.
+- **`email_login_available` no longer callable logged out (SEC-08):** it let anyone test whether an email has an account. The only caller was the old "existing emails only" S-05 rule (`allowSignUp: false`), which is not used. `otp_status` stays public because phone sign-in needs it before login.
+- **SEC-11 (multi-account ratings) accepted for the closed test:** ratings already need a 3-day follow and one per account. Before the public pilot, decide on CAPTCHA (Auth → Bot protection) or a verified phone to rate.
+
 ## 2026-11-08 — Brand Pheri, subdomain, email sign-in (owner decisions)
 - **Name Pheri** in `APP_NAME` and the app name; user-facing strings read `APP_NAME`. Internal names (`@sabzi/*` packages, storage keys, repo) stay — renaming them would churn every import for no user benefit.
 - **App id `in.anchorlit.pheri` and scheme `pheri://`** now, before any store upload, because the Android package name can never change after publishing. `APP_ID` / `APP_SCHEME` constants feed the Play Store link, App Links file and web "Open" links.
