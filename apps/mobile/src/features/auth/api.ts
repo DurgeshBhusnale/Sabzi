@@ -182,8 +182,30 @@ export async function getMyAccount(c: Client = getSupabase()): Promise<MyAccount
   return (data as unknown as MyAccount | null) ?? null;
 }
 
+const USER_BUCKETS = ['vendor-photos', 'stock-photos', 'pmc-docs', 'report-photos'] as const;
+
+/** SEC-04: removes every file under "<uid>/" the user uploaded. Best effort: a failure never blocks the delete. */
+export async function removeMyFiles(uid: string, c: Client = getSupabase()): Promise<number> {
+  let removed = 0;
+  for (const bucket of USER_BUCKETS) {
+    try {
+      const { data } = await c.storage.from(bucket).list(uid, { limit: 1000 });
+      const paths = (data ?? []).filter((f) => f.name).map((f) => `${uid}/${f.name}`);
+      if (paths.length) {
+        const { error } = await c.storage.from(bucket).remove(paths);
+        if (!error) removed += paths.length;
+      }
+    } catch {
+      // keep going: the account delete matters more than one bucket
+    }
+  }
+  return removed;
+}
+
 /** S-16 (AUTH-6) */
 export async function deleteAccount(c: Client = getSupabase()): Promise<void> {
+  const { data } = await c.auth.getUser();
+  if (data?.user?.id) await removeMyFiles(data.user.id, c);
   const { error } = await c.rpc('delete_my_account');
   if (error) raise(error);
   await c.auth.signOut({ scope: 'local' });
