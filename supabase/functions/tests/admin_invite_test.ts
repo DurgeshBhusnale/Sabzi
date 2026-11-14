@@ -29,3 +29,11 @@ Deno.test('admin-invite: field staff and anonymous callers are refused', async (
 Deno.test('admin-invite: validates input', async () => {
   assertEquals((await handleInvite(req({ email: 'nope', name: 'A', level: 'boss' }), deps(true))).status, 400);
 });
+
+Deno.test('admin-invite: GoTrue error text is mapped to a code (SEC-16)', async () => {
+  const d = deps(true);
+  d.invite = () => Promise.resolve({ error: 'A user with this email address has already been registered' });
+  assertEquals(await (await handleInvite(req({ email: 'a@b.co', name: 'Ab', level: 'owner' }), d)).json(), { error: 'email_taken' });
+  d.invite = () => Promise.resolve({ error: 'Database error saving new user: relation x' });
+  assertEquals(await (await handleInvite(req({ email: 'a@b.co', name: 'Ab', level: 'owner' }), d)).json(), { error: 'invite_failed' });
+});

@@ -4,6 +4,26 @@ Date: 2026-11-14 · Scope: `main` @ `40cdb12` · Audit only: nothing was fixed i
 
 ---
 
+## 0. Fix progress and owner actions (kept current by the fix PRs)
+
+Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR) or Blocked (reason). The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
+
+### Owner actions (do in this order)
+
+- [ ] **Deploy the hardened edge functions** (SEC-02, SEC-12, SEC-16): `npx supabase functions deploy notify send-sms-hook admin-invite --project-ref <ref>`
+- [ ] **Set the notify secret in both places, same value** (SEC-02). From this deploy on, `notify` refuses every call without it, so pushes stop until both are set:
+  ```bash
+  SECRET=$(openssl rand -hex 32)
+  npx supabase secrets set NOTIFY_SECRET=$SECRET --project-ref <ref>
+  # SQL editor (hosted):
+  insert into private.settings (key, value) values ('notify_secret', '<SECRET>')
+    on conflict (key) do update set value = excluded.value;
+  ```
+  Check: `curl -s -o /dev/null -w '%{http_code}' -X POST https://<ref>.supabase.co/functions/v1/notify -d '{}'` prints `403`; a real "I've arrived" still pushes.
+- [ ] `send-sms-hook` now rejects every call without `SEND_SMS_HOOK_SECRET`. Phone OTP is off, so nothing to do until SMS is turned on; then set the secret from Auth → Hooks.
+
+---
+
 ## 1. Summary
 
 ### Verdict: **NO-GO as things stand. Likely GO tomorrow once the P0 list is cleared (all small).**
@@ -39,7 +59,7 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | TECH-01 | P0 | Auth | Email sign-in/up, add email | `apps/mobile/app/(auth)/email.tsx:46`, `apps/mobile/src/ui/OtpInput.tsx:18,68,72`, `apps/mobile/app/account/email.tsx:46` | Open |
 | TECH-03 | P0 | EAS / config | Build, OTA | `apps/mobile/eas.json:9-18`, `apps/mobile/src/lib/supabase.ts:7-8` | Open (Needs check) |
 | SEC-01 | P0 | Auth / email | Email sign-in/up | Hosted dashboard (Auth → SMTP) | Open (Needs check) |
-| SEC-02 | P0 | Edge function | Push notifications | `supabase/functions/notify/handler.ts:136-137`, `supabase/migrations/20261105000900_notifications.sql:22,30` | Open (Needs check) |
+| SEC-02 | P0 | Edge function | Push notifications | `supabase/functions/notify/handler.ts:136-137`, `supabase/migrations/20261105000900_notifications.sql:22,30` | Fixed in code (PR_LINK); owner: set secret, deploy |
 | SEC-03 | P0 | Auth / Google | Google sign-in/up | Google Cloud console, Supabase Auth → URL config | Open (Needs check) |
 | TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Open |
 | TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Open |
@@ -56,11 +76,11 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | SEC-09 | P2 | Storage | Public bucket listing | policy "vendor photos: public read" (`supabase/migrations/20261105000400_storage_settings.sql`) | Open |
 | SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Open |
 | SEC-11 | P2 | Abuse | Open sign-up; multi-account fake reviews | Auth settings; `submit_review` | Open |
-| SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Open |
+| SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (PR_LINK) |
 | SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Open |
 | SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Open |
 | SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Open |
-| SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Open |
+| SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (PR_LINK); CORS `*` kept, bearer-auth only |
 | SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Open |
 | TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Open |
 | TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Open |

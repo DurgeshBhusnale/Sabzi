@@ -16,7 +16,8 @@ type HookEvent = { user: { phone: string }; sms: { otp: string } };
 export async function handleSendSms(req: Request, deps: SendSmsDeps): Promise<Response> {
   const body = await req.text();
   const secret = deps.env('SEND_SMS_HOOK_SECRET');
-  if (secret && !(await verifyWebhook(secret, req.headers, body))) {
+  // SEC-12: fail closed. Without SEND_SMS_HOOK_SECRET configured, the hook rejects every call.
+  if (!secret || !(await verifyWebhook(secret, req.headers, body))) {
     return json({ error: { http_code: 401, message: 'invalid signature' } }, 401);
   }
   let event: HookEvent;

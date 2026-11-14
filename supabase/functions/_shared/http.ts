@@ -13,3 +13,12 @@ export function json(body: unknown, status = 200): Response {
 
 export type Env = (key: string) => string | undefined;
 export const denoEnv: Env = (key) => Deno.env.get(key);
+
+/** Constant-time string compare for shared secrets (no early exit on the first differing byte). */
+export function safeEqual(a: string, b: string): boolean {
+  const ea = new TextEncoder().encode(a);
+  const eb = new TextEncoder().encode(b);
+  let diff = ea.length ^ eb.length;
+  for (let i = 0; i < Math.max(ea.length, eb.length); i++) diff |= (ea[i] ?? 0) ^ (eb[i] ?? 0);
+  return diff === 0;
+}

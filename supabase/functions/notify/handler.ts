@@ -12,7 +12,7 @@ import {
   type NotifKind,
 } from '@sabzi/shared/notifications.ts';
 import { LIMITS, REVIEW_TAG_LABELS, type ReviewTag } from '@sabzi/shared/constants.ts';
-import { json, type Env } from '../_shared/http.ts';
+import { json, safeEqual, type Env } from '../_shared/http.ts';
 
 export type Recipient = {
   user_id: string;
@@ -133,8 +133,9 @@ export function chunk<T>(xs: T[], size: number): T[][] {
 /** Edge function `notify`: called by Postgres triggers via pg_net with { kind, ref }. */
 export async function handleNotify(req: Request, deps: NotifyDeps): Promise<Response> {
   const t0 = Date.now();
+  // SEC-02: fail closed. Without NOTIFY_SECRET configured, nobody may trigger pushes.
   const secret = deps.env('NOTIFY_SECRET');
-  if (secret && req.headers.get('x-notify-secret') !== secret) return json({ error: 'forbidden' }, 403);
+  if (!secret || !safeEqual(req.headers.get('x-notify-secret') ?? '', secret)) return json({ error: 'forbidden' }, 403);
   const body = (await req.json().catch(() => null)) as { kind?: string; ref?: string } | null;
   if (!body?.kind || !body.ref) return json({ error: 'invalid_input' }, 400);
 

@@ -22,7 +22,8 @@ export async function handleInvite(req: Request, deps: InviteDeps): Promise<Resp
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return json({ error: 'invalid_input' }, 400);
   const r = await deps.invite(parsed.data.email);
-  if ('error' in r) return json({ error: r.error }, 400);
+  // SEC-16: never pass GoTrue's raw message to the browser; map it to a stable code.
+  if ('error' in r) return json({ error: /already|registered|exists/i.test(r.error) ? 'email_taken' : 'invite_failed' }, 400);
   await deps.makeAdmin(r.userId, parsed.data.level, parsed.data.name);
   return json({ user_id: r.userId });
 }
