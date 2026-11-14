@@ -1,12 +1,24 @@
 # Pheri v1 — Technical + Security Audit (pre-tester APK)
 
-Date: 2026-11-14 · Scope: `main` @ `40cdb12` · Audit only: nothing was fixed in this pass.
+Date: 2026-11-14 · Scope: `main` @ `40cdb12` · Fixes since then: see §0.
 
 ---
 
 ## 0. Fix progress and owner actions (kept current by the fix PRs)
 
-Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR) or Blocked (reason). The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
+Code fixes land through `fix/<ids>` branches; each row's Status in §2 says Fixed (branch) or Blocked (reason).
+
+**Session 2026-11-15:** all P0 and P1 items are fixed in code or Blocked on an owner action. The five branches are **stacked**: open and squash-merge them into `main` **in this order**, each after the previous one is merged (GitHub retargets the next PR to `main`):
+
+1. `fix/sec-02-12-16`: SEC-02, SEC-12, SEC-16 (edge functions fail closed)
+2. `fix/tech-01-03`: TECH-01, TECH-03, TECH-14 (email code length, build env guard)
+3. `fix/sec-04-09-17`: SEC-04, SEC-09, SEC-17 (account delete, bucket listing, SVG). New migration + pgTAP `11_audit_fixes`
+4. `fix/tech-02-04-05-13`: TECH-02, TECH-04, TECH-05, TECH-13 (back stack, weak-network start, sign-out cleanup)
+5. `fix/tech-06-07-08-09`: TECH-06, TECH-07, TECH-08, TECH-09, SEC-13 (error boundaries, fingerprint runtime, update link, push taps, no backup). New migration
+
+Verified locally on each branch: `pnpm verify` green (mobile 278 tests at the end), Deno function tests 22/22. **Not run locally:** `npx supabase test db` (Docker would not start on this machine), so CI's `database` job on PRs 3 and 5 is the first pgTAP run of the new migrations; don't merge those if it fails.
+
+Still open (P2): SEC-08, SEC-10, SEC-11, SEC-14, SEC-15, TECH-10, TECH-11, TECH-12; SEC-13's SecureStore half. The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
 
 ### Owner actions (do in this order)
 
