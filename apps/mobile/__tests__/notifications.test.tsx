@@ -4,6 +4,7 @@ import { renderUi } from '../src/test/render';
 import { InAppBanner } from '../src/features/notifications/InAppBanner';
 import { NotificationsBlockedBanner } from '../src/features/notifications/BlockedBanner';
 import { notificationTarget } from '../src/features/buyer/notificationCopy';
+import { tapDecision } from '../src/features/notifications/notificationTap';
 
 describe('§9.2 in-app banner', () => {
   it('shows the alert and auto-hides after 5 seconds', async () => {
@@ -54,5 +55,24 @@ describe('tapping a notification opens the right screen', () => {
     expect(notificationTarget(n('request_reply')).pathname).toBe('/(buyer)/requests');
     expect(notificationTarget(n('vendor_new_requests')).pathname).toBe('/(vendor)/requests');
     expect(notificationTarget(n('vendor_new_rating')).pathname).toBe('/vendor/reviews');
+  });
+});
+
+describe('TECH-09: notification tap decision', () => {
+  const arrival = { type: 'arrival', vendor_id: 'v1', society_id: 's1', notification_id: 'n1' };
+  it('opens the screen when signed in with the matching role', () => {
+    expect(tapDecision(arrival, { status: 'signedIn', role: 'buyer' })).toEqual({ kind: 'go' });
+    expect(tapDecision({ type: 'vendor_new_requests' }, { status: 'signedIn', role: 'vendor' })).toEqual({ kind: 'go' });
+  });
+  it('waits while the session loads (cold start)', () => {
+    expect(tapDecision(arrival, { status: 'loading', role: null })).toEqual({ kind: 'wait' });
+  });
+  it('signed out: remembers the buyer screen for after login', () => {
+    expect(tapDecision(arrival, { status: 'signedOut', role: null })).toEqual({ kind: 'pending', href: '/buyer/vendor/v1?society=s1' });
+    expect(tapDecision({ type: 'vendor_new_rating' }, { status: 'signedOut', role: null })).toEqual({ kind: 'ignore' });
+  });
+  it('ignores targets for the other role', () => {
+    expect(tapDecision(arrival, { status: 'signedIn', role: 'vendor' })).toEqual({ kind: 'ignore' });
+    expect(tapDecision({ type: 'vendor_new_requests' }, { status: 'signedIn', role: 'buyer' })).toEqual({ kind: 'ignore' });
   });
 });

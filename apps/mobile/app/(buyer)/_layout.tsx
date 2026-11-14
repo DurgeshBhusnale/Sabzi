@@ -15,6 +15,9 @@ const TabBar = makeTabBar([
   { key: 'profile', label: en.nav.buyerTabs.profile, icon: User },
 ]);
 
+/** TECH-06: a crash in one tab shows a retry screen, not a blank app. */
+export { AppErrorBoundary as ErrorBoundary } from '../../src/features/system/AppErrorBoundary';
+
 export default function BuyerLayout() {
   const { status, step } = useSession();
   const societies = usePrimarySociety();

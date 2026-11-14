@@ -28,6 +28,10 @@ Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR
 - [ ] **Demo vs tester data** (SEC-05): SQL editor `select display_name, status from vendors;` and `select count(*) from profiles;`. If the seed (Ramesh Sabzi, Sunita, Imran, `+9199999000xx`) is there, decide: keep as demo vendors (tell testers) or remove them. Never run `seed.sql` on hosted.
 - [ ] **Privacy page reachable** (SEC-06): open `https://pheri.anchorlit.in/privacy` on a phone after the admin deploy.
 - [ ] **Admin MFA enforced** (SEC-07): SQL `select value from private.settings where key = 'admin_require_mfa';` must be `true`; Auth → MFA → TOTP enabled; your admin account has a factor.
+- [ ] **New APK needed** (TECH-07, SEC-13): `app.json` now uses `runtimeVersion.policy: "fingerprint"` and `android.allowBackup: false`. Both are native changes, so they reach testers only with a new build: `cd apps/mobile && eas build --profile preview --platform android`. Installed APKs keep their old runtime and simply stop receiving OTA updates made after this change; testers must install the new APK. From then on, `eas update` only reaches binaries whose native fingerprint matches.
+- [ ] **Update link for testers** (TECH-08): after the migration, point "Update" at the APK install page instead of the Play Store:
+  `update app_settings set value = to_jsonb('https://expo.dev/accounts/<owner>/projects/pheri/builds/<id>'::text) where key = 'update_url';`
+  Force an update with `update app_settings set value = '"0.2.0"' where key = 'min_app_version';` (and bump `version` in `app.json` for the new APK).
 - [ ] `send-sms-hook` now rejects every call without `SEND_SMS_HOOK_SECRET`. Phone OTP is off, so nothing to do until SMS is turned on; then set the secret from Auth → Hooks.
 
 ---
@@ -72,10 +76,10 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Fixed (branch `fix/tech-02-04-05-13`); device check pending |
 | TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Fixed (branch `fix/tech-02-04-05-13`) |
 | TECH-05 | P1 | Sign-out | Account → Log out / delete | `apps/mobile/src/features/auth/api.ts:186-195`, `apps/mobile/app/account/settings.tsx:62-67` | Fixed (branch `fix/tech-02-04-05-13`) |
-| TECH-06 | P1 | Stability | All screens | no `ErrorBoundary` export in `apps/mobile/app/**` | Open |
-| TECH-07 | P1 | OTA | Updates to installed APKs | `apps/mobile/app.json` (`runtimeVersion.policy: appVersion`) | Open |
-| TECH-08 | P1 | Kill switch | Force update (X-11) | `apps/mobile/src/features/system/AppStatusGate.tsx:22,28`, `packages/shared/src/constants.ts:20` | Open |
-| TECH-09 | P1 | Push | Tap notification from killed app | `apps/mobile/src/features/notifications/NotificationsProvider.tsx:29-35,69` | Open (Needs check) |
+| TECH-06 | P1 | Stability | All screens | no `ErrorBoundary` export in `apps/mobile/app/**` | Fixed (branch `fix/tech-06-07-08-09`) |
+| TECH-07 | P1 | OTA | Updates to installed APKs | `apps/mobile/app.json` (`runtimeVersion.policy: appVersion`) | Fixed (branch `fix/tech-06-07-08-09`); needs new APK |
+| TECH-08 | P1 | Kill switch | Force update (X-11) | `apps/mobile/src/features/system/AppStatusGate.tsx:22,28`, `packages/shared/src/constants.ts:20` | Fixed (branch `fix/tech-06-07-08-09`); owner: set update_url |
+| TECH-09 | P1 | Push | Tap notification from killed app | `apps/mobile/src/features/notifications/NotificationsProvider.tsx:29-35,69` | Fixed (branch `fix/tech-06-07-08-09`); device check pending |
 | SEC-04 | P1 | Privacy | Account delete | `delete_my_account()` in `supabase/migrations/20261108000100_google_signin.sql` (current def), storage buckets | Fixed (branch `fix/sec-04-09-17`); owner: db push |
 | SEC-05 | P1 | Privacy | Testers vs demo data | `supabase/seed.sql` on hosted DB | Blocked: hosted DB check (owner action) |
 | SEC-06 | P1 | Privacy | Privacy policy reachable | `apps/mobile/app/account/settings.tsx:40`, `apps/mobile/app/(auth)/signin.tsx:59` → `https://pheri.anchorlit.in/privacy` | Blocked: hosted site check (owner action) |
@@ -85,7 +89,7 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Open |
 | SEC-11 | P2 | Abuse | Open sign-up; multi-account fake reviews | Auth settings; `submit_review` | Open |
 | SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (branch `fix/sec-02-12-16`) |
-| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Open |
+| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Partly fixed (branch `fix/tech-06-07-08-09`): allowBackup off (new APK); SecureStore not done |
 | SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Open |
 | SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Open |
 | SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (branch `fix/sec-02-12-16`); CORS `*` kept, bearer-auth only |

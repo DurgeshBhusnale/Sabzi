@@ -600,6 +600,8 @@ export const en = {
     view: 'View',
   },
   system: {
+    crashTitle: 'Something went wrong',
+    crashBody: 'Sorry about that. Try again, or go back home.',
     misconfiguredTitle: "This build isn't set up right",
     misconfiguredBody: 'Please install the latest test version from the link we sent you.',
     notFound: "This vendor isn't available any more.",

@@ -67,6 +67,9 @@ function ArriveLayer() {
   );
 }
 
+/** TECH-06: a crash in one tab shows a retry screen, not a blank app. */
+export { AppErrorBoundary as ErrorBoundary } from '../../src/features/system/AppErrorBoundary';
+
 export default function VendorLayout() {
   const { status, step } = useSession();
   const vendor = useMyVendor();

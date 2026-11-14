@@ -1,3 +1,14 @@
+import { PLAY_STORE_URL } from '@sabzi/shared';
+
+/**
+ * TECH-08: where "Update" sends people. app_settings.update_url (public) wins, e.g. the EAS internal-distribution
+ * link while testers install APKs; otherwise the Play Store. Only https links are accepted.
+ */
+export function updateUrl(settings: Record<string, unknown> | undefined): string {
+  const u = settings?.update_url;
+  return typeof u === 'string' && /^https:\/\/\S+$/.test(u) ? u : PLAY_STORE_URL;
+}
+
 /** Compares dotted versions: -1 if a < b, 0 if equal, 1 if a > b. */
 export function compareVersions(a: string, b: string): number {
   const pa = a.split('.').map((n) => Number.parseInt(n, 10) || 0);

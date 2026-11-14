@@ -23,8 +23,8 @@ export const X09LocationDenied = ({ role, onContinue }: { role: 'buyer' | 'vendo
 export const X10CameraDenied = ({ onSkip }: { onSkip: () => void }) => (
   <SystemScreen illustration="camera" title={en.permissions.cameraDenied} actionLabel={en.common.openSettings} onAction={openAppSettings} secondaryLabel={en.permissions.skipToday} onSecondary={onSkip} testID="x10" />
 );
-export const X11ForceUpdate = () => (
-  <SystemScreen illustration="tools" title={en.system.forceUpdate} actionLabel={en.system.update} onAction={() => Linking.openURL(PLAY_STORE_URL)} testID="x11" />
+export const X11ForceUpdate = ({ url = PLAY_STORE_URL }: { url?: string }) => (
+  <SystemScreen illustration="tools" title={en.system.forceUpdate} actionLabel={en.system.update} onAction={() => Linking.openURL(url)} testID="x11" />
 );
 export const X13Maintenance = ({ until }: { until?: string | null }) => (
   <SystemScreen illustration="tools" art="maintenance" title={until ? en.system.maintenance(until) : en.system.maintenanceNoTime} testID="x13" />
