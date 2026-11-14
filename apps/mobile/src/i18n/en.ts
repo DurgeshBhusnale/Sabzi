@@ -39,6 +39,7 @@ export const en = {
     ],
     getStarted: 'Get started',
     logIn: 'Log in',
+    haveAccount: 'I already have an account · Log in',
     skip: 'Skip',
     next: 'Next',
   },

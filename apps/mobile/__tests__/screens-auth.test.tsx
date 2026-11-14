@@ -51,7 +51,7 @@ describe('S-02 welcome', () => {
   });
   it('Log in on any slide also replaces with sign-in', async () => {
     await renderUi(<Welcome />);
-    await fireEvent.press(screen.getByText('Log in'));
+    await fireEvent.press(screen.getByTestId('welcome-login'));
     expect(mockRouter.replace).toHaveBeenCalledWith('/(auth)/signin');
   });
 });
