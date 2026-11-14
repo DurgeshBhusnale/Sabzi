@@ -13,6 +13,7 @@ import { SocietySwitcher } from '../../src/features/buyer/SocietySwitcher';
 import { buyerKeys, useBuyerHome, useMySocieties, useNotifications } from '../../src/features/buyer/hooks';
 import { useBuyer } from '../../src/features/buyer/BuyerContext';
 import { removeSociety, setPrimarySociety } from '../../src/features/buyer/api';
+import { VendorPickerSheet } from '../../src/features/engagement/VendorPickerSheet';
 
 /** B-03 + B-04 */
 export default function BuyerHome() {
@@ -23,14 +24,14 @@ export default function BuyerHome() {
   const notifs = useNotifications();
   const qc = useQueryClient();
   const [switcher, setSwitcher] = useState(false);
+  const [picker, setPicker] = useState(false);
   const { online } = useOffline();
   if (!online && !home.data && !home.isLoading) return <X01NoInternet onRetry={() => home.refetch()} />;
   const current = mine.data?.find((s) => s.id === societyId);
-  const firstGate = home.data?.[0]?.gate_name;
   return (
     <Screen
       tone="forest"
-      header={<TopAppBar tone="forest" society={current ? `${current.name.replace(' Residency', '')}${firstGate ? `, ${firstGate}` : ''}` : '…'} onSocietyPress={() => setSwitcher(true)} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
+      header={<TopAppBar tone="forest" society={current?.name ?? '…'} onSocietyPress={() => setSwitcher(true)} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
       refreshing={home.isRefetching}
       onRefresh={() => home.refetch()}
     >
@@ -41,12 +42,22 @@ export default function BuyerHome() {
       <HomeView
         vendors={home.data}
         loading={home.isLoading}
+        updatedAt={home.dataUpdatedAt || undefined}
         actions={{
           openVendor: (id) => router.push({ pathname: '/buyer/vendor/[id]', params: { id } }),
+          follow: (id) => router.push({ pathname: '/buyer/vendor/[id]', params: { id, follow: '1' } }),
           openDeals: () => router.push('/buyer/deals'),
-          requestTomorrow: () => router.push('/(buyer)/following'),
+          requestTomorrow: () => setPicker(true),
           tellUs: () => router.push({ pathname: '/buyer-setup/not-served', params: { name: current?.name ?? '', id: current?.id ?? '' } }),
           switchSociety: () => setSwitcher(true),
+        }}
+      />
+      <VendorPickerSheet
+        visible={picker}
+        onClose={() => setPicker(false)}
+        onPick={(v) => {
+          setPicker(false);
+          router.push({ pathname: '/buyer/request', params: { vendorId: v.id, name: v.name } });
         }}
       />
       <SocietySwitcher
