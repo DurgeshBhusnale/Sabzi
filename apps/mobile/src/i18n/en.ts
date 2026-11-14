@@ -244,6 +244,7 @@ export const en = {
     tapToRetry: 'Tap to try again',
     displayName: 'Name buyers will see',
     displayNamePh: 'Ramesh Sabzi',
+    recheckWarning: 'Changing your shop name or PMC details sends your profile back to us for checking. Buyers will not see you until we approve it again.',
     displayNameError: 'Use at least 3 letters so buyers can find you.',
     sellFrom: 'You sell from a',
     tempo: 'Tempo',
