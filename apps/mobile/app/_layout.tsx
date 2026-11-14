@@ -19,7 +19,11 @@ import { configProblem, getSupabase } from '../src/lib/supabase';
 import { MisconfiguredBuild } from '../src/features/system/MisconfiguredBuild';
 import { SessionProvider, useSession } from '../src/features/auth/session';
 import { onSignOut } from '../src/lib/signOutCleanup';
+import { AppErrorBoundary } from '../src/features/system/AppErrorBoundary';
 import { AppState } from 'react-native';
+
+/** TECH-06 */
+export { AppErrorBoundary as ErrorBoundary };
 
 const posthog = createPosthogSink({ key: process.env.EXPO_PUBLIC_POSTHOG_KEY, host: process.env.EXPO_PUBLIC_POSTHOG_HOST });
 if (posthog) setAnalyticsSink(posthog.sink);

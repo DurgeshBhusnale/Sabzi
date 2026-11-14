@@ -1,12 +1,26 @@
 # Pheri v1 — Technical + Security Audit (pre-tester APK)
 
-Date: 2026-11-14 · Scope: `main` @ `40cdb12` · Audit only: nothing was fixed in this pass.
+Date: 2026-11-14 · Scope: `main` @ `40cdb12` · Fixes since then: see §0.
 
 ---
 
 ## 0. Fix progress and owner actions (kept current by the fix PRs)
 
-Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR) or Blocked (reason). The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
+Code fixes land through `fix/<ids>` branches; each row's Status in §2 says Fixed (branch) or Blocked (reason).
+
+**Session 2026-11-15:** all P0 and P1 items are fixed in code or Blocked on an owner action. Merged in this order as squash PRs (after #13 fixed the Expo SDK patch versions that broke CI's expo-doctor step): #12, #14, #15, #16, #17. The branches were:
+
+1. `fix/sec-02-12-16`: SEC-02, SEC-12, SEC-16 (edge functions fail closed)
+2. `fix/tech-01-03`: TECH-01, TECH-03, TECH-14 (email code length, build env guard)
+3. `fix/sec-04-09-17`: SEC-04, SEC-09, SEC-17 (account delete, bucket listing, SVG). New migration + pgTAP `11_audit_fixes`
+4. `fix/tech-02-04-05-13`: TECH-02, TECH-04, TECH-05, TECH-13 (back stack, weak-network start, sign-out cleanup)
+5. `fix/tech-06-07-08-09`: TECH-06, TECH-07, TECH-08, TECH-09, SEC-13 (error boundaries, fingerprint runtime, update link, push taps, no backup). New migration
+
+Branch 2 onwards also carries commit `e408ce5` (`docs/audit/UX_AUDIT.md`, from a parallel UX-audit session that shared this working folder), so merging PR 2 also brings the UX audit doc to `main`; `audit/ux` then has nothing left to merge.
+
+Verified locally on each branch: `pnpm verify` green (mobile 278 tests at the end), Deno function tests 22/22. pgTAP was not run locally (no Docker); CI's `database` job ran it on #15 and #17: 11 files, all pass.
+
+Still open (P2): SEC-08, SEC-10, SEC-11, SEC-14, SEC-15, TECH-10, TECH-11, TECH-12; SEC-13's SecureStore half. The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
 
 ### Owner actions (do in this order)
 
@@ -20,14 +34,18 @@ Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR
     on conflict (key) do update set value = excluded.value;
   ```
   Check: `curl -s -o /dev/null -w '%{http_code}' -X POST https://<ref>.supabase.co/functions/v1/notify -d '{}'` prints `403`; a real "I've arrived" still pushes.
-- [ ] **Email code length = 6 on hosted** (TECH-01): Authentication → Sign In / Providers → Email → *Email OTP Length* `6`, *Email OTP Expiration* `600` → Save. The app now reads the length from `LIMITS.emailOtpLength` (`packages/shared/src/constants.ts`); a test keeps it equal to `supabase/config.toml`. If you ever change the dashboard value, change both and ship an OTA.
-- [ ] **Custom SMTP** (SEC-01): Authentication → Emails → SMTP Settings → enable custom SMTP (Resend/Brevo/ZeptoMail, sender on `anchorlit.in`, SPF+DKIM). Then Authentication → Rate Limits → emails ≈ 30/hour. Test from a Gmail that is not on the Supabase team.
+- [x] **Email code length = 6 on hosted** (TECH-01), done by owner 2026-11-15: Authentication → Sign In / Providers → Email → *Email OTP Length* `6`, *Email OTP Expiration* `600` → Save. The app now reads the length from `LIMITS.emailOtpLength` (`packages/shared/src/constants.ts`); a test keeps it equal to `supabase/config.toml`. If you ever change the dashboard value, change both and ship an OTA.
+- [x] **Custom SMTP** (SEC-01), done by owner 2026-11-15: Authentication → Emails → SMTP Settings → enable custom SMTP (Resend/Brevo/ZeptoMail, sender on `anchorlit.in`, SPF+DKIM). Then Authentication → Rate Limits → emails ≈ 30/hour. Test from a Gmail that is not on the Supabase team.
 - [ ] **Google sign-in for outside testers** (SEC-03): Google Cloud → OAuth consent screen → *Publish app* (or add each tester under Test users). Supabase → Authentication → URL Configuration: Site URL `https://pheri.anchorlit.in`; Redirect URLs include `pheri://auth/callback`; remove unused localhost/wildcards.
 - [ ] **EAS environment variables** (TECH-03): `cd apps/mobile && eas env:list --environment preview` must show `EXPO_PUBLIC_SUPABASE_URL` (`https://<ref>.supabase.co`), `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_BASE_URL` (and optional `EXPO_PUBLIC_POSTHOG_*`, `GOOGLE_SERVICES_JSON`), nothing secret. `eas.json` now pins `environment` per build profile. Publish OTA only with `pnpm --filter mobile update:preview -- --message "…"` (adds `--environment preview`). A release bundle without the URL now shows "This build isn't set up right" instead of hanging.
 - [ ] **Apply the new migrations to hosted** (SEC-04, SEC-09, SEC-17 and later groups): `npx supabase db push --project-ref <ref>` (review the list it prints first; only `2026111*` files should be new). Then deploy the admin site (privacy text changed) the usual Vercel way.
 - [ ] **Demo vs tester data** (SEC-05): SQL editor `select display_name, status from vendors;` and `select count(*) from profiles;`. If the seed (Ramesh Sabzi, Sunita, Imran, `+9199999000xx`) is there, decide: keep as demo vendors (tell testers) or remove them. Never run `seed.sql` on hosted.
 - [ ] **Privacy page reachable** (SEC-06): open `https://pheri.anchorlit.in/privacy` on a phone after the admin deploy.
 - [ ] **Admin MFA enforced** (SEC-07): SQL `select value from private.settings where key = 'admin_require_mfa';` must be `true`; Auth → MFA → TOTP enabled; your admin account has a factor.
+- [ ] **New APK needed** (TECH-07, SEC-13): `app.json` now uses `runtimeVersion.policy: "fingerprint"` and `android.allowBackup: false`. Both are native changes, so they reach testers only with a new build: `cd apps/mobile && eas build --profile preview --platform android`. Installed APKs keep their old runtime and simply stop receiving OTA updates made after this change; testers must install the new APK. From then on, `eas update` only reaches binaries whose native fingerprint matches.
+- [ ] **Update link for testers** (TECH-08): after the migration, point "Update" at the APK install page instead of the Play Store:
+  `update app_settings set value = to_jsonb('https://expo.dev/accounts/<owner>/projects/pheri/builds/<id>'::text) where key = 'update_url';`
+  Force an update with `update app_settings set value = '"0.2.0"' where key = 'min_app_version';` (and bump `version` in `app.json` for the new APK).
 - [ ] `send-sms-hook` now rejects every call without `SEND_SMS_HOOK_SECRET`. Phone OTP is off, so nothing to do until SMS is turned on; then set the secret from Auth → Hooks.
 
 ---
@@ -64,37 +82,37 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 
 | ID | Severity | Area | Flow | File:line | Status |
 | --- | --- | --- | --- | --- | --- |
-| TECH-01 | P0 | Auth | Email sign-in/up, add email | `apps/mobile/app/(auth)/email.tsx:46`, `apps/mobile/src/ui/OtpInput.tsx:18,68,72`, `apps/mobile/app/account/email.tsx:46` | Fixed in code (branch `fix/tech-01-03`); owner: set hosted OTP length 6 |
-| TECH-03 | P0 | EAS / config | Build, OTA | `apps/mobile/eas.json:9-18`, `apps/mobile/src/lib/supabase.ts:7-8` | Fixed (branch `fix/tech-01-03`); owner: check EAS env vars |
-| SEC-01 | P0 | Auth / email | Email sign-in/up | Hosted dashboard (Auth → SMTP) | Blocked: dashboard only (owner action) |
-| SEC-02 | P0 | Edge function | Push notifications | `supabase/functions/notify/handler.ts:136-137`, `supabase/migrations/20261105000900_notifications.sql:22,30` | Fixed in code (branch `fix/sec-02-12-16`); owner: set secret, deploy |
+| TECH-01 | P0 | Auth | Email sign-in/up, add email | `apps/mobile/app/(auth)/email.tsx:46`, `apps/mobile/src/ui/OtpInput.tsx:18,68,72`, `apps/mobile/app/account/email.tsx:46` | Fixed (#14); hosted OTP length 6 set by owner 2026-11-15 |
+| TECH-03 | P0 | EAS / config | Build, OTA | `apps/mobile/eas.json:9-18`, `apps/mobile/src/lib/supabase.ts:7-8` | Fixed (#14); owner: check EAS env vars |
+| SEC-01 | P0 | Auth / email | Email sign-in/up | Hosted dashboard (Auth → SMTP) | Fixed by owner 2026-11-15: custom SMTP on |
+| SEC-02 | P0 | Edge function | Push notifications | `supabase/functions/notify/handler.ts:136-137`, `supabase/migrations/20261105000900_notifications.sql:22,30` | Fixed in code (#12); owner: set secret, deploy |
 | SEC-03 | P0 | Auth / Google | Google sign-in/up | Google Cloud console, Supabase Auth → URL config | Blocked: Google/Supabase console only (owner action) |
-| TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Fixed (branch `fix/tech-02-04-05-13`); device check pending |
-| TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Fixed (branch `fix/tech-02-04-05-13`) |
-| TECH-05 | P1 | Sign-out | Account → Log out / delete | `apps/mobile/src/features/auth/api.ts:186-195`, `apps/mobile/app/account/settings.tsx:62-67` | Fixed (branch `fix/tech-02-04-05-13`) |
-| TECH-06 | P1 | Stability | All screens | no `ErrorBoundary` export in `apps/mobile/app/**` | Open |
-| TECH-07 | P1 | OTA | Updates to installed APKs | `apps/mobile/app.json` (`runtimeVersion.policy: appVersion`) | Open |
-| TECH-08 | P1 | Kill switch | Force update (X-11) | `apps/mobile/src/features/system/AppStatusGate.tsx:22,28`, `packages/shared/src/constants.ts:20` | Open |
-| TECH-09 | P1 | Push | Tap notification from killed app | `apps/mobile/src/features/notifications/NotificationsProvider.tsx:29-35,69` | Open (Needs check) |
-| SEC-04 | P1 | Privacy | Account delete | `delete_my_account()` in `supabase/migrations/20261108000100_google_signin.sql` (current def), storage buckets | Fixed (branch `fix/sec-04-09-17`); owner: db push |
+| TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Fixed (#16); device check pending |
+| TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Fixed (#16) |
+| TECH-05 | P1 | Sign-out | Account → Log out / delete | `apps/mobile/src/features/auth/api.ts:186-195`, `apps/mobile/app/account/settings.tsx:62-67` | Fixed (#16) |
+| TECH-06 | P1 | Stability | All screens | no `ErrorBoundary` export in `apps/mobile/app/**` | Fixed (PR #17) |
+| TECH-07 | P1 | OTA | Updates to installed APKs | `apps/mobile/app.json` (`runtimeVersion.policy: appVersion`) | Fixed (PR #17); needs new APK |
+| TECH-08 | P1 | Kill switch | Force update (X-11) | `apps/mobile/src/features/system/AppStatusGate.tsx:22,28`, `packages/shared/src/constants.ts:20` | Fixed (PR #17); owner: set update_url |
+| TECH-09 | P1 | Push | Tap notification from killed app | `apps/mobile/src/features/notifications/NotificationsProvider.tsx:29-35,69` | Fixed (PR #17); device check pending |
+| SEC-04 | P1 | Privacy | Account delete | `delete_my_account()` in `supabase/migrations/20261108000100_google_signin.sql` (current def), storage buckets | Fixed (#15); owner: db push |
 | SEC-05 | P1 | Privacy | Testers vs demo data | `supabase/seed.sql` on hosted DB | Blocked: hosted DB check (owner action) |
 | SEC-06 | P1 | Privacy | Privacy policy reachable | `apps/mobile/app/account/settings.tsx:40`, `apps/mobile/app/(auth)/signin.tsx:59` → `https://pheri.anchorlit.in/privacy` | Blocked: hosted site check (owner action) |
 | SEC-07 | P1 | Admin | Admin login MFA | `public.admin_mfa_ok()` reads `private.settings.admin_require_mfa` | Blocked: hosted DB check (owner action) |
 | SEC-08 | P2 | DB | Anon RPCs | `public.setting_int`, `public.email_login_available`, `public.otp_status`, `public.record_qr_scan` | Open |
-| SEC-09 | P2 | Storage | Public bucket listing | policy "vendor photos: public read" (`supabase/migrations/20261105000400_storage_settings.sql`) | Fixed (branch `fix/sec-04-09-17`) |
+| SEC-09 | P2 | Storage | Public bucket listing | policy "vendor photos: public read" (`supabase/migrations/20261105000400_storage_settings.sql`) | Fixed (#15) |
 | SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Open |
 | SEC-11 | P2 | Abuse | Open sign-up; multi-account fake reviews | Auth settings; `submit_review` | Open |
-| SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (branch `fix/sec-02-12-16`) |
-| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Open |
+| SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (#12) |
+| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Partly fixed (PR #17): allowBackup off (new APK); SecureStore not done |
 | SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Open |
 | SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Open |
-| SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (branch `fix/sec-02-12-16`); CORS `*` kept, bearer-auth only |
-| SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Fixed (branch `fix/sec-04-09-17`) |
+| SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (#12); CORS `*` kept, bearer-auth only |
+| SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Fixed (#15) |
 | TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Open |
 | TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Open |
 | TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Open |
-| TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Fixed (branch `fix/tech-02-04-05-13`) |
-| TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Fixed (branch `fix/tech-01-03`) |
+| TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Fixed (#16) |
+| TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Fixed (#14) |
 
 ---
 

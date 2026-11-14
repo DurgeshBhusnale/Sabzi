@@ -25,7 +25,7 @@ grant execute on all functions in schema tests to anon, authenticated;
 \set ramesh '''10000000-0000-4000-8000-000000000001'''
 \set priya '''20000000-0000-4000-8000-000000000001'''
 
-select plan(11);
+select plan(12);
 
 -- ================= SEC-09: public buckets are not listable by others
 insert into storage.objects (bucket_id, name) values
@@ -42,6 +42,11 @@ select tests.logout();
 
 select ok(exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
   and policyname = 'report photos: reporter delete' and cmd = 'DELETE'), 'reporters can delete their own report photos');
+
+-- ================= TECH-08: update link is public (read before login)
+select tests.anon();
+select is((select count(*)::int from app_settings where key = 'update_url'), 1, 'anon can read update_url');
+select tests.logout();
 
 -- ================= SEC-17
 select ok(not ('image/svg+xml' = any (allowed_mime_types)), 'item-images no longer accepts SVG')
