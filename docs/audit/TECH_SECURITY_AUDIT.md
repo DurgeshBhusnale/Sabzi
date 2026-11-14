@@ -24,6 +24,10 @@ Code fixes land through `fix/<ids>` PRs; each row's Status in §2 says Fixed (PR
 - [ ] **Custom SMTP** (SEC-01): Authentication → Emails → SMTP Settings → enable custom SMTP (Resend/Brevo/ZeptoMail, sender on `anchorlit.in`, SPF+DKIM). Then Authentication → Rate Limits → emails ≈ 30/hour. Test from a Gmail that is not on the Supabase team.
 - [ ] **Google sign-in for outside testers** (SEC-03): Google Cloud → OAuth consent screen → *Publish app* (or add each tester under Test users). Supabase → Authentication → URL Configuration: Site URL `https://pheri.anchorlit.in`; Redirect URLs include `pheri://auth/callback`; remove unused localhost/wildcards.
 - [ ] **EAS environment variables** (TECH-03): `cd apps/mobile && eas env:list --environment preview` must show `EXPO_PUBLIC_SUPABASE_URL` (`https://<ref>.supabase.co`), `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_BASE_URL` (and optional `EXPO_PUBLIC_POSTHOG_*`, `GOOGLE_SERVICES_JSON`), nothing secret. `eas.json` now pins `environment` per build profile. Publish OTA only with `pnpm --filter mobile update:preview -- --message "…"` (adds `--environment preview`). A release bundle without the URL now shows "This build isn't set up right" instead of hanging.
+- [ ] **Apply the new migrations to hosted** (SEC-04, SEC-09, SEC-17 and later groups): `npx supabase db push --project-ref <ref>` (review the list it prints first; only `2026111*` files should be new). Then deploy the admin site (privacy text changed) the usual Vercel way.
+- [ ] **Demo vs tester data** (SEC-05): SQL editor `select display_name, status from vendors;` and `select count(*) from profiles;`. If the seed (Ramesh Sabzi, Sunita, Imran, `+9199999000xx`) is there, decide: keep as demo vendors (tell testers) or remove them. Never run `seed.sql` on hosted.
+- [ ] **Privacy page reachable** (SEC-06): open `https://pheri.anchorlit.in/privacy` on a phone after the admin deploy.
+- [ ] **Admin MFA enforced** (SEC-07): SQL `select value from private.settings where key = 'admin_require_mfa';` must be `true`; Auth → MFA → TOTP enabled; your admin account has a factor.
 - [ ] `send-sms-hook` now rejects every call without `SEND_SMS_HOOK_SECRET`. Phone OTP is off, so nothing to do until SMS is turned on; then set the secret from Auth → Hooks.
 
 ---
@@ -72,12 +76,12 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | TECH-07 | P1 | OTA | Updates to installed APKs | `apps/mobile/app.json` (`runtimeVersion.policy: appVersion`) | Open |
 | TECH-08 | P1 | Kill switch | Force update (X-11) | `apps/mobile/src/features/system/AppStatusGate.tsx:22,28`, `packages/shared/src/constants.ts:20` | Open |
 | TECH-09 | P1 | Push | Tap notification from killed app | `apps/mobile/src/features/notifications/NotificationsProvider.tsx:29-35,69` | Open (Needs check) |
-| SEC-04 | P1 | Privacy | Account delete | `delete_my_account()` in `supabase/migrations/20261108000100_google_signin.sql` (current def), storage buckets | Open |
-| SEC-05 | P1 | Privacy | Testers vs demo data | `supabase/seed.sql` on hosted DB | Open (Needs check) |
-| SEC-06 | P1 | Privacy | Privacy policy reachable | `apps/mobile/app/account/settings.tsx:40`, `apps/mobile/app/(auth)/signin.tsx:59` → `https://pheri.anchorlit.in/privacy` | Open (Needs check) |
-| SEC-07 | P1 | Admin | Admin login MFA | `public.admin_mfa_ok()` reads `private.settings.admin_require_mfa` | Open (Needs check) |
+| SEC-04 | P1 | Privacy | Account delete | `delete_my_account()` in `supabase/migrations/20261108000100_google_signin.sql` (current def), storage buckets | Fixed (branch `fix/sec-04-09-17`); owner: db push |
+| SEC-05 | P1 | Privacy | Testers vs demo data | `supabase/seed.sql` on hosted DB | Blocked: hosted DB check (owner action) |
+| SEC-06 | P1 | Privacy | Privacy policy reachable | `apps/mobile/app/account/settings.tsx:40`, `apps/mobile/app/(auth)/signin.tsx:59` → `https://pheri.anchorlit.in/privacy` | Blocked: hosted site check (owner action) |
+| SEC-07 | P1 | Admin | Admin login MFA | `public.admin_mfa_ok()` reads `private.settings.admin_require_mfa` | Blocked: hosted DB check (owner action) |
 | SEC-08 | P2 | DB | Anon RPCs | `public.setting_int`, `public.email_login_available`, `public.otp_status`, `public.record_qr_scan` | Open |
-| SEC-09 | P2 | Storage | Public bucket listing | policy "vendor photos: public read" (`supabase/migrations/20261105000400_storage_settings.sql`) | Open |
+| SEC-09 | P2 | Storage | Public bucket listing | policy "vendor photos: public read" (`supabase/migrations/20261105000400_storage_settings.sql`) | Fixed (branch `fix/sec-04-09-17`) |
 | SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Open |
 | SEC-11 | P2 | Abuse | Open sign-up; multi-account fake reviews | Auth settings; `submit_review` | Open |
 | SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (branch `fix/sec-02-12-16`) |
@@ -85,7 +89,7 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Open |
 | SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Open |
 | SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (branch `fix/sec-02-12-16`); CORS `*` kept, bearer-auth only |
-| SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Open |
+| SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Fixed (branch `fix/sec-04-09-17`) |
 | TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Open |
 | TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Open |
 | TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Open |
@@ -339,7 +343,7 @@ Use it in Settings (`settings.tsx:62-67`) and Delete. `save_push_token` would ne
 
 **What happens.** `delete_my_account()` scrubs profile fields, follows, societies, waitlist, notifications, identities and sessions, and nulls the email and phone on `auth.users`. It also bans the user. It **doesn't**:
 - delete Storage objects: vendor photo (`vendor-photos`, public), stock photos, PMC document (`pmc-docs`), report photos;
-- delete the `auth.users` row, the vendor row (display name stays, status `suspended`), `profile_phones` (**Needs check**: the trigger `delete_profile_phone_on_delete` exists, so confirm it fires on this update path), `app_opens`, `qr_scans`, `vendor_page_views` or `action_log`.
+- delete the `auth.users` row, the vendor row (display name stays, status `suspended`), `profile_phones` (checked: the `profiles_delete_phone` trigger removes it when `deleted_at` is set), `app_opens`, `qr_scans`, `vendor_page_views` or `action_log`.
 
 Reviews stay public under "Former user", which is by design.
 

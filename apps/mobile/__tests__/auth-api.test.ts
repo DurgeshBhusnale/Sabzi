@@ -1,5 +1,6 @@
 import {
   completeProfile,
+  deleteAccount,
   nextAuthStep,
   sendEmailOtp,
   sendPhoneOtp,
@@ -92,5 +93,41 @@ describe('auth api', () => {
     expect(nextAuthStep({ ...base, role: null, name: null })).toBe('role');
     expect(nextAuthStep({ ...base, role: 'buyer', name: null })).toBe('name');
     expect(nextAuthStep({ ...base, role: 'vendor', name: 'Ramesh' })).toBe('vendor');
+  });
+});
+
+describe('SEC-04: account delete removes the user\'s files first', () => {
+  it('lists and removes every file in each user bucket, then deletes the account', async () => {
+    const calls: string[] = [];
+    const storage = {
+      from: (bucket: string) => ({
+        list: jest.fn(async (dir: string) => ({ data: bucket === 'vendor-photos' ? [{ name: 'face.jpg' }] : bucket === 'stock-photos' ? [{ name: 'a.jpg' }, { name: 'b.jpg' }] : [], error: null, dir })),
+        remove: jest.fn(async (paths: string[]) => {
+          calls.push(`${bucket}:${paths.join(',')}`);
+          return { error: null };
+        }),
+      }),
+    };
+    const rpc = jest.fn(async (name: string) => {
+      calls.push(`rpc:${name}`);
+      return { data: null, error: null };
+    });
+    const c = {
+      rpc,
+      storage,
+      auth: { getUser: jest.fn(async () => ({ data: { user: { id: 'u1' } } })), signOut: jest.fn(async () => ({ error: null })) },
+    } as unknown as Client;
+    await deleteAccount(c);
+    expect(calls).toEqual(['vendor-photos:u1/face.jpg', 'stock-photos:u1/a.jpg,u1/b.jpg', 'rpc:delete_my_account']);
+  });
+  it('a storage failure never blocks the delete', async () => {
+    const rpc = jest.fn(async () => ({ data: null, error: null }));
+    const c = {
+      rpc,
+      storage: { from: () => ({ list: jest.fn(async () => { throw new Error('offline'); }), remove: jest.fn() }) },
+      auth: { getUser: jest.fn(async () => ({ data: { user: { id: 'u1' } } })), signOut: jest.fn(async () => ({ error: null })) },
+    } as unknown as Client;
+    await deleteAccount(c);
+    expect(rpc).toHaveBeenCalledWith('delete_my_account');
   });
 });
