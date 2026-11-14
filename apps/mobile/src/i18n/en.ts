@@ -219,6 +219,13 @@ export const en = {
     hidden: (reason?: string | null) => `Hidden by ${APP_NAME} team${reason ? ` · ${reason}` : ''} · only you can see this review`,
   },
   requests: {
+    /** UX-24: the answer the buyer came for, first on the card */
+    answer: {
+      open: (n: string) => `Waiting for ${n}`,
+      will_bring: (n: string) => `✓ ${n} will bring it`,
+      cant_bring: (n: string) => `${n} can't bring it`,
+      cancelled: (n: string) => `Cancelled (${n})`,
+    } as Record<'open' | 'will_bring' | 'cant_bring' | 'cancelled', (n: string) => string>,
     status: { open: 'Waiting', will_bring: 'Will bring', cant_bring: "Can't bring", cancelled: 'Cancelled' },
   },
   photo: {
@@ -431,6 +438,12 @@ export const en = {
     atTheGate: 'At the gate',
     notToday: 'Not today',
     unfollowHint: 'Press and hold a vendor to unfollow.',
+    alerts: 'Alerts',
+    alertsOn: (n: string) => `Alerts for ${n} are on. Change`,
+    alertsOff: (n: string) => `Alerts for ${n} are off. Change`,
+    mySocieties: 'My societies',
+    verifiedVendor: 'Verified vendor',
+    waitingVerification: 'Waiting for verification',
     unfollowQ: (name: string) => `Unfollow ${name}?`,
     unfollowBody: "You won't get alerts when they arrive.",
     alsoAtGate: 'Also at the gate',
