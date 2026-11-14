@@ -5,6 +5,7 @@ import { ActionQueue, type ActionKind, type QueuedAction, type QueueStorage } fr
 import { executor } from './executor';
 import { isNetworkError, useNetwork, type Network } from './network';
 import { newClientId } from '../ids';
+import { onSignOut } from '../signOutCleanup';
 
 const KEY = 'sabzi.actionQueue.v1';
 const storage: QueueStorage = {
@@ -43,8 +44,10 @@ export function OfflineProvider({ children, queue: injected }: { children: React
   useEffect(() => {
     const unsub = queue.subscribe(setActions);
     queue.init().then(() => queue.prune());
+    const off = onSignOut(() => queue.clear());
     return () => {
       unsub();
+      off();
     };
   }, [queue]);
 

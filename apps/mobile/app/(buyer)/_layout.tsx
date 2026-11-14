@@ -19,7 +19,8 @@ export default function BuyerLayout() {
   const { status, step } = useSession();
   const societies = usePrimarySociety();
   useLiveStopEvents(status === 'signedIn' && step === 'buyer');
-  if (status === 'signedOut') return <Redirect href="/(auth)/welcome" />;
+  // index decides between welcome and sign-in (TECH-02, TECH-13)
+  if (status === 'signedOut') return <Redirect href="/" />;
   if (status === 'signedIn' && step !== 'buyer') return <Redirect href="/" />;
   if (societies.isLoading) return <Screen><SkeletonBlock kind="vendorCard" count={3} /></Screen>;
   if (societies.isSuccess && !societies.primary) return <Redirect href="/buyer-setup/society" />;

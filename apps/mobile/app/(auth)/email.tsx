@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { BackHandler, View } from 'react-native';
 import { AUTH_METHODS, LIMITS } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, OtpInput, Screen, Text, TextInput, TopAppBar } from '../../src/ui';
@@ -32,6 +32,19 @@ export default function EmailLogin({
     const id = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(id);
   }, [seconds]);
+
+  // TECH-02: hardware back on the code step returns to the email field, like the header arrow.
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (!sent) return false;
+        setSent(false);
+        setCode('');
+        return true;
+      });
+      return () => sub.remove();
+    }, [sent]),
+  );
 
   const doSend = async () => {
     setBusy(true);

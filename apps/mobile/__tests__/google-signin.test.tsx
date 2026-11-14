@@ -1,4 +1,5 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { BackHandler } from 'react-native';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { AUTH_METHODS, LIMITS } from '@sabzi/shared';
@@ -6,7 +7,11 @@ import { renderUi } from '../src/test/render';
 import { nextAuthStep, sendEmailOtp, signInWithGoogle } from '../src/features/auth/api';
 import type { Client } from '../src/lib/supabase';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false } }));
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  useFocusEffect: (cb: () => void | (() => void)) => require('react').useEffect(cb, [cb]),
+}));
 const mockComplete = jest.fn();
 jest.mock('../src/features/auth/session', () => ({
   useSession: () => ({ refresh: jest.fn(), account: { role: 'buyer', name: 'Riya Patil', has_phone: false } }),
@@ -125,6 +130,25 @@ describe('email sign-in / sign-up', () => {
     expect(verify).not.toHaveBeenCalled();
     await fireEvent.changeText(screen.getByTestId('email-otp'), '12345678');
     await waitFor(() => expect(verify).toHaveBeenLastCalledWith('riya@example.com', '12345678'));
+  });
+  it('TECH-02: hardware back on the code step returns to the email field', async () => {
+    const handlers: ((e: never) => boolean | null | undefined)[] = [];
+    const spy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_e, h) => {
+      handlers.push(h);
+      return { remove: () => undefined };
+    });
+    const send = jest.fn(async () => ({ ok: true as const }));
+    await renderUi(<EmailLogin send={send} verify={jest.fn()} />);
+    await fireEvent.changeText(screen.getByTestId('email-input'), 'riya@example.com');
+    await fireEvent.press(screen.getByTestId('send-email-code'));
+    await waitFor(() => expect(screen.getByTestId('email-otp')).toBeTruthy());
+    let handled: boolean | null | undefined;
+    await act(async () => {
+      handled = handlers[handlers.length - 1]!({} as never);
+    });
+    expect(handled).toBe(true);
+    spy.mockRestore();
+    await waitFor(() => expect(screen.getByTestId('email-input').props.value).toBe('riya@example.com'));
   });
   it('TECH-01: LIMITS.emailOtpLength matches supabase/config.toml otp_length', () => {
     const toml = readFileSync(join(__dirname, '../../../supabase/config.toml'), 'utf8');

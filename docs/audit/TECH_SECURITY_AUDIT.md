@@ -69,9 +69,9 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | SEC-01 | P0 | Auth / email | Email sign-in/up | Hosted dashboard (Auth → SMTP) | Blocked: dashboard only (owner action) |
 | SEC-02 | P0 | Edge function | Push notifications | `supabase/functions/notify/handler.ts:136-137`, `supabase/migrations/20261105000900_notifications.sql:22,30` | Fixed in code (branch `fix/sec-02-12-16`); owner: set secret, deploy |
 | SEC-03 | P0 | Auth / Google | Google sign-in/up | Google Cloud console, Supabase Auth → URL config | Blocked: Google/Supabase console only (owner action) |
-| TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Open |
-| TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Open |
-| TECH-05 | P1 | Sign-out | Account → Log out / delete | `apps/mobile/src/features/auth/api.ts:186-195`, `apps/mobile/app/account/settings.tsx:62-67` | Open |
+| TECH-02 | P1 | Navigation | Onboarding → sign-in | `apps/mobile/app/(auth)/welcome.tsx:15,42-43`, `apps/mobile/src/features/auth/session.tsx:74-77`, `apps/mobile/app/(auth)/email.tsx:58` | Fixed (branch `fix/tech-02-04-05-13`); device check pending |
+| TECH-04 | P1 | Session | Cold start (signed in, bad network) | `apps/mobile/src/features/auth/session.tsx:41-46`, `apps/mobile/src/features/auth/api.ts:198-199` | Fixed (branch `fix/tech-02-04-05-13`) |
+| TECH-05 | P1 | Sign-out | Account → Log out / delete | `apps/mobile/src/features/auth/api.ts:186-195`, `apps/mobile/app/account/settings.tsx:62-67` | Fixed (branch `fix/tech-02-04-05-13`) |
 | TECH-06 | P1 | Stability | All screens | no `ErrorBoundary` export in `apps/mobile/app/**` | Open |
 | TECH-07 | P1 | OTA | Updates to installed APKs | `apps/mobile/app.json` (`runtimeVersion.policy: appVersion`) | Open |
 | TECH-08 | P1 | Kill switch | Force update (X-11) | `apps/mobile/src/features/system/AppStatusGate.tsx:22,28`, `packages/shared/src/constants.ts:20` | Open |
@@ -93,7 +93,7 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Open |
 | TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Open |
 | TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Open |
-| TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Open |
+| TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Fixed (branch `fix/tech-02-04-05-13`) |
 | TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Fixed (branch `fix/tech-01-03`) |
 
 ---
