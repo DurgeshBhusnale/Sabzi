@@ -9,7 +9,7 @@ import { Screen, SkeletonBlock } from '../../src/ui';
 import { ArriveFab } from '../../src/features/vendor/ArriveFab';
 import { ArriveSheet } from '../../src/features/vendor/ArriveSheet';
 import { VendorShellProvider, useVendorShell } from '../../src/features/vendor/VendorShell';
-import { useInvalidateVendor, useMyVendor, useStopsToday, vendorKeys } from '../../src/features/vendor/hooks';
+import { useInvalidateVendor, useMyVendor, useStopsToday, useTodayMenu, vendorKeys } from '../../src/features/vendor/hooks';
 import { currentStop } from '../../src/features/vendor/arrival';
 import { arrive, undoStopEvent } from '../../src/features/vendor/api';
 import { currentPosition, locationPermission, openAppSettings, requestLocationPermission } from '../../src/lib/permissions';
@@ -30,6 +30,7 @@ function ArriveLayer() {
   const { arriveOpen, openArrive, closeArrive } = useVendorShell();
   const vendor = useMyVendor();
   const stops = useStopsToday();
+  const menu = useTodayMenu();
   const invalidate = useInvalidateVendor();
   const offline = useOffline();
   const verified = vendor.data?.status === 'verified';
@@ -39,7 +40,7 @@ function ArriveLayer() {
     <>
       {showFab ? (
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: t.layout.bottomNav }}>
-          <ArriveFab onPress={openArrive} disabled={!verified} />
+          <ArriveFab onPress={openArrive} disabled={!verified} subdued={!menu.data?.publishedAt} />
         </View>
       ) : null}
       <ArriveSheet

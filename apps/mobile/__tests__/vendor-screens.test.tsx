@@ -1,6 +1,6 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderUi } from '../src/test/render';
-import { TodayView } from '../src/features/vendor/TodayView';
+import { nextAction, TodayView } from '../src/features/vendor/TodayView';
 import { MenuEditor } from '../src/features/vendor/MenuEditor';
 import { ArriveSheet, type ArriveDeps } from '../src/features/vendor/ArriveSheet';
 import { buildDraft } from '../src/features/vendor/menuLogic';
@@ -188,5 +188,40 @@ describe('V-08 I have arrived', () => {
     await waitFor(() => expect(screen.getByTestId('send-arrival')).toBeTruthy());
     await fireEvent.press(screen.getByTestId('send-arrival'));
     await waitFor(() => expect(screen.getByText('You already sent an alert here recently.')).toBeTruthy());
+  });
+});
+
+describe('V-04 Today (UX audit)', () => {
+  it('UX-31: one next action by state', () => {
+    expect(nextAction({ published: false, live: false, done: false })).toBe('set_menu');
+    expect(nextAction({ published: true, live: false, done: false })).toBe('next_stop');
+    expect(nextAction({ published: true, live: true, done: false })).toBe('live');
+    expect(nextAction({ published: false, live: true, done: false })).toBe('live');
+    expect(nextAction({ published: true, live: false, done: true })).toBe('done');
+  });
+  it('UX-30/43: stats are one line under the next action; no bell in the header', async () => {
+    await renderUi(<TodayView vendor={vendor} name="Ramesh" menu={null} stops={[stop({})]} stats={stats} loading={false} now={now} actions={actions} />, { mode: 'vendor' });
+    expect(screen.getByTestId('stats-line')).toHaveTextContent('186 followers · 0 alert opens today · 4.4 ★');
+    expect(screen.queryByLabelText('Notifications')).toBeNull();
+  });
+  it('UX-32: only the next stop, with All stops', async () => {
+    const onAllStops = jest.fn();
+    const later = stop({ stopId: 's9', societyName: 'Sai Residency', gateName: 'Main gate', windowStart: '10:00:00', windowEnd: '10:30:00' });
+    await renderUi(<TodayView vendor={vendor} name="Ramesh" menu={menu} stops={[stop({}), later]} stats={stats} loading={false} now={now} actions={{ ...actions, onAllStops }} />, { mode: 'vendor' });
+    expect(screen.getByTestId('next-stop-card')).toBeTruthy();
+    expect(screen.queryByText('Sai Residency')).toBeNull();
+    await fireEvent.press(screen.getByText('All stops'));
+    expect(onAllStops).toHaveBeenCalled();
+  });
+  it('UX-33: quick actions — sold out after the menu, deal only from 4 PM', async () => {
+    const onSoldOut = jest.fn();
+    const r = await renderUi(<TodayView vendor={vendor} name="Ramesh" menu={null} stops={[stop({})]} stats={stats} loading={false} now={now} actions={{ ...actions, onSoldOut }} />, { mode: 'vendor' });
+    expect(screen.getByTestId('quick-soldout').props.accessibilityState.disabled).toBe(true);
+    await r.rerender(<TodayView vendor={vendor} name="Ramesh" menu={menu} stops={[stop({})]} stats={stats} loading={false} now={now} actions={{ ...actions, onSoldOut }} />);
+    await fireEvent.press(screen.getByTestId('quick-soldout'));
+    expect(onSoldOut).toHaveBeenCalled();
+    expect(screen.getByTestId('quick-deal').props.accessibilityState.disabled).toBe(true);
+    await r.rerender(<TodayView vendor={vendor} name="Ramesh" menu={menu} stops={[stop({})]} stats={stats} loading={false} now={new Date('2026-11-05T11:00:00Z')} actions={{ ...actions, onSoldOut }} />);
+    expect(screen.getByTestId('quick-deal').props.accessibilityState.disabled).toBe(false);
   });
 });
