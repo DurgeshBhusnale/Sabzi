@@ -87,11 +87,19 @@ Deno.test('webhook signatures round-trip', async () => {
   assert(!(await verifyWebhook(secret, headers, '{"a":2}')));
 });
 
+const HOOK_SECRET = 'v1,whsec_' + btoa('secret-secret-secret');
+async function signedHook(body: string): Promise<Request> {
+  const id = 'msg_1';
+  const ts = String(Math.floor(Date.now() / 1000));
+  const sig = await signWebhook(HOOK_SECRET, id, ts, body);
+  return new Request('http://x', { method: 'POST', body, headers: { 'webhook-id': id, 'webhook-timestamp': ts, 'webhook-signature': sig } });
+}
+
 Deno.test('send-sms-hook: stub when MSG91 missing, 429 when blocked, sends when configured', async () => {
   const event = JSON.stringify({ user: { phone: '919999900021' }, sms: { otp: '123456' } });
   const logs: string[] = [];
-  const stub = await handleSendSms(new Request('http://x', { method: 'POST', body: event }), {
-    env: () => undefined,
+  const stub = await handleSendSms(await signedHook(event), {
+    env: (k) => ({ SEND_SMS_HOOK_SECRET: HOOK_SECRET } as Record<string, string>)[k],
     fetch: () => Promise.reject(new Error('should not call')),
     blockedUntil: () => Promise.resolve(null),
     log: (m) => logs.push(m),
@@ -100,16 +108,16 @@ Deno.test('send-sms-hook: stub when MSG91 missing, 429 when blocked, sends when 
   assert(logs[0]!.includes('stub'));
   assert(!logs[0]!.includes('919999900021'), 'logs never contain the full phone number');
 
-  const blocked = await handleSendSms(new Request('http://x', { method: 'POST', body: event }), {
-    env: () => undefined,
+  const blocked = await handleSendSms(await signedHook(event), {
+    env: (k) => ({ SEND_SMS_HOOK_SECRET: HOOK_SECRET } as Record<string, string>)[k],
     fetch,
     blockedUntil: () => Promise.resolve('2026-11-05T02:00:00Z'),
   });
   assertEquals(blocked.status, 429);
 
   let called = 0;
-  const env = (k: string) => ({ MSG91_AUTH_KEY: 'k', MSG91_TEMPLATE_ID: 't' } as Record<string, string>)[k];
-  const sent = await handleSendSms(new Request('http://x', { method: 'POST', body: event }), {
+  const env = (k: string) => ({ SEND_SMS_HOOK_SECRET: HOOK_SECRET, MSG91_AUTH_KEY: 'k', MSG91_TEMPLATE_ID: 't' } as Record<string, string>)[k];
+  const sent = await handleSendSms(await signedHook(event), {
     env,
     fetch: () => {
       called++;
@@ -129,4 +137,19 @@ Deno.test('send-sms-hook: rejects bad signatures when a secret is set', async ()
     blockedUntil: () => Promise.resolve(null),
   });
   assertEquals(res.status, 401);
+});
+
+Deno.test('send-sms-hook: fails closed when no secret is configured (SEC-12)', async () => {
+  const body = JSON.stringify({ user: { phone: '919999900021' }, sms: { otp: '123456' } });
+  let called = 0;
+  const res = await handleSendSms(await signedHook(body), {
+    env: (k) => ({ MSG91_AUTH_KEY: 'k', MSG91_TEMPLATE_ID: 't' } as Record<string, string>)[k],
+    fetch: () => {
+      called++;
+      return Promise.resolve(new Response('{}'));
+    },
+    blockedUntil: () => Promise.resolve(null),
+  });
+  assertEquals(res.status, 401);
+  assertEquals(called, 0);
 });

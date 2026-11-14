@@ -27,7 +27,7 @@ function deps(ctx: Context | null, o: Partial<NotifyDeps> = {}) {
   const sent: ExpoMessage[][] = [];
   const inserted: { user_id: string; type: string; payload: Record<string, unknown> }[] = [];
   const d: NotifyDeps = {
-    env: (k) => ({ UNDO_WAIT_MS: '0', SUPABASE_URL: 'http://sb' } as Record<string, string>)[k],
+    env: (k) => ({ NOTIFY_SECRET: 's3cret', UNDO_WAIT_MS: '0', SUPABASE_URL: 'http://sb' } as Record<string, string>)[k],
     now: () => new Date('2026-11-05T02:35:10Z'), // 8:05 AM IST
     sleep: () => Promise.resolve(),
     context: () => Promise.resolve(ctx),
@@ -44,7 +44,7 @@ function deps(ctx: Context | null, o: Partial<NotifyDeps> = {}) {
   return { d, sent, inserted };
 }
 
-const req = (body: unknown, headers: Record<string, string> = {}) => new Request('http://x/notify', { method: 'POST', body: JSON.stringify(body), headers });
+const req = (body: unknown, headers: Record<string, string> = { 'x-notify-secret': 's3cret' }) => new Request('http://x/notify', { method: 'POST', body: JSON.stringify(body), headers });
 
 Deno.test('arrival: correct followers, opt-outs and global prefs respected, deleted skipped', async () => {
   const ctx = arrivalCtx([
@@ -71,7 +71,7 @@ Deno.test('arrival waits for the undo window and skips undone events', async () 
   let calls = 0;
   let slept = 0;
   const { d, sent } = deps(null, {
-    env: (k) => ({ UNDO_WAIT_MS: '5500' } as Record<string, string>)[k],
+    env: (k) => ({ NOTIFY_SECRET: 's3cret', UNDO_WAIT_MS: '5500' } as Record<string, string>)[k],
     now: () => new Date('2026-11-05T02:35:01Z'),
     sleep: (ms) => {
       slept = ms;
@@ -161,7 +161,12 @@ Deno.test('unverified vendors and wrong secrets send nothing', async () => {
   const unv = deps({ ...arrivalCtx([r('priya')]), vendor: { id: 'v', display_name: 'Ganesh', verified: false } });
   assertEquals((await (await handleNotify(req({ kind: 'stop_event', ref: 'e1' }), unv.d)).json()).skipped, 'vendor_not_verified');
   const sec = deps(arrivalCtx([r('priya')]), { env: (k) => ({ NOTIFY_SECRET: 's3cret', UNDO_WAIT_MS: '0' } as Record<string, string>)[k] });
-  assertEquals((await handleNotify(req({ kind: 'stop_event', ref: 'e1' }), sec.d)).status, 403);
+  assertEquals((await handleNotify(req({ kind: 'stop_event', ref: 'e1' }, {}), sec.d)).status, 403);
+  assertEquals((await handleNotify(req({ kind: 'stop_event', ref: 'e1' }, { 'x-notify-secret': 'wrong' }), sec.d)).status, 403);
+  // SEC-02: no secret configured on the server → fail closed, even with a header.
+  const open = deps(arrivalCtx([r('priya')]), { env: (k) => ({ UNDO_WAIT_MS: '0' } as Record<string, string>)[k] });
+  assertEquals((await handleNotify(req({ kind: 'stop_event', ref: 'e1' }), open.d)).status, 403);
+  assertEquals(open.sent.length, 0);
   assertEquals((await handleNotify(req({ kind: 'stop_event', ref: 'e1' }, { 'x-notify-secret': 's3cret' }), sec.d)).status, 200);
 });
 
