@@ -2,6 +2,7 @@ import * as vendorApi from '../../features/vendor/api';
 import { sendDeal } from '../../features/engagement/api';
 import { AppErrorException } from '../errors';
 import { uploadImage } from '../storage';
+import { releaseKept } from '../keepFile';
 import { PermanentError, type Executor, type QueuedAction } from './queue';
 
 /** Server answers that will never succeed on retry. */
@@ -40,6 +41,7 @@ export const executor: Executor = async (a: QueuedAction) => {
       case 'stock_photo':
         await uploadImage('stock-photos', p.path as string, p.uri as string);
         await vendorApi.setStockPhoto(p.path as string, a.clientId);
+        releaseKept(p.uri as string);
         return;
     }
   } catch (e) {

@@ -2,11 +2,11 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { LIMITS } from '@sabzi/shared';
 
-export type CaptureResult = { kind: 'ok'; uri: string; bytes: number } | { kind: 'cancelled' } | { kind: 'denied' };
+export type CaptureResult = { kind: 'ok'; uri: string; bytes: number } | { kind: 'cancelled' } | { kind: 'denied' } | { kind: 'too_big'; bytes: number };
 
 /**
  * VEN-4: camera only (no gallery), then compress until under 300 KB.
- * Starts at 1280 px wide / 0.7 quality and steps down.
+ * Starts at 1280 px wide / 0.7 quality and steps down; `too_big` if even 480 px is over the limit.
  */
 export async function captureCompressed(maxBytes: number = LIMITS.stockPhotoMaxBytes): Promise<CaptureResult> {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -23,6 +23,7 @@ export async function compressUnder(uri: string, maxBytes: number): Promise<Capt
     [960, 0.5],
     [800, 0.45],
     [640, 0.4],
+    [480, 0.35],
   ];
   let last = { uri, bytes: Number.POSITIVE_INFINITY };
   for (const [width, compress] of steps) {
@@ -31,5 +32,6 @@ export async function compressUnder(uri: string, maxBytes: number): Promise<Capt
     last = { uri: out.uri, bytes };
     if (bytes <= maxBytes) return { kind: 'ok', ...last };
   }
-  return { kind: 'ok', ...last };
+  // TECH-11: never hand back a file the bucket will reject.
+  return { kind: 'too_big', bytes: last.bytes };
 }

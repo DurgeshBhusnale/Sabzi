@@ -8,6 +8,7 @@ import { captureCompressed } from '../../src/features/vendor/photos';
 import { setStockPhoto, todayIst } from '../../src/features/vendor/api';
 import { useInvalidateVendor, useMyVendor, vendorKeys } from '../../src/features/vendor/hooks';
 import { uploadImage } from '../../src/lib/storage';
+import { keepForUpload, releaseKept } from '../../src/lib/keepFile';
 import { openAppSettings } from '../../src/lib/permissions';
 import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
@@ -28,6 +29,7 @@ export default function StockPhoto() {
     const r = await captureCompressed();
     if (r.kind === 'denied') return setPhase('denied');
     if (r.kind === 'cancelled') return;
+    if (r.kind === 'too_big') return setPhase('failed');
     setUri(r.uri);
     setPhase('preview');
   };
@@ -37,10 +39,12 @@ export default function StockPhoto() {
     setPhase('uploading');
     try {
       const path = `${vendor.data.user_id}/${todayIst()}.jpg`;
-      await offline.runOrQueue('stock_photo', { path, uri }, 'photo', async (cid) => {
-        await uploadImage('stock-photos', path, uri);
+      const kept = await keepForUpload(uri, `${todayIst()}.jpg`);
+      const r = await offline.runOrQueue('stock_photo', { path, uri: kept }, 'photo', async (cid) => {
+        await uploadImage('stock-photos', path, kept);
         await setStockPhoto(path, cid);
       });
+      if (!r.queued) releaseKept(kept);
       track('stock_photo_added');
       await invalidate(vendorKeys.today);
       router.back();
