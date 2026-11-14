@@ -2,10 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Linking, Share, View } from 'react-native';
-import { ArrowLeft, EllipsisVertical, Flag, Share2 } from 'lucide-react-native';
+import { ArrowLeft, EllipsisVertical, Flag, Phone, Share2 } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Card, IconCircleButton, ListRow, Icon, Screen, Snackbar } from '../../../src/ui';
-import { VendorPageView } from '../../../src/features/buyer/VendorPageView';
+import { BottomSheet, Button, IconCircleButton, ListRow, Icon, Screen, Snackbar } from '../../../src/ui';
+import { VendorPageView, vendorPageFooter } from '../../../src/features/buyer/VendorPageView';
 import { FollowSheet } from '../../../src/features/buyer/FollowSheet';
 import { useBuyerHome, useMySocieties, usePrimarySociety, useVendorPage } from '../../../src/features/buyer/hooks';
 import { follow, recordView, unfollow, vendorPhone } from '../../../src/features/buyer/api';
@@ -46,12 +46,28 @@ export default function VendorPageScreen() {
   const alternatives = (home.data ?? []).filter((v) => v.vendor_id !== id && v.status !== 'not_coming' && v.status !== 'left');
   // UX-06: "Follow" on a Home row lands here with the follow sheet already open.
   const [autoDismissed, setAutoDismissed] = useState(false);
+  // UX-10: one sticky primary by state (Follow / Call / none)
+  const footerAction = vendorPageFooter(data);
+  const doFollow = async () => {
+    setBlocked((await notificationPermission().catch(() => 'undetermined')) === 'denied');
+    setSheet(true);
+  };
+  const doCall = async () => {
+    const phone = await vendorPhone(id);
+    if (phone) Linking.openURL(`tel:${phone}`);
+  };
   const autoFollow = followParam === '1' && !!data?.available && following.length === 0 && !autoDismissed;
 
   return (
     <Screen
       padded={false}
-      footer={data?.available ? <Button label={en.buyer.requestTomorrow} onPress={() => router.push({ pathname: '/buyer/request', params: { vendorId: id, name } })} testID="request-tomorrow" /> : undefined}
+      footer={
+        footerAction === 'follow' ? (
+          <Button label={en.buyer.follow} onPress={doFollow} testID="footer-follow" />
+        ) : footerAction === 'call' ? (
+          <Button label={en.buyer.call} icon={Phone} onPress={doCall} testID="footer-call" />
+        ) : undefined
+      }
       refreshing={page.isRefetching}
       onRefresh={() => page.refetch()}
     >
@@ -66,6 +82,7 @@ export default function VendorPageScreen() {
         page={data}
         loading={page.isLoading}
         societyName={mine.data?.find((s) => s.id === societyId)?.name}
+        societyId={societyId}
         alternatives={alternatives}
         coach={coach}
         onCoachDone={() => {
@@ -73,14 +90,8 @@ export default function VendorPageScreen() {
           AsyncStorage.setItem(COACH_KEY, '1').catch(() => undefined);
         }}
         actions={{
-          follow: async () => {
-            setBlocked((await notificationPermission().catch(() => 'undetermined')) === 'denied');
-            setSheet(true);
-          },
-          call: async () => {
-            const phone = await vendorPhone(id);
-            if (phone) Linking.openURL(`tel:${phone}`);
-          },
+          follow: doFollow,
+          call: doCall,
           openPhoto: () => data?.available && router.push({ pathname: '/buyer/photo', params: { path: data.menu?.stock_photo_path ?? '', at: data.menu?.stock_photo_at ?? '', name } }),
           seeAllReviews: () => router.push({ pathname: '/buyer/reviews', params: { vendorId: id, name } }),
           writeReview: () => router.push({ pathname: '/buyer/review', params: { vendorId: id, name } }),
@@ -89,8 +100,9 @@ export default function VendorPageScreen() {
           openVendor: (vid) => router.push({ pathname: '/buyer/vendor/[id]', params: { id: vid } }),
         }}
       />
-      {menu && data?.available ? (
-        <Card style={{ position: 'absolute', top: 52, right: 16, padding: 0, paddingHorizontal: 16, minWidth: 200 }} testID="overflow-menu">
+      {/* UX-18: a proper sheet with outside-tap dismiss instead of a floating card */}
+      <BottomSheet visible={menu && !!data?.available} onClose={() => setMenu(false)} title={en.buyer.moreOptions} testID="overflow-menu">
+        <View>
           <ListRow
             title={en.buyer.report}
             left={<Icon icon={Flag} size={18} />}
@@ -105,11 +117,11 @@ export default function VendorPageScreen() {
             left={<Icon icon={Share2} size={18} />}
             onPress={() => {
               setMenu(false);
-              Share.share({ message: en.vendor.shareText(name, vendorQrUrl(data.vendor.code)) });
+              if (data?.available) Share.share({ message: en.vendor.shareText(name, vendorQrUrl(data.vendor.code)) });
             }}
           />
-        </Card>
-      ) : null}
+        </View>
+      </BottomSheet>
       {toast ? <Snackbar kind="success" message={toast} /> : null}
       <View />
       {data?.available ? (

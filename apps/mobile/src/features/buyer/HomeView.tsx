@@ -78,7 +78,7 @@ function VendorTimeRow({ v, last, onOpen, onFollow, muted }: { v: HomeVendor; la
 }
 
 /** UX-03: one equal live card per vendor at the gate (replaces the single forest hero). */
-function LiveVendorCard({ v, onOpen }: { v: HomeVendor; onOpen: () => void }) {
+export function LiveVendorCard({ v, onOpen }: { v: HomeVendor; onOpen: () => void }) {
   const t = useTheme();
   const c = t.colors;
   const label = statusLabel(v.status, { gateName: v.gate_name, windowStart: v.window_start, windowEnd: v.window_end, since: v.status_at });
