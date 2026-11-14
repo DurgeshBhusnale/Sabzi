@@ -35,10 +35,10 @@ export default function AtTheStop() {
   return (
     <Screen
       tone="forest"
-      header={<TopAppBar tone="forest" title={en.vendor.live} compact onBack={() => router.back()} />}
+      header={<TopAppBar tone="forest" compact onBack={() => router.back()} />}
       footer={
-        <View style={{ flexDirection: 'row', gap: t.spacing.sm }}>
-          <View style={{ flex: 1 }}>
+        <View style={{ gap: t.spacing.sm }}>
+          <View>
             <Button
               size="xl"
               variant="secondary"
@@ -58,7 +58,7 @@ export default function AtTheStop() {
               }}
             />
           </View>
-          <View style={{ flex: 1 }}>
+          <View>
             <Button
               size="xl"
               label={en.vendor.iveLeft}
@@ -89,6 +89,7 @@ export default function AtTheStop() {
       {toast ? <Snackbar kind="success" message={toast} /> : null}
       <SectionHeader title={en.vendor.soldOutQ} />
       {menu.data ? <SoldOutList menu={menu.data} onToggle={(itemId, soldOut) => sold.mutate({ itemId, soldOut })} /> : null}
+      <Button label={en.vendor.eveningDealLink} variant="tertiary" onPress={() => router.push('/vendor/deal')} testID="live-deal-link" />
     </Screen>
   );
 }

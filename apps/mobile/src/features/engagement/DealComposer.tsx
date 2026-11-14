@@ -59,7 +59,7 @@ export function DealComposer({
                 else next[l.itemId] = pctOff(l.price, 20);
                 setPicked(next);
               }}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: t.layout.minTouch }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm, minHeight: t.layout.vendorPrimaryHeight }}
             >
               <ItemArt name={l.name} size={40} />
               <Text weight="600" style={{ flex: 1 }}>{l.name}</Text>
@@ -70,7 +70,7 @@ export function DealComposer({
                 <View style={{ flexDirection: 'row', gap: t.spacing.xs }}>
                   {[10, 20].map((p) => (
                     <View key={p} style={{ flex: 1 }}>
-                      <Button label={en.eng.pct(p)} variant="secondary" onPress={() => setPicked({ ...picked, [l.itemId]: pctOff(l.price, p) })} testID={`pct-${p}-${l.name}`} />
+                      <Button size="xl" label={en.eng.pct(p)} variant="secondary" onPress={() => setPicked({ ...picked, [l.itemId]: pctOff(l.price, p) })} testID={`pct-${p}-${l.name}`} />
                     </View>
                   ))}
                 </View>

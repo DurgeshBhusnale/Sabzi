@@ -225,3 +225,25 @@ describe('V-04 Today (UX audit)', () => {
     expect(screen.getByTestId('quick-deal').props.accessibilityState.disabled).toBe(false);
   });
 });
+
+describe('Vendor screens (UX audit)', () => {
+  it('UX-37: the whole sold-out row toggles and shows a Sold out pill', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { SoldOutList } = require('../src/features/vendor/SoldOutList') as typeof import('../src/features/vendor/SoldOutList');
+    const onToggle = jest.fn();
+    const m = { ...menu, lines: [{ ...menu.lines[0]!, soldOut: true }, menu.lines[1]!] };
+    await renderUi(<SoldOutList menu={m} onToggle={onToggle} />, { mode: 'vendor' });
+    expect(screen.getByTestId('soldout-Tomato')).toHaveStyle({ minHeight: 56 });
+    expect(screen.getByText('Sold out')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('soldout-Onion'));
+    expect(onToggle).toHaveBeenCalledWith(menu.lines[1]!.itemId, true);
+  });
+  it('UX-35/45: a priced tile shows the price in the vendor price style and a selected tint', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { ItemTile } = require('../src/ui/ItemTile') as typeof import('../src/ui/ItemTile');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { vendorType } = require('@sabzi/shared') as typeof import('@sabzi/shared');
+    await renderUi(<ItemTile name="Tomato" state="priced" price={40} unit="kg" onPress={jest.fn()} testID="t" />, { mode: 'vendor' });
+    expect(screen.getByTestId('tile-price')).toHaveStyle({ fontSize: vendorType.price.fontSize });
+  });
+});
