@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import Constants from 'expo-constants';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
-import { Bell, Code, FileText, HelpCircle, Languages, LogOut, Shield, Trash2 } from 'lucide-react-native';
+import { Code, FileText, HelpCircle, Languages, LogOut, Shield, Trash2 } from 'lucide-react-native';
 import { PUBLIC_BASE_URL } from '@sabzi/shared';
 import { useTheme, type SchemePreference } from '../../src/theme/ThemeProvider';
 import { Dialog, Screen, SegmentedControl, Text, TopAppBar } from '../../src/ui';
@@ -19,7 +19,6 @@ export default function Settings() {
   return (
     <Screen header={<TopAppBar title={en.settings.title} onBack={() => router.back()} />}>
       <View>
-        <LinkRow icon={Bell} label={en.settings.notifications} onPress={() => router.push('/account/notifications')} />
         <LinkRow icon={Languages} label={en.settings.language} sub={`${en.settings.english} · ${en.settings.comingSoon}`} onPress={() => undefined} />
       </View>
       <View style={{ gap: t.spacing.sm, paddingVertical: t.spacing.xs }}>
@@ -40,7 +39,8 @@ export default function Settings() {
         <LinkRow icon={Shield} label={en.settings.privacy} onPress={() => Linking.openURL(`${PUBLIC_BASE_URL}/privacy`)} />
         <LinkRow icon={FileText} label={en.settings.terms} onPress={() => Linking.openURL(`${PUBLIC_BASE_URL}/terms`)} />
       </View>
-      <View>
+      {/* UX-29: log out and delete in their own last group, after a section gap */}
+      <View style={{ marginTop: t.spacing.sectionGap - t.spacing.md }} testID="account-actions">
         <LinkRow icon={LogOut} label={en.settings.logOut} onPress={() => setLogout(true)} />
         <LinkRow icon={Trash2} label={en.settings.deleteAccount} danger last onPress={() => router.push('/account/delete')} />
       </View>
