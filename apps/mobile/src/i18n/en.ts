@@ -606,6 +606,7 @@ export const en = {
     misconfiguredTitle: "This build isn't set up right",
     misconfiguredBody: 'Please install the latest test version from the link we sent you.',
     notFound: "This vendor isn't available any more.",
+    badLink: "This link doesn't look right. Ask for a fresh QR code.",
     offlineTitle: "You're offline",
     offlineBody: 'Check your mobile data or Wi-Fi.',
     offlineBanner: (t: string) => `Offline · showing data from ${t}`,

@@ -20,7 +20,7 @@ Branch 2 onwards also carries commit `e408ce5` (`docs/audit/UX_AUDIT.md`, from a
 
 Verified locally on each branch: `pnpm verify` green (mobile 278 tests at the end), Deno function tests 22/22. pgTAP was not run locally (no Docker); CI's `database` job ran it on #15 and #17: 11 files, all pass.
 
-Still open (P2): SEC-08, SEC-10, SEC-11, SEC-14, SEC-15, TECH-10, TECH-11, TECH-12; SEC-13's SecureStore half. The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
+P2 follow-up (same day): SEC-08/10/15 in #18; SEC-13 (SecureStore), SEC-14, TECH-10/11/12 in the next PR; SEC-11 accepted for the closed test (DECISIONS). New native modules `expo-secure-store` and `expo-file-system` also need the new APK. The items below need **you**. Nothing here was done from the code sessions: no dashboard change, no deploy, no `eas build`/`eas update`.
 
 ### Owner actions (do in this order)
 
@@ -98,19 +98,19 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | SEC-05 | P1 | Privacy | Testers vs demo data | `supabase/seed.sql` on hosted DB | Blocked: hosted DB check (owner action) |
 | SEC-06 | P1 | Privacy | Privacy policy reachable | `apps/mobile/app/account/settings.tsx:40`, `apps/mobile/app/(auth)/signin.tsx:59` → `https://pheri.anchorlit.in/privacy` | Blocked: hosted site check (owner action) |
 | SEC-07 | P1 | Admin | Admin login MFA | `public.admin_mfa_ok()` reads `private.settings.admin_require_mfa` | Blocked: hosted DB check (owner action) |
-| SEC-08 | P2 | DB | Anon RPCs | `public.setting_int`, `public.email_login_available`, `public.otp_status`, `public.record_qr_scan` | Fixed (#PR) |
+| SEC-08 | P2 | DB | Anon RPCs | `public.setting_int`, `public.email_login_available`, `public.otp_status`, `public.record_qr_scan` | Fixed (#18) |
 | SEC-09 | P2 | Storage | Public bucket listing | policy "vendor photos: public read" (`supabase/migrations/20261105000400_storage_settings.sql`) | Fixed (#15) |
-| SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Fixed (#PR) |
+| SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Fixed (#18) |
 | SEC-11 | P2 | Abuse | Open sign-up; multi-account fake reviews | Auth settings; `submit_review` | Accepted for closed test (DECISIONS 2026-11-15); owner: CAPTCHA before public pilot |
 | SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (#12) |
-| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Partly fixed (PR #17): allowBackup off (new APK); SecureStore not done |
-| SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Open |
-| SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Fixed (#PR) |
+| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Fixed (#17 allowBackup, #PR SecureStore); new APK |
+| SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Fixed (#PR) |
+| SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Fixed (#18) |
 | SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (#12); CORS `*` kept, bearer-auth only |
 | SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Fixed (#15) |
-| TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Open |
-| TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Open |
-| TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Open |
+| TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Fixed (#PR) |
+| TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Fixed (#PR) |
+| TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Fixed (#PR); new APK (expo-file-system) |
 | TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Fixed (#16) |
 | TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Fixed (#14) |
 

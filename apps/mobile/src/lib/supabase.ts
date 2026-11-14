@@ -1,4 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppState, Platform } from 'react-native';
+import { createSecureStorage } from './secureStorage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@sabzi/shared';
 
@@ -24,8 +25,16 @@ export function configProblem(u: string | undefined = process.env.EXPO_PUBLIC_SU
 export function getSupabase(): Client {
   if (!client) {
     client = createClient<Database>(url, anonKey, {
-      auth: { storage: AsyncStorage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: 'pkce' },
+      auth: { storage: createSecureStorage(), persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: 'pkce' },
     });
+    // TECH-10: refresh the token only while the app is in the foreground, and right away when it comes back.
+    if (Platform.OS !== 'web') {
+      const c = client;
+      AppState.addEventListener('change', (s) => {
+        if (s === 'active') c.auth.startAutoRefresh();
+        else c.auth.stopAutoRefresh();
+      });
+    }
   }
   return client;
 }

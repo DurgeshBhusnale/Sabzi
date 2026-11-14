@@ -145,3 +145,14 @@ export const itemSchema = z.object({
   name: z.string().trim().min(2).max(40),
   default_unit: priceUnitSchema,
 });
+
+/**
+ * SEC-14: deep-link params. Vendor QR codes are 8 characters from generate_vendor_code()'s alphabet
+ * (no 0/1/I/L/O); lower case is accepted because people type them. Society links carry a UUID.
+ */
+export const vendorCodeSchema = z
+  .string()
+  .trim()
+  .transform((s) => s.toUpperCase())
+  .pipe(z.string().regex(/^[2-9A-HJKMNP-Z]{8}$/));
+export const societyIdSchema = z.string().uuid();
