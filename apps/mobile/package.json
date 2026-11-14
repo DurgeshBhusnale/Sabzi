@@ -54,7 +54,9 @@
     "android": "expo run:android",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "jest --ci"
+    "test": "jest --ci",
+    "update:preview": "eas update --channel preview --environment preview",
+    "update:production": "eas update --channel production --environment production"
   },
   "private": true,
   "jest": {

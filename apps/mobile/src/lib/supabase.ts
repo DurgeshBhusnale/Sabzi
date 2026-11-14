@@ -9,6 +9,17 @@ const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 let client: Client | null = null;
 
+/**
+ * TECH-03: a release build (APK or OTA bundle) made without the EAS environment has no Supabase URL/key and
+ * would silently talk to the emulator address and hang. Returns why the build is unusable, or null.
+ */
+export function configProblem(u: string | undefined = process.env.EXPO_PUBLIC_SUPABASE_URL, k: string | undefined = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY, dev: boolean = __DEV__): 'missing' | 'local' | null {
+  if (dev) return null;
+  if (!u || !k) return 'missing';
+  if (/10\.0\.2\.2|127\.0\.0\.1|localhost/.test(u)) return 'local';
+  return null;
+}
+
 /** AUTH-5: session persisted on the device and refreshed silently. */
 export function getSupabase(): Client {
   if (!client) {

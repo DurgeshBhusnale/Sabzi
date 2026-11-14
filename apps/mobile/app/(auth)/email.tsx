@@ -10,10 +10,14 @@ import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
 
 /**
- * S-05 email sign-in / sign-up: email → 6-digit code → signed in (new emails get a new account).
+ * S-05 email sign-in / sign-up: email → code (LIMITS.emailOtpLength digits) → signed in (new emails get a new account).
  * Then role → profile building (name + mobile number) like Google users.
  */
-export default function EmailLogin({ send = sendEmailOtp, verify = verifyEmailOtp }: { send?: typeof sendEmailOtp; verify?: typeof verifyEmailOtp }) {
+export default function EmailLogin({
+  send = sendEmailOtp,
+  verify = verifyEmailOtp,
+  codeLength = LIMITS.emailOtpLength,
+}: { send?: typeof sendEmailOtp; verify?: typeof verifyEmailOtp; codeLength?: number }) {
   const t = useTheme();
   const { refresh } = useSession();
   const [email, setEmail] = useState('');
@@ -43,7 +47,7 @@ export default function EmailLogin({ send = sendEmailOtp, verify = verifyEmailOt
   const onCode = async (v: string) => {
     setCode(v);
     setError(null);
-    if (v.length < 6) return;
+    if (v.length < codeLength) return;
     setBusy(true);
     const r = await verify(email, v);
     setBusy(false);
@@ -65,7 +69,7 @@ export default function EmailLogin({ send = sendEmailOtp, verify = verifyEmailOt
         </>
       ) : (
         <View style={{ gap: t.spacing.sm }}>
-          <OtpInput value={code} onChange={onCode} state={error ? 'error' : 'default'} message={error ?? (busy ? en.auth.verifying : null)} autoFocus testID="email-otp" />
+          <OtpInput length={codeLength} value={code} onChange={onCode} state={error ? 'error' : 'default'} message={error ?? (busy ? en.auth.verifying : null)} autoFocus testID="email-otp" />
           <Text variant="caption" color="textMuted">{en.auth.checkSpam}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text color="textSecondary">{seconds > 0 ? en.auth.resendIn(seconds) : en.auth.didntGet}</Text>

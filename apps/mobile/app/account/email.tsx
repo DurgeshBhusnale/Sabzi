@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { LIMITS } from '@sabzi/shared';
 import { Button, OtpInput, Screen, Snackbar, Text, TextInput, TopAppBar } from '../../src/ui';
 import { addEmail, verifyEmailChange } from '../../src/features/auth/api';
 import { useSession } from '../../src/features/auth/session';
@@ -37,13 +38,14 @@ export default function AddEmail() {
         <>
           <Text color="textSecondary">{en.auth.codeSentTo(email)}</Text>
           <OtpInput
+            length={LIMITS.emailOtpLength}
             value={code}
             state={error ? 'error' : done ? 'success' : 'default'}
             message={error ?? (done ? en.auth.verified : null)}
             onChange={async (v) => {
               setCode(v);
               setError(null);
-              if (v.length < 6) return;
+              if (v.length < LIMITS.emailOtpLength) return;
               const r = await verifyEmailChange(email, v);
               if (r.ok) {
                 setDone(true);

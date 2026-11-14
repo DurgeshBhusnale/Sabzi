@@ -1,7 +1,9 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { AUTH_METHODS } from '@sabzi/shared';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { AUTH_METHODS, LIMITS } from '@sabzi/shared';
 import { renderUi } from '../src/test/render';
-import { nextAuthStep, signInWithGoogle } from '../src/features/auth/api';
+import { nextAuthStep, sendEmailOtp, signInWithGoogle } from '../src/features/auth/api';
 import type { Client } from '../src/lib/supabase';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false } }));
@@ -19,8 +21,6 @@ import SignIn from '../app/(auth)/signin';
 import ProfileStep from '../app/(auth)/name';
 // eslint-disable-next-line import/first
 import EmailLogin from '../app/(auth)/email';
-// eslint-disable-next-line import/first
-import { sendEmailOtp } from '../src/features/auth/api';
 
 function fakeAuth(over: Record<string, unknown> = {}) {
   const auth = {
@@ -113,6 +113,24 @@ describe('email sign-in / sign-up', () => {
     await waitFor(() => expect(screen.getByText("That code doesn't match. Check your email and try again.")).toBeTruthy());
     await fireEvent.changeText(screen.getByTestId('email-otp'), '123456');
     await waitFor(() => expect(verify).toHaveBeenLastCalledWith('riya@example.com', '123456'));
+  });
+  it('TECH-01: the whole code is sent, whatever the configured length (8 digits does not stop at 6)', async () => {
+    const send = jest.fn(async () => ({ ok: true as const }));
+    const verify = jest.fn(async () => ({ ok: true as const }));
+    await renderUi(<EmailLogin send={send} verify={verify} codeLength={8} />);
+    await fireEvent.changeText(screen.getByTestId('email-input'), 'riya@example.com');
+    await fireEvent.press(screen.getByTestId('send-email-code'));
+    await waitFor(() => expect(screen.getByTestId('email-otp-box-7')).toBeTruthy());
+    await fireEvent.changeText(screen.getByTestId('email-otp'), '123456');
+    expect(verify).not.toHaveBeenCalled();
+    await fireEvent.changeText(screen.getByTestId('email-otp'), '12345678');
+    await waitFor(() => expect(verify).toHaveBeenLastCalledWith('riya@example.com', '12345678'));
+  });
+  it('TECH-01: LIMITS.emailOtpLength matches supabase/config.toml otp_length', () => {
+    const toml = readFileSync(join(__dirname, '../../../supabase/config.toml'), 'utf8');
+    const section = toml.slice(toml.indexOf('[auth.email]'));
+    const m = /^otp_length\s*=\s*(\d+)/m.exec(section);
+    expect(Number(m?.[1])).toBe(LIMITS.emailOtpLength);
   });
   it('sign-in screen offers Google and email, both behind consent', async () => {
     await renderUi(<SignIn google={jest.fn()} />);

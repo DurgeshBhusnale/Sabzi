@@ -52,6 +52,11 @@ export const LIMITS = {
   /** A vendor counts as at the gate for this long after "arrived" without "left" */
   atGateHours: 3,
   otpResendSeconds: 30,
+  /**
+   * Email sign-in code length (TECH-01). Must equal the hosted project's Auth → Email → "Email OTP Length"
+   * and supabase/config.toml `otp_length`; Supabase's default is 8, which the app cannot accept.
+   */
+  emailOtpLength: 6,
   otpMaxFailures: 5,
   otpBlockMinutes: 60,
   stockPhotoMaxBytes: 300 * 1024,
