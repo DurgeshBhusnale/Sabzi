@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 import { renderUi } from '../src/test/render';
 import { HomeView } from '../src/features/buyer/HomeView';
-import { VendorPageView } from '../src/features/buyer/VendorPageView';
+import { VendorPageView, vendorPageFooter } from '../src/features/buyer/VendorPageView';
 import { FollowSheet } from '../src/features/buyer/FollowSheet';
 import { SocietySwitcher } from '../src/features/buyer/SocietySwitcher';
 import { SocietyPicker } from '../src/features/buyer/SocietyPicker';
@@ -115,7 +115,7 @@ describe('B-05 vendor page', () => {
     expect(screen.getByText('Sold out')).toBeTruthy();
     expect(screen.getByText('₹25 /kg')).toBeTruthy();
     expect(screen.getByText('Updated 6:42 AM')).toBeTruthy();
-    expect(screen.getByText('Home delivery available')).toBeTruthy();
+    expect(screen.getByText('Verified · 4.4 ★ · 128 ratings · Tempo · Home delivery')).toBeTruthy();
   });
   it('never shows a phone number; Call only when allow_calls is on', async () => {
     const r = await renderUi(<VendorPageView page={page({ allow_calls: false })} loading={false} actions={pageActions} />);
@@ -234,5 +234,48 @@ describe('UX-07 vendor picker', () => {
     const { pickableVendors } = require('../src/features/engagement/VendorPickerSheet') as typeof import('../src/features/engagement/VendorPickerSheet');
     const list = pickableVendors([{ ...imran, is_following: false }, hv({}), hv({ stop_id: 's2', gate_name: 'Gate 2' })]);
     expect(list.map((v) => v.id)).toEqual(['r', 'i']);
+  });
+});
+
+describe('B-05 vendor page (UX audit)', () => {
+  const two = (o: Parameters<typeof page>[0] = {}) => {
+    const p = page(o);
+    if (!p.available) return p;
+    return {
+      ...p,
+      stops: [...p.stops, { ...p.stops[0]!, stop_id: 's2', society_id: 'sai', society_name: 'Sai Residency', gate_name: 'Main gate', window_start: '09:30:00', window_end: '10:00:00' }],
+      reviews: [p.reviews[0]!, { ...p.reviews[0]!, id: 'rv2' }, { ...p.reviews[0]!, id: 'rv3', text: 'Third review' }],
+    };
+  };
+  it('UX-10: one sticky primary by state', () => {
+    expect(vendorPageFooter(page())).toBe('follow');
+    expect(vendorPageFooter(page({ following: true }))).toBe('call');
+    expect(vendorPageFooter(page({ following: true, allow_calls: false }))).toBeNull();
+    expect(vendorPageFooter(undefined)).toBeNull();
+  });
+  it('UX-12: my gate and time under the name; other stops collapsed at the end', async () => {
+    await renderUi(<VendorPageView page={two()} loading={false} societyId="gp" actions={pageActions} />);
+    expect(screen.getByText('Usually at Gate 1, 8:00–8:45 AM · Daily')).toBeTruthy();
+    expect(screen.queryByText('Sai Residency · Main gate')).toBeNull();
+    await fireEvent.press(screen.getByTestId('other-stops-toggle'));
+    expect(screen.getByText('Sai Residency · Main gate')).toBeTruthy();
+  });
+  it('UX-13/14: two reviews on the page, "See all", and a rate hint for non-followers', async () => {
+    await renderUi(<VendorPageView page={two()} loading={false} actions={pageActions} />);
+    expect(screen.queryByText('Third review')).toBeNull();
+    expect(screen.getByTestId('see-all-reviews')).toBeTruthy();
+    expect(screen.getByTestId('rate-hint')).toBeTruthy();
+  });
+  it('UX-14: followers get "Rate Ramesh" in the ratings header', async () => {
+    const writeReview = jest.fn();
+    await renderUi(<VendorPageView page={page({ following: true })} loading={false} actions={{ ...pageActions, writeReview }} />);
+    await fireEvent.press(screen.getByText('Rate Ramesh'));
+    expect(writeReview).toHaveBeenCalled();
+  });
+  it('UX-15: request for tomorrow lives in its own section', async () => {
+    pageActions.requestTomorrow.mockClear();
+    await renderUi(<VendorPageView page={page()} loading={false} actions={pageActions} />);
+    await fireEvent.press(screen.getByTestId('request-tomorrow-section'));
+    expect(pageActions.requestTomorrow).toHaveBeenCalled();
   });
 });
