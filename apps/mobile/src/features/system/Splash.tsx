@@ -31,7 +31,7 @@ export function Splash() {
   return (
     <View testID="splash" style={[styles.fill, styles.center, { backgroundColor: t.colors.bg, gap: t.spacing.xs }]}>
       <Image source={ILLUSTRATION_ART.splash} resizeMode="contain" style={{ width: 280, height: 280, borderRadius: t.radius.dialog }} accessible={false} />
-      <Text variant="display" color="primary" style={{ fontSize: 40, lineHeight: 46 }}>{APP_NAME}</Text>
+      <Text variant="brand" color="primary">{APP_NAME}</Text>
       {slow ? <Text variant="bodySmall" color="textSecondary">{en.splash.slow}</Text> : null}
       <Text variant="caption" weight="400" color="textSecondary" style={[styles.version, { bottom: t.spacing.xxl }]}>
         {`v${Constants.expoConfig?.version ?? '0.0.0'}`}

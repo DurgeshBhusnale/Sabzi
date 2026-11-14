@@ -69,7 +69,7 @@ function AtGateHero({ v, onOpen }: { v: HomeVendor; onOpen: () => void }) {
       {items.length ? (
         <View style={[styles.row, { gap: t.spacing.xs }]}>
           {items.map((i) => (
-            <View key={i.item_id} style={[styles.priceBox, { borderRadius: t.radius.button, paddingHorizontal: t.spacing.sm, paddingVertical: 10 }]}>
+            <View key={i.item_id} style={[styles.priceBox, { borderRadius: t.radius.button, borderColor: t.colors.onForestLine, paddingHorizontal: t.spacing.sm, paddingVertical: t.spacing.xs }]}>
               <Text variant="caption" weight="400" color="onForest" style={{ opacity: 0.75 }} numberOfLines={1}>{i.name.replace(/\s*\(.*\)/, '')}</Text>
               <Text variant="body" weight="500" color="onForest" strike={i.sold_out}>
                 {formatAmount(Number(i.deal_price ?? i.price))}
@@ -164,7 +164,7 @@ export function HomeView({ vendors, loading, now = new Date(), actions }: { vend
         {s.showDeals ? (
           <Pressable onPress={actions.openDeals} accessibilityRole="button" accessibilityLabel={`${en.buyer.eveningDeals}. ${en.buyer.dealsLine(dealItems, dealVendors)}. ${en.buyer.seeDeals}`} testID="deals-strip">
             <ImageBackground source={PHOTO_ART.eveningDeal} resizeMode="cover" imageStyle={{ borderRadius: t.radius.card }} style={[styles.deal, { borderRadius: t.radius.card, padding: t.spacing.md }]}>
-              <View style={[StyleSheet.absoluteFill, { borderRadius: t.radius.card, backgroundColor: 'rgba(15,61,42,0.55)' }]} />
+              <View style={[StyleSheet.absoluteFill, { borderRadius: t.radius.card, backgroundColor: t.colors.heroScrim }]} />
               <View style={[styles.row, { gap: t.spacing.sm }]}>
                 <View style={{ flex: 1 }}>
                   <Text variant="h2" color="onForest">{en.buyer.eveningDeals}</Text>
@@ -204,7 +204,7 @@ export function HomeView({ vendors, loading, now = new Date(), actions }: { vend
               style={[styles.row, { minHeight: t.layout.minTouch, justifyContent: 'space-between' }]}
               testID="not-coming-toggle"
             >
-              <Text variant="caption" color="textSecondary" style={{ fontSize: 13 }}>{en.buyer.notComingToday(s.notComing.length)}</Text>
+              <Text variant="bodySmall" color="textSecondary">{en.buyer.notComingToday(s.notComing.length)}</Text>
               <Icon icon={showNotComing ? ChevronUp : ChevronDown} size={16} color="textSecondary" />
             </Pressable>
             {showNotComing
@@ -221,7 +221,7 @@ export function HomeView({ vendors, loading, now = new Date(), actions }: { vend
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
-  priceBox: { flex: 1, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', gap: 2 },
+  priceBox: { flex: 1, borderWidth: 1, gap: 2 },
   followPill: { height: 32, paddingHorizontal: 14, borderWidth: 1, justifyContent: 'center' },
   deal: { minHeight: 96, justifyContent: 'flex-end', overflow: 'hidden' },
 });

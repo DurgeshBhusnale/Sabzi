@@ -103,14 +103,14 @@ The known back-navigation bug (TECH-02) is **P1**. It annoys people but blocks n
 | SEC-10 | P2 | DB | Verified vendor can rename / change photo freely | `supabase/migrations/20261105000200_rls.sql:72-73,92-93` | Fixed (#18) |
 | SEC-11 | P2 | Abuse | Open sign-up; multi-account fake reviews | Auth settings; `submit_review` | Accepted for closed test (DECISIONS 2026-11-15); owner: CAPTCHA before public pilot |
 | SEC-12 | P2 | Edge function | `send-sms-hook` fails open without its secret | `supabase/functions/send-sms-hook/handler.ts:18-19` | Fixed (#12) |
-| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Fixed (#17 allowBackup, #PR SecureStore); new APK |
-| SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Fixed (#PR) |
+| SEC-13 | P2 | App storage | Session tokens in AsyncStorage + Android backup | `apps/mobile/src/lib/supabase.ts:16`, `apps/mobile/app.json` (`android.allowBackup` unset) | Fixed (#17 allowBackup, #19 SecureStore); new APK |
+| SEC-14 | P2 | Deep links | `v/[code]`, `s/[id]` params not validated | `apps/mobile/app/v/[code].tsx:24`, `apps/mobile/app/s/[id].tsx:17-21` | Fixed (#19) |
 | SEC-15 | P2 | DB hygiene | `authenticated` holds TRUNCATE + write grants on views | Supabase default grants (see §3) | Fixed (#18) |
 | SEC-16 | P2 | Edge function | `admin-invite` returns raw GoTrue error text; CORS `*` | `supabase/functions/admin-invite/handler.ts:25`, `supabase/functions/_shared/http.ts:2` | Fixed: error codes (#12); CORS `*` kept, bearer-auth only |
 | SEC-17 | P2 | Storage | `item-images` allows `image/svg+xml` | bucket config | Fixed (#15) |
-| TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Fixed (#PR) |
-| TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Fixed (#PR) |
-| TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Fixed (#PR); new APK (expo-file-system) |
+| TECH-10 | P2 | Session | No AppState start/stop of token auto-refresh | `apps/mobile/src/lib/supabase.ts:13-19` | Fixed (#19) |
+| TECH-11 | P2 | Images | Compressor can return a file over the bucket limit | `apps/mobile/src/features/vendor/photos.ts:27-34` | Fixed (#19) |
+| TECH-12 | P2 | Offline queue | Queued stock photo keeps a temp-cache URI | `apps/mobile/src/lib/offline/executor.ts:41` | Fixed (#19); new APK (expo-file-system) |
 | TECH-13 | P2 | Navigation | Sign-out fires two competing redirects | `apps/mobile/app/account/settings.tsx:66` + `apps/mobile/app/(buyer)/_layout.tsx:22` | Fixed (#16) |
 | TECH-14 | P2 | Lint | Duplicate import warnings | `apps/mobile/__tests__/google-signin.test.tsx:4,23` | Fixed (#14) |
 

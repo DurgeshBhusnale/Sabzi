@@ -76,13 +76,13 @@ export function ItemTile({
       {state === 'priced' && price != null && unit ? (
         <>
           <Text variant="caption" weight="600" align="center" style={{ fontSize: t.type.label.fontSize + 1 }}>{formatPrice(price, unit)}</Text>
-          {wasPrice != null && wasPrice !== price ? <Text variant="caption" weight="400" color="textSecondary" style={{ fontSize: 10 }}>{en.menu.was(wasPrice)}</Text> : null}
+          {wasPrice != null && wasPrice !== price ? <Text variant="tiny" weight="400" color="textSecondary">{en.menu.was(wasPrice)}</Text> : null}
         </>
       ) : null}
       {state === 'selected' && showSetPrice ? (
-        <Text variant="caption" color={missingPrice ? 'error' : 'textSecondary'} style={{ fontSize: 11 }}>{missingPrice ? en.menu.addPrice : en.menu.setPrice}</Text>
+        <Text variant="tiny" color={missingPrice ? 'error' : 'textSecondary'}>{missingPrice ? en.menu.addPrice : en.menu.setPrice}</Text>
       ) : null}
-      {state === 'sold_out' ? <Text variant="caption" color="error" style={{ fontSize: 11 }}>{en.menu.soldOut}</Text> : null}
+      {state === 'sold_out' ? <Text variant="tiny" color="error">{en.menu.soldOut}</Text> : null}
     </Pressable>
   );
 }

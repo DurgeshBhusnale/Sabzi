@@ -75,7 +75,7 @@ export default function RoleScreen() {
               </View>
               <Icon icon={selected ? CircleCheck : Circle} size={22} color={selected ? 'primary' : 'border'} />
             </View>
-            <Text variant="h1" style={{ fontSize: 22, lineHeight: 26 }}>{c.title}</Text>
+            <Text variant="cardTitle">{c.title}</Text>
             <Text variant="bodySmall" color="textSecondary">{c.body}</Text>
           </Pressable>
         );

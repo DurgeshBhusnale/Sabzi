@@ -107,7 +107,7 @@ export function ArriveSheet({ visible, stops, onClose, deps, now = () => new Dat
     >
       {highlight ? (
         <>
-          <Text variant="h1" color="onForest" style={{ fontSize: 26, lineHeight: 30 }}>{`${s.societyName} · ${s.gateName}`}</Text>
+          <Text variant="cardTitle" color="onForest">{`${s.societyName} · ${s.gateName}`}</Text>
           {distance != null ? <Text variant="bodySmall" color="onForestMuted">{en.vendor.away(formatDistance(distance))}</Text> : null}
           <Text variant="label" color="mint">{en.vendor.willBeTold(s.followers)}</Text>
         </>

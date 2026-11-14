@@ -18,12 +18,23 @@ export function contrast(a: string, b: string): number {
 const PAIRS: [keyof ColorTokens, keyof ColorTokens][] = [
   ['textPrimary', 'bg'], ['textPrimary', 'surface'], ['textPrimary', 'surface2'],
   ['textSecondary', 'bg'], ['textSecondary', 'surface'], ['textSecondary', 'surface2'],
-  ['textMuted', 'surface'], ['textMuted', 'bg'],
+  ['textMuted', 'surface'], ['textMuted', 'bg'], ['textMuted', 'surface2'], ['textMuted', 'sectionBg'],
+  ['textPrimary', 'sectionBg'], ['textSecondary', 'sectionBg'],
   ['onPrimary', 'primary'], ['primary', 'surface'], ['onPrimaryTint', 'primaryTint'], ['onPrimaryTint', 'primaryTintStrong'],
   ['error', 'surface'], ['onErrorTint', 'errorTint'], ['dealAmberText', 'dealAmberTint'], ['onDealAmber', 'dealAmber'],
   ['warning', 'warningTint'], ['onInfoTint', 'infoTint'], ['textPrimary', 'primaryTintStrong'],
   ['onForest', 'forest'], ['mint', 'forest'], ['onCream', 'cream'], ['onAccent', 'accent'], ['textPrimary', 'sage'],
 ];
+
+describe('UX-50: three distinct text levels', () => {
+  it.each([['light', lightColors], ['dark', darkColors]] as const)('%s: primary > secondary > muted, each step visible', (_n, c) => {
+    const p = contrast(c.textPrimary, c.bg);
+    const s = contrast(c.textSecondary, c.bg);
+    const m = contrast(c.textMuted, c.bg);
+    expect(p).toBeGreaterThan(s);
+    expect(s - m).toBeGreaterThan(1);
+  });
+});
 
 describe('WCAG AA contrast of token pairs', () => {
   it.each(PAIRS)('light: %s on %s ≥ 4.5', (fg, bg) => {

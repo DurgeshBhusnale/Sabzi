@@ -43,6 +43,21 @@ export type ColorTokens = {
   surface: string;
   surface2: string;
   border: string;
+  /** UX-51: row hairlines inside a section (lighter than card borders) */
+  divider: string;
+  /** UX-51: ground behind flat secondary sections */
+  sectionBg: string;
+  /** 3 dp left edge on live cards (at the gate, current stop) */
+  liveEdge: string;
+  /** UX-54: hairlines and outlines on the forest ground */
+  onForestLine: string;
+  onForestOutline: string;
+  /** dark scrim over a hero photo */
+  heroScrim: string;
+  /** off track of switches */
+  switchTrackOff: string;
+  /** welcome slides art panel */
+  artPanel: string;
   textPrimary: string;
   textSecondary: string;
   textMuted: string;
@@ -97,10 +112,18 @@ export const lightColors: ColorTokens = {
   bg: '#F6F5EF',
   surface: '#FFFFFF',
   surface2: '#EEEDE5',
-  border: '#E4E2D6',
+  border: '#D9D6C8',
+  divider: '#E6E3D7',
+  sectionBg: '#EFEDE4',
+  liveEdge: '#178046',
+  onForestLine: 'rgba(255,255,255,0.2)',
+  onForestOutline: 'rgba(255,255,255,0.4)',
+  heroScrim: 'rgba(15,61,42,0.55)',
+  switchTrackOff: '#CFCDBF',
+  artPanel: '#F3F2E6',
   textPrimary: '#10241A',
-  textSecondary: '#5A675E',
-  textMuted: '#5F665E',
+  textSecondary: '#4F5B53',
+  textMuted: '#666D65',
   disabled: '#EEEDE5',
   onDisabled: '#8B8F86',
   scrim: 'rgba(16,36,26,0.5)',
@@ -149,7 +172,15 @@ export const darkColors: ColorTokens = {
   bg: '#0F1612',
   surface: '#17201A',
   surface2: '#1F2A23',
-  border: '#2C3830',
+  border: '#34413A',
+  divider: '#2A352E',
+  sectionBg: '#141C17',
+  liveEdge: '#6BE39C',
+  onForestLine: 'rgba(255,255,255,0.2)',
+  onForestOutline: 'rgba(255,255,255,0.4)',
+  heroScrim: 'rgba(15,61,42,0.55)',
+  switchTrackOff: '#34413A',
+  artPanel: '#1F2A23',
   textPrimary: '#ECF1EC',
   textSecondary: '#A9B5AC',
   textMuted: '#8C988F',
@@ -204,6 +235,20 @@ export type TypeScale = {
   eyebrow: TextStyleToken;
   /** List row title */
   label: TextStyleToken;
+  /** UX-52: every section header (bold sans, not italic) */
+  sectionTitle: TextStyleToken;
+  /** UX-52: sub-group label inside a section ("TOMORROW") */
+  sectionLabel: TextStyleToken;
+  /** UX-54: card / sheet titles (serif, one step below h1) */
+  cardTitle: TextStyleToken;
+  /** big rating number */
+  numberLarge: TextStyleToken;
+  /** price editor value */
+  priceHero: TextStyleToken;
+  /** splash wordmark */
+  brand: TextStyleToken;
+  /** tab-bar labels and tile hints */
+  tiny: TextStyleToken;
 };
 
 /** Buyer (default) type scale — v4 */
@@ -224,7 +269,14 @@ export const buyerType: TypeScale = {
     letterSpacing: 1.1,
     textTransform: 'uppercase',
   },
-  label: { fontFamily: fontFamilies.body, fontSize: 14, lineHeight: 18, fontWeight: '500' },
+  label: { fontFamily: fontFamilies.body, fontSize: 15, lineHeight: 20, fontWeight: '500' },
+  sectionTitle: { fontFamily: fontFamilies.body, fontSize: 18, lineHeight: 24, fontWeight: '600' },
+  sectionLabel: { fontFamily: fontFamilies.body, fontSize: 12, lineHeight: 16, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
+  cardTitle: { fontFamily: fontFamilies.heading, fontSize: 22, lineHeight: 26, fontWeight: '400' },
+  numberLarge: { fontFamily: fontFamilies.heading, fontSize: 44, lineHeight: 48, fontWeight: '400' },
+  priceHero: { fontFamily: fontFamilies.heading, fontSize: 56, lineHeight: 62, fontWeight: '400' },
+  brand: { fontFamily: fontFamilies.heading, fontSize: 40, lineHeight: 46, fontWeight: '400' },
+  tiny: { fontFamily: fontFamilies.body, fontSize: 11, lineHeight: 14, fontWeight: '500' },
 };
 
 /** Vendor type scale: 2 px larger throughout, prices 22 (v4 vendor screens) */
@@ -238,7 +290,14 @@ export const vendorType: TypeScale = {
   price: { ...buyerType.price, fontSize: 22, lineHeight: 26 },
   button: { ...buyerType.button, fontSize: 17, lineHeight: 22 },
   eyebrow: { ...buyerType.eyebrow, fontSize: 13, lineHeight: 18 },
-  label: { ...buyerType.label, fontSize: 16, lineHeight: 20 },
+  label: { ...buyerType.label, fontSize: 17, lineHeight: 22 },
+  sectionTitle: { ...buyerType.sectionTitle, fontSize: 20, lineHeight: 26 },
+  sectionLabel: { ...buyerType.sectionLabel, fontSize: 13, lineHeight: 18 },
+  cardTitle: { ...buyerType.cardTitle, fontSize: 24, lineHeight: 28 },
+  numberLarge: buyerType.numberLarge,
+  priceHero: buyerType.priceHero,
+  brand: buyerType.brand,
+  tiny: { ...buyerType.tiny, fontSize: 12, lineHeight: 16 },
 };
 
 export const typeScales = { buyer: buyerType, vendor: vendorType } as const;
@@ -257,6 +316,12 @@ export const spacing = {
   huge: 48,
   /** v4 screens use a 24 dp side gutter */
   screen: 24,
+  /** UX-53: the only vertical space between two sections */
+  sectionGap: 32,
+  /** section title → its first row or card */
+  sectionHeaderGap: 12,
+  /** between cards inside one section */
+  stackGap: 12,
 } as const;
 
 export const radius = {
@@ -281,7 +346,9 @@ export const controlHeights = {
   buyer: 48,
   vendorXL: 56,
   fab: 56,
-  chip: 32,
+  /** UX-44: 40 visible, 48 hit area via hitSlop */
+  chip: 40,
+  vendorChip: 48,
   unitChip: 48,
   input: 48,
   iconButton: 36,
