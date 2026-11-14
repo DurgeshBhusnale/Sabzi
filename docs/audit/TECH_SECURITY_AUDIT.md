@@ -8,7 +8,7 @@ Date: 2026-11-14 · Scope: `main` @ `40cdb12` · Fixes since then: see §0.
 
 Code fixes land through `fix/<ids>` branches; each row's Status in §2 says Fixed (branch) or Blocked (reason).
 
-**Session 2026-11-15:** all P0 and P1 items are fixed in code or Blocked on an owner action. Merged in this order as squash PRs (after #13 fixed the Expo SDK patch versions that broke CI's expo-doctor step): #12, #14, #15, #16, #17. The branches were:
+**Session 2026-11-15:** all P0 and P1 items are fixed in code or Blocked on an owner action. Merged in this order as squash PRs (after #13 fixed the Expo SDK patch versions that broke CI's expo-doctor step): #12, #14, #15, #16, #17, then the P2 fixes #18 and #19. Every issue in §2 now has a status. The P0/P1 branches were:
 
 1. `fix/sec-02-12-16`: SEC-02, SEC-12, SEC-16 (edge functions fail closed)
 2. `fix/tech-01-03`: TECH-01, TECH-03, TECH-14 (email code length, build env guard)
