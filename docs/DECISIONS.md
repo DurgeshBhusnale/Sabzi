@@ -144,3 +144,4 @@ Simpler than calling FCM directly; uses FCM underneath on Android.
 - **Vendor bell (V-04):** v1 has no vendor notification list, so the bell opens Requests.
 - **"Not in spec – for review" frames** (lock-screen notifications, QR sticker/poster restyle, "Tell us your vendor's name" form): not built, per owner; listed in QUESTIONS.
 
+- **2026-11-15 — UX owner decisions approved.** The owner agreed with every proposal in UX audit §6, replacing the safe defaults: no Home society dropdown (caption, tappable only with 2+ societies; UX-01), no stats strip on vendor Today (UX-30), compact rating summary with the star bars moved to B-09 (UX-13), 4 buyer tabs for the pilot (UX-25), the "I've arrived" FAB hidden until today's menu is live (UX-31), and light top bars on Following and Stops (UX-22). These differ from DESIGN_BRIEF B-03, B-05, V-04 and the v4 frames; the brief itself is unchanged.

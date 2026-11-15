@@ -6,7 +6,7 @@ import { useSession } from '../../src/features/auth/session';
 import { TypeModeScope, useTheme } from '../../src/theme/ThemeProvider';
 import { makeTabBar } from '../../src/ui/TabBar';
 import { Screen, SkeletonBlock } from '../../src/ui';
-import { ArriveFab } from '../../src/features/vendor/ArriveFab';
+import { ArriveFab, showArriveFab } from '../../src/features/vendor/ArriveFab';
 import { ArriveSheet } from '../../src/features/vendor/ArriveSheet';
 import { VendorShellProvider, useVendorShell } from '../../src/features/vendor/VendorShell';
 import { useInvalidateVendor, useMyVendor, useStopsToday, useTodayMenu, vendorKeys } from '../../src/features/vendor/hooks';
@@ -35,12 +35,12 @@ function ArriveLayer() {
   const offline = useOffline();
   const verified = vendor.data?.status === 'verified';
   const live = currentStop(stops.data ?? []);
-  const showFab = /\/(today|stops)$/.test(path) && !live;
+  const showFab = showArriveFab(path, !!live, !!menu.data?.publishedAt);
   return (
     <>
       {showFab ? (
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: t.layout.bottomNav }}>
-          <ArriveFab onPress={openArrive} disabled={!verified} subdued={!menu.data?.publishedAt} />
+          <ArriveFab onPress={openArrive} disabled={!verified} />
         </View>
       ) : null}
       <ArriveSheet

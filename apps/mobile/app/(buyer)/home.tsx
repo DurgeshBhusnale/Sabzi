@@ -31,7 +31,7 @@ export default function BuyerHome() {
   return (
     <Screen
       tone="forest"
-      header={<TopAppBar tone="forest" society={current?.name ?? '…'} onSocietyPress={() => setSwitcher(true)} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
+      header={<TopAppBar tone="forest" society={current?.name ?? '…'} onSocietyPress={(mine.data?.length ?? 0) >= 2 ? () => setSwitcher(true) : undefined} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
       refreshing={home.isRefetching}
       onRefresh={() => home.refetch()}
     >

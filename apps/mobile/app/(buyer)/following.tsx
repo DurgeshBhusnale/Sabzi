@@ -6,7 +6,7 @@ import { FollowSheet } from '../../src/features/buyer/FollowSheet';
 import { useQueryClient } from '@tanstack/react-query';
 import { statusLabel } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Avatar, Button, Dialog, EmptyState, Screen, SectionLabel, Sections, SheetBody, SkeletonBlock, Snackbar, StatusPill, Text, TopAppBar } from '../../src/ui';
+import { Avatar, Button, Dialog, EmptyState, Screen, SectionLabel, Sections, SkeletonBlock, Snackbar, StatusPill, Text, TopAppBar } from '../../src/ui';
 import { useFollowing, useMySocieties } from '../../src/features/buyer/hooks';
 import { follow, unfollow } from '../../src/features/buyer/api';
 import { publicUrl } from '../../src/lib/storage';
@@ -50,12 +50,12 @@ export default function Following() {
 
   return (
     <Screen
-      tone="forest"
-      header={<TopAppBar tone="forest" title={en.buyer.followingTitle} subtitle={list.length ? en.buyer.vendorCount(list.length) : undefined} />}
+      header={<TopAppBar title={en.buyer.followingTitle} subtitle={list.length ? en.buyer.vendorCount(list.length) : undefined} />}
       refreshing={following.isRefetching}
       onRefresh={() => following.refetch()}
     >
-      <SheetBody>
+      {/* UX-22 (owner decision §6 #6): light top bar on list tabs; forest is for live moments */}
+      <>
       {toast ? <Snackbar kind="info" message={toast} /> : null}
       {following.isLoading ? (
         <SkeletonBlock kind="vendorCard" count={4} />
@@ -107,7 +107,7 @@ export default function Following() {
           ))}
         </Sections>
       )}
-      </SheetBody>
+      </>
       {editing ? (
         <FollowSheet
           visible

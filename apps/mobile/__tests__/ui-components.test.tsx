@@ -34,6 +34,7 @@ import {
   isValidPrice,
 } from '../src/ui';
 import { Home } from 'lucide-react-native';
+import { RatingBars, starCounts } from '../src/features/engagement/RatingBars';
 import { flat, renderUi } from '../src/test/render';
 
 const ramesh = {
@@ -416,6 +417,20 @@ describe('Navigation pieces', () => {
     await r.rerender(<TopAppBar society="Green Park, Gate 1" onBellPress={() => undefined} unread scrolled />);
     expect(screen.getByTestId('app-bar-scrolled')).toBeTruthy();
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
+  });
+  it('UX-01: society is a plain caption unless there are 2+ to switch between', async () => {
+    const onSwitch = jest.fn();
+    const r = await renderUi(<TopAppBar tone="forest" society="Green Park Residency" />);
+    expect(screen.getByTestId('society-caption')).toBeTruthy();
+    expect(screen.queryByTestId('society-switcher')).toBeNull();
+    await r.rerender(<TopAppBar tone="forest" society="Green Park Residency" onSocietyPress={onSwitch} />);
+    await fireEvent.press(screen.getByTestId('society-switcher'));
+    expect(onSwitch).toHaveBeenCalled();
+  });
+  it('UX-13: rating bars and star counts for B-09', async () => {
+    expect(starCounts([{ stars: 5 }, { stars: 5 }, { stars: 3 }, { stars: 9 }])).toEqual({ 1: 0, 2: 0, 3: 1, 4: 0, 5: 2 });
+    await renderUi(<RatingBars counts={{ 1: 0, 2: 0, 3: 1, 4: 0, 5: 3 }} />);
+    expect(flat(screen.getByTestId('bar-5').props.style).width).toBe('75%');
   });
   it('bottom nav selected, unselected and badge', async () => {
     const onSelect = jest.fn();

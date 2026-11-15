@@ -6,6 +6,7 @@ import { formatIstRelative, REVIEW_TAGS, REVIEW_TAG_LABELS } from '@sabzi/shared
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, Card, Chip, EmptyState, RatingDisplay, ReviewCard, Screen, SkeletonBlock, Text, TopAppBar } from '../../src/ui';
 import { allReviews } from '../../src/features/engagement/api';
+import { RatingBars, starCounts } from '../../src/features/engagement/RatingBars';
 import { en } from '../../src/i18n/en';
 
 /** B-09: summary, star and tag filters, review cards with replies; author sees own hidden review. */
@@ -27,7 +28,10 @@ export default function AllReviews() {
         <EmptyState illustration="star" title={en.buyer.noReviews} testID="reviews-empty" />
       ) : (
         <>
-          <Card><RatingDisplay value={avg} count={visible.length} size={20} /></Card>
+          <Card style={{ gap: t.spacing.sm }}>
+            <RatingDisplay value={avg} count={visible.length} size={20} />
+            <RatingBars counts={starCounts(visible)} />
+          </Card>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.xs }}>
             <Chip label="All" selected={star == null && tag == null} onPress={() => { setStar(null); setTag(null); }} />
             {[5, 4, 3, 2, 1].map((s) => <Chip key={s} label={`${s}★`} selected={star === s} onPress={() => setStar(star === s ? null : s)} />)}

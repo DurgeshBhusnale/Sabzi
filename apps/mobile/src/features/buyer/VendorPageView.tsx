@@ -26,7 +26,7 @@ const DAY = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 /** UX-16: shorter photo so the menu starts above the fold */
 const PHOTO_HEIGHT = 160;
 const AVATAR = 72;
-/** UX-13 (safe default, §6 #3): two latest reviews on this page; the rest on B-09 */
+/** UX-13 (owner decision §6 #3): two latest reviews on this page; the rest, and the bars, on B-09 */
 const REVIEWS_ON_PAGE = 2;
 
 const daysText = (days: number[]) => (days.length === 7 ? en.buyer.daily : days.map((d) => DAY[d - 1]).join(' '));
@@ -101,7 +101,6 @@ export function VendorPageView({
   const ms = menuState(items);
   const pill = today ? statusLabel(today.status, { gateName: today.gate_name, windowStart: today.window_start, windowEnd: today.window_end, since: today.status_at }) : null;
   const isNew = v.rating_count === 0;
-  const totalStars = Math.max(1, v.rating_count);
   const topTags = Object.entries(v.tag_counts ?? {}).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const avg = Number(v.avg_rating);
   const myStops = societyId ? page.stops.filter((st) => st.society_id === societyId) : [];
@@ -238,25 +237,11 @@ export function VendorPageView({
               <Text variant="bodySmall" color="textSecondary" testID="no-reviews">{en.buyer.noReviews}</Text>
             ) : (
               <>
-                <View style={[styles.row, { gap: t.spacing.lg, alignItems: 'flex-start' }]}>
-                  <View style={{ alignItems: 'flex-start', gap: t.spacing.xxs }}>
-                    <Text variant="numberLarge">{avg.toFixed(1)}</Text>
-                    <RatingDisplay value={avg} size={14} hideNumber />
-                    <Text variant="caption" weight="400" color="textSecondary">{en.buyer.ratingsCount(v.rating_count)}</Text>
-                  </View>
-                  <View style={{ flex: 1, gap: t.spacing.xxs, paddingTop: t.spacing.xs }}>
-                    {[5, 4, 3, 2, 1].map((n) => {
-                      const c = (v as unknown as Record<string, number>)[`stars_${n}`] ?? 0;
-                      return (
-                        <View key={n} style={[styles.row, { gap: t.spacing.xs }]}>
-                          <Text variant="caption" weight="400" color="textSecondary" style={{ width: 10 }}>{String(n)}</Text>
-                          <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: t.colors.surface2 }}>
-                            <View style={{ height: 6, borderRadius: 3, width: `${(c / totalStars) * 100}%`, backgroundColor: t.colors.star }} />
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
+                {/* UX-13 (owner decision §6 #3): compact summary row; the bar breakdown is on B-09 */}
+                <View style={[styles.row, { gap: t.spacing.xs }]} testID="rating-summary">
+                  <Text variant="cardTitle">{avg.toFixed(1)}</Text>
+                  <RatingDisplay value={avg} size={14} hideNumber />
+                  <Text variant="caption" weight="400" color="textSecondary">{en.buyer.ratingsCount(v.rating_count)}</Text>
                 </View>
                 {topTags.length ? (
                   <View style={[styles.row, { gap: t.spacing.xs, flexWrap: 'wrap' }]}>

@@ -150,6 +150,11 @@ describe('B-05 vendor page', () => {
     await renderUi(<VendorPageView page={page()} loading={false} actions={pageActions} />);
     expect(screen.getByTestId('no-photo')).toBeTruthy();
   });
+  it('UX-13: compact rating summary, no bar breakdown on the vendor page', async () => {
+    await renderUi(<VendorPageView page={page({})} loading={false} actions={pageActions} />);
+    expect(screen.getByTestId('rating-summary')).toBeTruthy();
+    expect(screen.queryByTestId('rating-bars')).toBeNull();
+  });
   it('new vendor with no ratings', async () => {
     await renderUi(<VendorPageView page={page({ rating_count: 0 })} loading={false} actions={pageActions} />);
     expect(screen.getByText('New on Pheri')).toBeTruthy();

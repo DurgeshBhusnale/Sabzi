@@ -12,7 +12,8 @@ export type AppBarAction = { icon: LucideIcon; label: string; onPress: () => voi
 /**
  * v4 top bar: 44 dp row with a round back button on the left and actions on the right,
  * then the page title as a large Newsreader heading. `tone="forest"` for header screens.
- * The society variant (buyer home) shows a map pin, the society and a caret.
+ * The society variant (buyer home) shows a map pin and the society as a caption. It is a button with a caret only
+ * when `onSocietyPress` is given, i.e. the buyer has 2+ saved societies (UX-01, owner decision §6 #1).
  */
 export function TopAppBar({
   title,
@@ -61,18 +62,23 @@ export function TopAppBar({
     >
       <View style={[styles.bar, { minHeight: t.layout.topAppBar, gap: t.spacing.xs }]}>
         {onBack ? <IconCircleButton icon={ArrowLeft} label={en.nav.back} onPress={onBack} onDark={onDark} testID="app-bar-back" /> : null}
-        {society ? (
+        {society && onSocietyPress ? (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={en.nav.switchSociety(society)}
             onPress={onSocietyPress}
-            style={[styles.row, styles.flex, { minHeight: t.layout.minTouch, gap: 6 }]}
+            style={[styles.row, styles.flex, { minHeight: t.layout.minTouch, gap: t.spacing.xxs }]}
             testID="society-switcher"
           >
             <Icon icon={MapPin} size={16} color={fg} />
             <Text variant="label" color={fg} numberOfLines={1} style={{ flexShrink: 1 }}>{society}</Text>
             <Icon icon={ChevronDown} size={16} color={fg} />
           </Pressable>
+        ) : society ? (
+          <View style={[styles.row, styles.flex, { minHeight: t.layout.minTouch, gap: t.spacing.xxs }]} testID="society-caption">
+            <Icon icon={MapPin} size={16} color={fg} />
+            <Text variant="caption" color={fg} numberOfLines={1} style={{ flexShrink: 1 }}>{society}</Text>
+          </View>
         ) : compact && title ? (
           <Text variant="label" color={fg} accessibilityRole="header" numberOfLines={1} style={[styles.flex, { marginLeft: onBack ? t.spacing.xxs : 0 }]}>
             {title}
