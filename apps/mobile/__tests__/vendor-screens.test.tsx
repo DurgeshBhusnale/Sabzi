@@ -1,6 +1,7 @@
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { renderUi } from '../src/test/render';
 import { nextAction, TodayView } from '../src/features/vendor/TodayView';
+import { showArriveFab } from '../src/features/vendor/ArriveFab';
 import { MenuEditor } from '../src/features/vendor/MenuEditor';
 import { ArriveSheet, type ArriveDeps } from '../src/features/vendor/ArriveSheet';
 import { buildDraft } from '../src/features/vendor/menuLogic';
@@ -199,9 +200,16 @@ describe('V-04 Today (UX audit)', () => {
     expect(nextAction({ published: false, live: true, done: false })).toBe('live');
     expect(nextAction({ published: true, live: false, done: true })).toBe('done');
   });
-  it('UX-30/43: stats are one line under the next action; no bell in the header', async () => {
+  it('UX-31: the arrive FAB waits for a live menu', () => {
+    expect(showArriveFab('/today', false, false)).toBe(false);
+    expect(showArriveFab('/today', false, true)).toBe(true);
+    expect(showArriveFab('/stops', true, true)).toBe(false);
+    expect(showArriveFab('/me', false, true)).toBe(false);
+  });
+  it('UX-30/43: no stats strip on Today (they live on Me); no bell in the header', async () => {
     await renderUi(<TodayView vendor={vendor} name="Ramesh" menu={null} stops={[stop({})]} stats={stats} loading={false} now={now} actions={actions} />, { mode: 'vendor' });
-    expect(screen.getByTestId('stats-line')).toHaveTextContent('186 followers · 0 alert opens today · 4.4 ★');
+    expect(screen.queryByTestId('stats-line')).toBeNull();
+    expect(screen.queryByText(/alert opens today/)).toBeNull();
     expect(screen.queryByLabelText('Notifications')).toBeNull();
   });
   it('UX-32: only the next stop, with All stops', async () => {

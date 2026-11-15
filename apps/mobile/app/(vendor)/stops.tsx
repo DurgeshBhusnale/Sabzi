@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Linking, View } from 'react-native';
 import { formatTimeWindow, SUPPORT_PHONE } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, Dialog, EmptyState, Screen, SegmentedControl, SheetBody, SkeletonBlock, Snackbar, Text, TopAppBar } from '../../src/ui';
+import { Button, Dialog, EmptyState, Screen, SegmentedControl, SkeletonBlock, Snackbar, Text, TopAppBar } from '../../src/ui';
 import { stopPhase, type TodayStop } from '../../src/features/vendor/arrival';
 import { skipStop, unskipStop } from '../../src/features/vendor/api';
 import { useInvalidateVendor, useStopsToday, useStopsWeek, vendorKeys } from '../../src/features/vendor/hooks';
@@ -34,8 +34,9 @@ export default function VendorStops() {
 
   const hasNoStops = !week.isLoading && (week.data ?? []).length === 0;
   return (
-    <Screen tone="forest" header={<TopAppBar tone="forest" title={en.vendor.myStops} />} refreshing={today.isRefetching} onRefresh={() => invalidate(vendorKeys.stops, vendorKeys.week)}>
-      <SheetBody>
+    <Screen header={<TopAppBar title={en.vendor.myStops} />} refreshing={today.isRefetching} onRefresh={() => invalidate(vendorKeys.stops, vendorKeys.week)}>
+      {/* UX-22 (owner decision §6 #6): light top bar on list tabs; forest is for live moments */}
+      <>
       {hasNoStops ? (
         <EmptyState illustration="pin" title={en.vendor.noStopsTitle} body={en.vendor.noStopsBody} actionLabel={en.common.callSupport} onAction={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} testID="no-stops" />
       ) : (
@@ -106,7 +107,7 @@ export default function VendorStops() {
         />
       ) : null}
       <View style={{ height: t.heights.fab + t.spacing.xl }} />
-      </SheetBody>
+      </>
       <Dialog
         visible={!!confirm}
         kind="destructive"

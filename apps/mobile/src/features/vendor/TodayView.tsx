@@ -96,7 +96,7 @@ function QuickTile({ icon, label, onPress, disabled, testID }: { icon: LucideIco
 
 /**
  * V-04 Today (UX audit §4): a short header, one Next action card, the day checklist, quick actions, the next stop.
- * Stats stay as a one-line strip under the next action (safe default for UX-30, §6 #2). Pure view for tests.
+ * No stats strip: followers, opens and rating live on Me (UX-30, owner decision §6 #2). Pure view for tests.
  */
 export function TodayView({
   vendor,
@@ -149,12 +149,10 @@ export function TodayView({
   const done = allStopsDone(all, now);
   const verified = vendor?.status === 'verified';
   const photoUrl = publicUrl('stock-photos', menu?.stockPhotoPath);
-  const rating = stats?.rating_count ? `${Number(stats.avg_rating).toFixed(1)} ★` : null;
   const doneCount = all.filter((s) => ['done', 'skipped'].includes(stopPhase(s, now))).length;
   const next = all.find((s) => stopPhase(s, now) === 'upcoming') ?? null;
   const action = nextAction({ published, live: !!live, done });
   const dealOpen = done || istHour(now) >= DEAL_FROM_HOUR_IST;
-  const statsLine = [en.vendor.followersCount(stats?.followers ?? 0), en.vendor.opensToday(stats?.alert_opens_today ?? 0), rating].filter(Boolean).join(' · ');
 
   return (
     <View testID="today-view" style={{ flexGrow: 1 }}>
@@ -191,7 +189,6 @@ export function TodayView({
                 <Text variant="bodySmall" color="textSecondary">{en.vendor.tapArrived}</Text>
               </Card>
             )}
-            <Text variant="caption" color="textMuted" testID="stats-line">{statsLine}</Text>
           </View>
 
           {/* Day checklist: Menu · Photo · Stops */}
