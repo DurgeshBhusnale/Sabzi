@@ -47,6 +47,13 @@ export async function buyerHome(societyId: string, c: Client = getSupabase()): P
   return (data ?? []) as unknown as HomeVendor[];
 }
 
+/** Owner review 2026-11-21: vendors whose stop at this society runs tomorrow ("Coming tomorrow"). */
+export async function buyerHomeTomorrow(societyId: string, c: Client = getSupabase()): Promise<HomeVendor[]> {
+  const { data, error } = await c.rpc('buyer_home_tomorrow', { p_society_id: societyId });
+  if (error) raise(error);
+  return (data ?? []) as unknown as HomeVendor[];
+}
+
 export type PublicVendor = {
   id: string; display_name: string; photo_path: string | null; vehicle: 'tempo' | 'thela'; delivery_available: boolean; allow_calls: boolean;
   code: string; avg_rating: number; rating_count: number; tag_counts: Record<string, number>;

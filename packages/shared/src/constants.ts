@@ -51,6 +51,8 @@ export const LIMITS = {
   arrivalRadiusMeters: 300,
   /** A vendor counts as at the gate for this long after "arrived" without "left" */
   atGateHours: 3,
+  /** Buyer home: a vendor who has not arrived this long after his window ends drops out of "Coming today" */
+  expectedGraceMin: 60,
   otpResendSeconds: 30,
   /**
    * Email sign-in code length (TECH-01). Must equal the hosted project's Auth → Email → "Email OTP Length"

@@ -4,6 +4,7 @@ import { useSession } from '../../src/features/auth/session';
 import { TypeModeScope } from '../../src/theme/ThemeProvider';
 import { makeTabBar } from '../../src/ui/TabBar';
 import { Screen, SkeletonBlock } from '../../src/ui';
+import { BottomInsetContext } from '../../src/ui/Screen';
 import { usePrimarySociety, useLiveStopEvents } from '../../src/features/buyer/hooks';
 import { BuyerProvider } from '../../src/features/buyer/BuyerContext';
 import { en } from '../../src/i18n/en';
@@ -30,12 +31,14 @@ export default function BuyerLayout() {
   return (
     <TypeModeScope mode="buyer">
       <BuyerProvider initial={societies.primary?.id ?? null}>
-        <Tabs tabBar={TabBar} screenOptions={{ headerShown: false }}>
-          <Tabs.Screen name="home" />
-          <Tabs.Screen name="following" />
-          <Tabs.Screen name="requests" />
-          <Tabs.Screen name="profile" />
-        </Tabs>
+        <BottomInsetContext.Provider value={false}>
+          <Tabs tabBar={TabBar} screenOptions={{ headerShown: false }}>
+            <Tabs.Screen name="home" />
+            <Tabs.Screen name="following" />
+            <Tabs.Screen name="requests" />
+            <Tabs.Screen name="profile" />
+          </Tabs>
+        </BottomInsetContext.Provider>
       </BuyerProvider>
     </TypeModeScope>
   );

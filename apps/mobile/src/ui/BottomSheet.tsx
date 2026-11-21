@@ -1,5 +1,6 @@
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import type { ReactNode } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
 import { Text } from './Text';
 
@@ -21,9 +22,10 @@ export function BottomSheet({
 }) {
   const t = useTheme();
   const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.fill}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
+      <KeyboardAvoidingView behavior="padding" style={styles.fill}>
         <Pressable accessibilityLabel="Close" accessibilityRole="button" style={[styles.fill, { backgroundColor: t.colors.scrim }]} onPress={onClose} />
         <View
           testID={testID}
@@ -34,7 +36,7 @@ export function BottomSheet({
             borderTopLeftRadius: t.radius.sheet,
             borderTopRightRadius: t.radius.sheet,
             paddingHorizontal: t.spacing.screen,
-            paddingBottom: t.spacing.xxl,
+            paddingBottom: t.spacing.xxl + insets.bottom,
             shadowColor: t.colors.shadow,
             shadowOpacity: t.elevation.raised.shadowOpacity,
             shadowRadius: t.elevation.raised.shadowRadius,

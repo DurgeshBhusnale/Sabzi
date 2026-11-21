@@ -10,7 +10,7 @@ import { useOffline } from '../../src/lib/offline/OfflineProvider';
 import { NotificationsBlockedBanner } from '../../src/features/notifications/BlockedBanner';
 import { HomeView } from '../../src/features/buyer/HomeView';
 import { SocietySwitcher } from '../../src/features/buyer/SocietySwitcher';
-import { buyerKeys, useBuyerHome, useMySocieties, useNotifications } from '../../src/features/buyer/hooks';
+import { buyerKeys, useBuyerHome, useBuyerHomeTomorrow, useMySocieties, useNotifications } from '../../src/features/buyer/hooks';
 import { useBuyer } from '../../src/features/buyer/BuyerContext';
 import { removeSociety, setPrimarySociety } from '../../src/features/buyer/api';
 import { VendorPickerSheet } from '../../src/features/engagement/VendorPickerSheet';
@@ -21,6 +21,7 @@ export default function BuyerHome() {
   const { societyId, setSocietyId } = useBuyer();
   const mine = useMySocieties();
   const home = useBuyerHome(societyId);
+  const tomorrow = useBuyerHomeTomorrow(societyId);
   const notifs = useNotifications();
   const qc = useQueryClient();
   const [switcher, setSwitcher] = useState(false);
@@ -33,7 +34,10 @@ export default function BuyerHome() {
       tone="forest"
       header={<TopAppBar tone="forest" society={current?.name ?? '…'} onSocietyPress={(mine.data?.length ?? 0) >= 2 ? () => setSwitcher(true) : undefined} onBellPress={() => router.push('/buyer/notifications')} unread={(notifs.data ?? []).some((n) => !n.opened_at)} />}
       refreshing={home.isRefetching}
-      onRefresh={() => home.refetch()}
+      onRefresh={() => {
+        home.refetch();
+        tomorrow.refetch();
+      }}
     >
       <View style={{ paddingHorizontal: t.spacing.screen, gap: t.spacing.xs }}>
         <NetworkBanner dataUpdatedAt={home.dataUpdatedAt || undefined} />
@@ -41,6 +45,7 @@ export default function BuyerHome() {
       </View>
       <HomeView
         vendors={home.data}
+        tomorrow={tomorrow.data}
         loading={home.isLoading}
         updatedAt={home.dataUpdatedAt || undefined}
         actions={{

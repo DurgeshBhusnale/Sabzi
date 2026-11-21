@@ -43,6 +43,35 @@ describe('home sections (B-03)', () => {
   it('leaving soon counts as at the gate', () => {
     expect(homeSections([v({ status: 'leaving_soon' })], morning).atGate).toHaveLength(1);
   });
+
+  // Owner review 2026-11-21: a vendor coming tomorrow is never listed under "Coming today".
+  const noon = new Date('2026-11-05T06:30:00Z'); // 12:00 PM IST
+  it('a morning vendor who did not come moves to Coming tomorrow after his window', () => {
+    const s = homeSections([v({})], noon, [v({ menu: null })]);
+    expect(s.comingToday).toHaveLength(0);
+    expect(s.comingTomorrow.map((x) => x.vendor_id)).toEqual(['r']);
+    expect(s.notComing).toHaveLength(0);
+    expect(s.nobodyAtGate).toBe(true);
+    expect(s.nextIsTomorrow).toBe(true);
+  });
+  it('within an hour of the window end he still counts as coming today', () => {
+    const s = homeSections([v({})], new Date('2026-11-05T03:40:00Z'), [v({ menu: null })]); // 9:10 AM IST
+    expect(s.comingToday.map((x) => x.vendor_id)).toEqual(['r']);
+    expect(s.comingTomorrow).toHaveLength(0);
+    expect(s.nextIsTomorrow).toBe(false);
+  });
+  it('a missed vendor with no visit tomorrow reads as not coming today', () => {
+    const s = homeSections([v({})], noon, []);
+    expect(s.comingToday).toHaveLength(0);
+    expect(s.notComing.map((x) => x.vendor_id)).toEqual(['r']);
+  });
+  it('a society with only tomorrow visits is not empty', () => {
+    const s = homeSections([], morning, [v({ vendor_id: 'i' })]);
+    expect(s.empty).toBe(false);
+    expect(s.comingTomorrow).toHaveLength(1);
+    expect(s.nextExpected?.vendor_id).toBe('i');
+    expect(s.nextIsTomorrow).toBe(true);
+  });
 });
 
 describe('menu helpers', () => {

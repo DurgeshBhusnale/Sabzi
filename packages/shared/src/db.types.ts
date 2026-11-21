@@ -953,6 +953,9 @@ isOneToOne: false
 "buyer_home":
 { Args: { "p_society_id": string }; Returns: Json
                            },
+"buyer_home_tomorrow":
+{ Args: { "p_society_id": string }; Returns: Json
+                           },
 "cancel_request":
 { Args: { "p_request_id": string }; Returns: undefined
                            },

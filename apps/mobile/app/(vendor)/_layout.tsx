@@ -1,11 +1,13 @@
 import { Redirect, Tabs, router, usePathname } from 'expo-router';
 import { Linking, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarCheck, ClipboardList, MapPinned, User } from 'lucide-react-native';
 import { SUPPORT_PHONE } from '@sabzi/shared';
 import { useSession } from '../../src/features/auth/session';
 import { TypeModeScope, useTheme } from '../../src/theme/ThemeProvider';
 import { makeTabBar } from '../../src/ui/TabBar';
 import { Screen, SkeletonBlock } from '../../src/ui';
+import { BottomInsetContext } from '../../src/ui/Screen';
 import { ArriveFab, showArriveFab } from '../../src/features/vendor/ArriveFab';
 import { ArriveSheet } from '../../src/features/vendor/ArriveSheet';
 import { VendorShellProvider, useVendorShell } from '../../src/features/vendor/VendorShell';
@@ -27,6 +29,7 @@ const TabBar = makeTabBar([
 function ArriveLayer() {
   const path = usePathname();
   const t = useTheme();
+  const insets = useSafeAreaInsets();
   const { arriveOpen, openArrive, closeArrive } = useVendorShell();
   const vendor = useMyVendor();
   const stops = useStopsToday();
@@ -39,7 +42,7 @@ function ArriveLayer() {
   return (
     <>
       {showFab ? (
-        <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: t.layout.bottomNav }}>
+        <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: t.layout.bottomNav + insets.bottom }}>
           <ArriveFab onPress={openArrive} disabled={!verified} />
         </View>
       ) : null}
@@ -89,12 +92,14 @@ export default function VendorLayout() {
     <TypeModeScope mode="vendor">
       <VendorShellProvider>
         <View style={{ flex: 1 }}>
-          <Tabs tabBar={TabBar} screenOptions={{ headerShown: false }}>
-            <Tabs.Screen name="today" />
-            <Tabs.Screen name="stops" />
-            <Tabs.Screen name="requests" />
-            <Tabs.Screen name="me" />
-          </Tabs>
+          <BottomInsetContext.Provider value={false}>
+            <Tabs tabBar={TabBar} screenOptions={{ headerShown: false }}>
+              <Tabs.Screen name="today" />
+              <Tabs.Screen name="stops" />
+              <Tabs.Screen name="requests" />
+              <Tabs.Screen name="me" />
+            </Tabs>
+          </BottomInsetContext.Provider>
           <ArriveLayer />
         </View>
       </VendorShellProvider>

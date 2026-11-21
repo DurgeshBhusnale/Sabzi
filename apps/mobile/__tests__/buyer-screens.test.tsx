@@ -33,6 +33,15 @@ describe('B-03 Home states', () => {
     await renderUi(<HomeView vendors={[hv({}), imran]} loading={false} now={morning} actions={homeActions} />);
     expect(screen.getByText('No one at the gate right now. Next: Ramesh around 8:00 AM.')).toBeTruthy();
   });
+
+  it('B-03 Coming tomorrow: section, AM/PM time and "tomorrow" in the next line (owner review 2026-11-21)', async () => {
+    const noon = new Date('2026-11-05T06:30:00Z');
+    await renderUi(<HomeView vendors={[hv({})]} tomorrow={[hv({ menu: null })]} loading={false} now={noon} actions={homeActions} />);
+    expect(screen.getByTestId('coming-tomorrow')).toBeTruthy();
+    expect(screen.queryByText('Coming today')).toBeNull();
+    expect(screen.getByText(/tomorrow around 8:00 AM/)).toBeTruthy();
+    expect(screen.getByText('AM')).toBeTruthy();
+  });
   it('evening with deals', async () => {
     await renderUi(<HomeView vendors={[hv({ status: 'left', menu: menu([item('Tomato', { deal_price: 30 })]) }), { ...imran, status: 'at_gate' }]} loading={false} now={evening} actions={homeActions} />);
     expect(screen.getByTestId('deals-strip')).toBeTruthy();

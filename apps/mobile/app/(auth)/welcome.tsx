@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { Button, ILLUSTRATION_ART, Text } from '../../src/ui';
 import { en } from '../../src/i18n/en';
@@ -17,6 +17,7 @@ export default function Welcome() {
   const [i, setI] = useState(0);
   // TECH-02: sign-in replaces the slides, so Android back from sign-in leaves the app instead of returning here,
   // and later signed-out starts skip the slides.
+  const insets = useSafeAreaInsets();
   const toSignIn = () => {
     markSeen();
     router.replace('/(auth)/signin');
@@ -37,7 +38,7 @@ export default function Welcome() {
           <Image source={ART[i]} resizeMode="contain" style={{ flex: 1, width: '100%' }} accessible={false} testID={`welcome-art-${i}`} />
         </SafeAreaView>
       </View>
-      <View style={{ flex: 1, paddingHorizontal: t.spacing.screen, paddingTop: 28, paddingBottom: t.spacing.xl, gap: t.spacing.lg }}>
+      <View style={{ flex: 1, paddingHorizontal: t.spacing.screen, paddingTop: 28, paddingBottom: t.spacing.xl + insets.bottom, gap: t.spacing.lg }}>
         <Text variant="display" accessibilityRole="header">{slide.title}</Text>
         {slide.body ? <Text variant="bodySmall" color="textSecondary">{slide.body}</Text> : null}
         <View style={{ flexDirection: 'row', gap: 6 }} accessibilityLabel={`Slide ${i + 1} of 3`}>
