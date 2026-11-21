@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { cutoffPhrase, formatPrice, LIMITS, PRICE_UNITS, shortSociety, slotDayLabel, slotWindowLabel, UNIT_LABELS, type PriceUnit, type RequestGroup, type SlotGroup } from '@sabzi/shared';
+import { cutoffPhrase, formatIstTime, formatPrice, LIMITS, PRICE_UNITS, shortSociety, slotDayLabel, slotWindowLabel, UNIT_LABELS, type PriceUnit, type RequestGroup, type SlotGroup } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
 import { Banner, Button, Card, Chip, Dialog, EmptyState, ItemArt, RequestStatusBlock, SegmentedControl, SkeletonBlock, Text } from '../../ui';
 import { en } from '../../i18n/en';
+import { DeliveryOrders, type MarkFn } from './DeliveryOrders';
 
 export type VendorTab = 'requests' | 'confirmed';
 export type AnswerInput = { slot: SlotGroup; group: RequestGroup; status: 'will_bring' | 'cant_bring'; price?: number; unit?: PriceUnit };
@@ -164,39 +165,57 @@ function SlotHeader({ slot, now, sub }: { slot: SlotGroup; now: Date; sub?: stri
   );
 }
 
-/** Confirmed list: what to carry on each visit, built from the orders buyers have confirmed. */
-function ConfirmedList({ slots, now }: { slots: SlotGroup[]; now: Date }) {
+/** Short label for a visit filter chip: "Green Park · Tomorrow morning" */
+const visitLabel = (s: SlotGroup, now: Date) => `${s.societies.map(shortSociety).join(', ')} · ${slotDayLabel(s.slot_start, now)}`;
+
+/**
+ * Confirmed list: per visit, what to carry and the orders to close. Filter by visit (society + day); the default is
+ * the first visit that can be marked now and still has orders to mark. Delivered / Not delivered work here any time
+ * in the delivery window, whether or not the vendor tapped "Leaving soon".
+ */
+function ConfirmedList({ slots, now, onMark }: { slots: SlotGroup[]; now: Date; onMark: MarkFn }) {
   const t = useTheme();
-  const withOrders = slots.map((s) => ({ s, items: s.items.filter((g) => g.counts.confirmed > 0) })).filter((x) => x.items.length);
+  const withOrders = slots.filter((s) => s.orders.length > 0);
+  const firstOpen = withOrders.find((s) => s.deliverable && s.orders.some((o) => o.state === 'pending'));
+  const [picked, setPicked] = useState<string | null>(null);
+  const filter = picked ?? firstOpen?.key ?? 'all';
   if (!withOrders.length) {
     return <EmptyState illustration="list" art="noRequests" title={en.req.cNone} body={en.req.cNoneBody} testID="vc-empty" />;
   }
+  const shown = filter === 'all' ? withOrders : withOrders.filter((s) => s.key === filter);
   return (
     <View style={{ gap: t.spacing.md }} testID="vendor-confirmed">
       <Text variant="bodySmall" color="textSecondary">{en.req.cSub}</Text>
-      {withOrders.map(({ s, items }) => (
-        <View key={s.key} style={{ gap: t.spacing.sm }}>
-          <SlotHeader slot={s} now={now} />
-          {items.map((g) => (
-            <Card key={g.key} style={{ gap: t.spacing.xs }} testID={`vc-item-${g.name}`}>
-              <View style={[styles.row, { gap: t.spacing.sm }]}>
-                <ItemArt name={g.name} size={40} />
-                <View style={{ flex: 1 }}>
-                  <Text variant="label" weight="700">{g.name}</Text>
-                  <Text variant="bodySmall" color="textSecondary">{`${en.req.cBuyers(g.counts.confirmed)}${g.price != null ? ` · ${en.req.cAt(formatPrice(g.price, g.unit))}` : ''}`}</Text>
-                </View>
-                {g.confirmedTotal ? <Text variant="price" weight="600" testID="vc-total">{g.confirmedTotal}</Text> : null}
-              </View>
-              {g.confirmed.map((b, i) => (
-                <View key={i} style={[styles.buyerRow, { borderTopColor: t.colors.divider, paddingTop: t.spacing.xs }]}>
-                  <Text variant="bodySmall">{`${b.buyer} · ${shortSociety(b.society)}`}</Text>
-                  <Text variant="bodySmall" weight="600">{b.qty ?? '—'}</Text>
+      <View style={[styles.row, { gap: t.spacing.xs, flexWrap: 'wrap' }]} testID="vc-filter">
+        <Chip label={en.req.filterAll} selected={filter === 'all'} onPress={() => setPicked('all')} testID="vc-filter-all" />
+        {withOrders.map((s) => {
+          const left = s.deliverable ? s.orders.filter((o) => o.state === 'pending').length : 0;
+          return <Chip key={s.key} label={left ? `${visitLabel(s, now)} (${left})` : visitLabel(s, now)} selected={filter === s.key} onPress={() => setPicked(s.key)} testID={`vc-filter-${s.key}`} />;
+        })}
+      </View>
+      {shown.map((s) => {
+        const items = s.items.filter((g) => g.counts.confirmed > 0);
+        return (
+          <View key={s.key} style={{ gap: t.spacing.sm }}>
+            <SlotHeader slot={s} now={now} />
+            <Text variant="sectionLabel" color="textSecondary">{en.req.carryTitle}</Text>
+            <Card style={{ gap: t.spacing.xs }}>
+              {items.map((g, i) => (
+                <View key={g.key} style={[styles.row, { gap: t.spacing.sm }, i ? { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.colors.divider, paddingTop: t.spacing.xs } : null]} testID={`vc-item-${g.name}`}>
+                  <ItemArt name={g.name} size={36} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="label" weight="700">{g.name}</Text>
+                    <Text variant="bodySmall" color="textSecondary">{`${en.req.cBuyers(g.counts.confirmed)}${g.price != null ? ` · ${en.req.cAt(formatPrice(g.price, g.unit))}` : ''}`}</Text>
+                  </View>
+                  {g.confirmedTotal ? <Text variant="price" weight="600" testID="vc-total">{g.confirmedTotal}</Text> : null}
                 </View>
               ))}
             </Card>
-          ))}
-        </View>
-      ))}
+            <Text variant="sectionLabel" color="textSecondary">{en.req.ordersTitle}</Text>
+            <DeliveryOrders testID={`vc-orders-${s.key}`} orders={s.orders} enabled={s.deliverable} opensAt={formatIstTime(new Date(Date.parse(s.slot_start) - 3_600_000))} onMark={onMark} />
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -210,6 +229,7 @@ export function VendorRequestsView({
   tab,
   onTab,
   onAnswer,
+  onMark,
   onShareQr,
   onRetry,
 }: {
@@ -220,6 +240,7 @@ export function VendorRequestsView({
   tab: VendorTab;
   onTab: (t: VendorTab) => void;
   onAnswer: (a: AnswerInput) => Promise<void>;
+  onMark: MarkFn;
   onShareQr: () => void;
   onRetry?: () => void;
 }) {
@@ -228,8 +249,11 @@ export function VendorRequestsView({
   if (!slots) {
     return <EmptyState illustration="list" title={en.req.loadError} body={en.errors.unknown} actionLabel={en.common.retry} onAction={onRetry} testID="vr-error" />;
   }
-  const toAnswer = slots.reduce((n, s) => n + s.items.filter((g) => g.decision === 'pending').length, 0);
-  const confirmed = slots.reduce((n, s) => n + s.items.reduce((m, g) => m + g.counts.confirmed, 0), 0);
+  // Requests tab: only visits still ahead (finished visits stay in the Confirmed list until the delivery window ends).
+  const upcoming = slots.filter((s) => Date.parse(s.slot_end) > now.getTime());
+  const toAnswer = upcoming.reduce((n, s) => n + s.items.filter((g) => g.decision === 'pending').length, 0);
+  const toMark = slots.reduce((n, s) => n + (s.deliverable ? s.orders.filter((o) => o.state === 'pending').length : 0), 0);
+  const confirmed = slots.reduce((n, s) => n + s.orders.length, 0);
   return (
     <View style={{ gap: t.spacing.md }} testID="vendor-requests">
       <SegmentedControl
@@ -238,18 +262,18 @@ export function VendorRequestsView({
         onChange={onTab}
         options={[
           { value: 'requests', label: toAnswer ? `${en.req.tabRequests} (${toAnswer})` : en.req.tabRequests },
-          { value: 'confirmed', label: confirmed ? `${en.req.tabConfirmed} (${confirmed})` : en.req.tabConfirmed },
+          { value: 'confirmed', label: toMark ? `${en.req.tabConfirmed} (${en.req.pendingCount(toMark)})` : confirmed ? `${en.req.tabConfirmed} (${confirmed})` : en.req.tabConfirmed },
         ]}
       />
       {error ? <Banner kind="error" message={en.req.loadError} /> : null}
       {tab === 'confirmed' ? (
-        <ConfirmedList slots={slots} now={now} />
-      ) : slots.length === 0 ? (
+        <ConfirmedList slots={slots} now={now} onMark={onMark} />
+      ) : upcoming.length === 0 ? (
         <EmptyState illustration="list" art="noRequests" title={en.req.vNone} body={en.req.vNoneBody} actionLabel={en.eng.vrShareQr} onAction={onShareQr} testID="vr-empty" />
       ) : (
         <>
           <Text variant="bodySmall" color="textSecondary">{en.req.vSub}</Text>
-          {slots.map((s) => (
+          {upcoming.map((s) => (
             <View key={s.key} style={{ gap: t.spacing.sm }}>
               <SlotHeader slot={s} now={now} sub={s.items.some((g) => g.decision === 'pending') ? en.req.vReplyBy(cutoffPhrase(s.slot_start, now)) : undefined} />
               {s.items.map((g) => <ItemRequestCard key={`${s.key}:${g.key}`} slot={s} g={g} onAnswer={onAnswer} />)}

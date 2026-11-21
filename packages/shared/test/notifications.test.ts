@@ -65,6 +65,14 @@ describe('push copy matches design brief §9.1', () => {
       body: 'Your order for this evening is cancelled.',
     });
   });
+  it('request: not delivered, with the reason', () => {
+    const now = new Date('2026-11-22T05:00:00Z'); // 10:30 AM IST
+    expect(requestReplyMessage('Ramesh Sabzi', { item: 'Tomato', qty: '2 kg', status: 'not_delivered', slot_start: '2026-11-22T02:30:00Z', missed_reason: 'buyer_not_there' }, now)).toEqual({
+      title: "Sorry, Ramesh couldn't hand over your tomato",
+      body: 'Ramesh says no one was at the gate this morning.',
+    });
+    expect(requestReplyMessage('Ramesh Sabzi', { item: 'Tomato', qty: null, status: 'not_delivered', missed_reason: 'vendor_unavailable', slot_start: '2026-11-22T02:30:00Z' }, now).body).toBe("Ramesh couldn't get it this morning.");
+  });
   it('vendor: new requests', () => {
     expect(vendorRequestsMessage([{ name: 'Broccoli', count: 2 }, { name: 'Drumsticks', count: 3 }, { name: 'Baby corn', count: 1 }])).toEqual({
       title: '6 requests need your reply',

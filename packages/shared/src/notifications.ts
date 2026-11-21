@@ -1,6 +1,6 @@
 import { formatPriceCompact, isQuietHours } from './format.ts';
 import type { PriceUnit } from './constants.ts';
-import { slotPhrase } from './requests.ts';
+import { slotPhrase, type MissReason } from './requests.ts';
 
 /** Push copy from DESIGN_BRIEF §9.1. Shared by edge functions (Deno) and the app (in-app list). */
 export type Message = { title: string; body: string };
@@ -45,8 +45,8 @@ export function notComingMessage(vendor: string, society: string): Message {
   return { title: `${firstName(vendor)} isn't coming to ${shortSociety(society)} today`, body: "We'll tell you when he's back" };
 }
 
-export type ReplyStatus = 'will_bring' | 'cant_bring' | 'vendor_cancelled';
-export type ReplyInput = { item: string; qty: string | null; status: ReplyStatus; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null };
+export type ReplyStatus = 'will_bring' | 'cant_bring' | 'vendor_cancelled' | 'not_delivered';
+export type ReplyInput = { item: string; qty: string | null; status: ReplyStatus; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null; missed_reason?: MissReason | null };
 
 /** Request flow v2: the vendor accepted with a price (buyer must confirm), denied, or backed out after confirming. */
 export function requestReplyMessage(vendor: string, r: ReplyInput, now: Date = new Date()): Message {
@@ -56,6 +56,13 @@ export function requestReplyMessage(vendor: string, r: ReplyInput, now: Date = n
   if (r.status === 'will_bring') {
     const price = r.price != null ? `About ${formatPriceCompact(Number(r.price), r.unit ?? 'kg')}` : 'He can bring it';
     return { title: `${who} accepted your request for ${item}`, body: `${price} for ${when}. Tap to confirm your order.` };
+  }
+  if (r.status === 'not_delivered') {
+    const why =
+      r.missed_reason === 'buyer_not_there' ? `${who} says no one was at the gate ${when}.`
+      : r.missed_reason === 'vendor_unavailable' ? `${who} couldn't get it ${when}.`
+      : 'Tap to see what happened.';
+    return { title: `Sorry, ${who} couldn't hand over your ${item}`, body: why };
   }
   if (r.status === 'vendor_cancelled') {
     return { title: `Sorry, ${who} can't bring ${item} after all`, body: `Your order for ${when} is cancelled.` };
