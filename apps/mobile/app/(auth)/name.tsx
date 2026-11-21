@@ -45,7 +45,11 @@ export default function ProfileStep() {
       }
     >
       <Text variant="h1" accessibilityRole="header">{needsPhone ? en.auth.profileTitle : en.auth.nameTitle}</Text>
-      {needsPhone ? <Text color="textSecondary">{account?.role === 'vendor' ? en.auth.profileBodyVendor : en.auth.profileBody}</Text> : null}
+      <Text color="textSecondary">
+        {needsPhone
+          ? account?.role === 'vendor' ? en.auth.profileBodyVendor : en.auth.profileBody
+          : account?.role === 'vendor' ? en.auth.nameBodyVendor : en.auth.nameBody}
+      </Text>
       <TextInput label={en.auth.nameLabel} placeholder={en.auth.namePlaceholder} value={name} onChangeText={setName} error={error?.field === 'name' ? error.msg : null} autoCapitalize="words" testID="name-input" />
       {needsPhone ? (
         <TextInput
