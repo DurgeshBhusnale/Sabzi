@@ -138,6 +138,36 @@ Deno.test('request reply respects notify_requests and replies pref', async () =>
   assertEquals(off.inserted.length, 0);
 });
 
+Deno.test('request reply is pushed during quiet hours, high priority, heads-up channel', async () => {
+  const ctx: Context = {
+    request: { id: 'q1', status: 'will_bring', qty: '500 g', item: 'Drumsticks' },
+    vendor: { id: 'v1', display_name: 'Ramesh Sabzi', verified: true },
+    recipients: [r('priya')],
+  };
+  const night = deps(ctx, { now: () => new Date('2026-11-05T17:00:00Z') }); // 22:30 IST
+  const res = await handleNotify(req({ kind: 'request_reply', ref: 'q1' }), night.d);
+  assertEquals((await res.json()).quiet, undefined);
+  assertEquals(night.sent.flat().length, 1);
+  assertEquals(night.sent[0]![0]!.priority, 'high');
+  assertEquals(night.sent[0]![0]!.channelId, 'alerts');
+});
+
+Deno.test('every push is high priority (Doze holds normal ones when the app is closed)', async () => {
+  const deal: Context = {
+    deal: { id: 'd1' },
+    vendor: { id: 'v1', display_name: 'Ramesh Sabzi', verified: true },
+    menu: { stock_photo_path: null, items: [{ name: 'Tomato', price: 40, unit: 'kg', deal_price: 30 }] },
+    recipients: [r('priya')],
+  };
+  const day = deps(deal, { now: () => new Date('2026-11-05T12:00:00Z') });
+  await handleNotify(req({ kind: 'deal', ref: 'd1' }), day.d);
+  assertEquals(day.sent[0]![0]!.priority, 'high');
+  assertEquals(day.sent[0]![0]!.channelId, 'alerts');
+  const arrival = deps(arrivalCtx([r('priya')]));
+  await handleNotify(req({ kind: 'stop_event', ref: 'e1' }), arrival.d);
+  assertEquals(arrival.sent[0]![0]!.channelId, 'arrivals');
+});
+
 Deno.test('vendor digest and rating copy', async () => {
   const digest = deps({ vendor: { id: 'v1', display_name: 'Ramesh Sabzi', verified: true }, groups: [{ name: 'Drumsticks', count: 3 }, { name: 'Broccoli', count: 2 }, { name: 'Baby corn', count: 1 }], recipients: [r('v1')] }, { now: () => new Date('2026-11-05T10:30:00Z') });
   await handleNotify(req({ kind: 'vendor_requests', ref: 'v1' }), digest.d);

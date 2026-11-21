@@ -82,8 +82,17 @@ export function vendorRatingMessage(stars: number, society: string | null, text:
 
 export type NotifKind = 'arrival' | 'leaving_soon' | 'deal' | 'not_coming' | 'request_reply' | 'vendor_new_requests' | 'vendor_new_rating';
 
-/** NOT-3: deals and request replies are not pushed between 21:00 and 06:00 IST; arrivals always are. */
+/**
+ * NOT-3: evening deals and new-rating alerts are not pushed between 21:00 and 06:00 IST.
+ * Arrivals and everything in the request flow are transactional — a buyer must hear the vendor's reply
+ * the same night to act on it before the slot cutoff — so they are always pushed (DECISIONS 2026-11-21).
+ */
 export function pushAllowedNow(kind: NotifKind, now: Date = new Date()): boolean {
-  if (kind === 'deal' || kind === 'request_reply' || kind === 'vendor_new_requests' || kind === 'vendor_new_rating') return !isQuietHours(now);
+  if (kind === 'deal' || kind === 'vendor_new_rating') return !isQuietHours(now);
   return true;
+}
+
+/** Android channel per kind. Every channel is HIGH importance so the alert shows even when the app is closed. */
+export function channelFor(kind: NotifKind): 'arrivals' | 'alerts' {
+  return kind === 'arrival' || kind === 'leaving_soon' ? 'arrivals' : 'alerts';
 }

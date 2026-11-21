@@ -64,7 +64,7 @@ export const LIMITS = {
   requestsVisibleFromHourIst: 16,
   /** Evening deals strip on buyer home after 17:00 IST — B-03 */
   eveningDealsFromHourIst: 17,
-  /** Quiet hours for deals and request replies — NOT-3 */
+  /** Quiet hours for evening deals and rating alerts (not request replies) — NOT-3 */
   quietHoursStartIst: 21,
   quietHoursEndIst: 6,
   /** Ask the vendor before sending an arrival queued for more than 30 minutes */
