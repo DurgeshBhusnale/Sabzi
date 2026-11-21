@@ -82,21 +82,29 @@ describe('V-13 vendor requests (request flow v2)', () => {
     <VendorRequestsView slots={groupBySlot(rows, evening)} loading={false} now={evening} tab="requests" onTab={jest.fn()} onAnswer={jest.fn(async () => undefined)} onMark={jest.fn(async () => undefined)} onShareQr={jest.fn()} {...o} />
   );
   it('groups by visit then item, with totals, notes and the visit header', async () => {
-    await renderUi(view([req({}), req({ qty: '1 kg', buyer_first_name: 'Arjun', society_name: 'Sahyadri Heights', note: 'Fresh ones please' }), req({ item_id: 'b', item_name: 'Broccoli', qty: '1 piece' })]), { mode: 'vendor' });
+    await renderUi(view([req({ buyer_name: 'Priya Kulkarni' }), req({ qty: '1 kg', buyer_first_name: 'Arjun', buyer_name: 'Arjun Mehta', society_name: 'Sahyadri Heights', note: 'Fresh ones please' }), req({ item_id: 'b', item_name: 'Broccoli', qty: '1 piece' })]), { mode: 'vendor' });
     expect(screen.getByText('Tomorrow morning')).toBeTruthy();
     expect(screen.getByText('Drumsticks · 1.5 kg')).toBeTruthy();
     expect(screen.getByText('2 people · Green Park, Sahyadri Heights')).toBeTruthy();
     expect(screen.getByText('2 waiting for you')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Show notes (1)'));
-    expect(screen.getByText('Arjun · Sahyadri Heights · 1 kg: “Fresh ones please”')).toBeTruthy();
+    // owner review 2026-11-21: every buyer by full name, with society, quantity and note
+    expect(screen.getByText('Priya Kulkarni')).toBeTruthy();
+    expect(screen.getByText('Arjun Mehta')).toBeTruthy();
+    expect(screen.getByText('Sahyadri Heights · 1 kg')).toBeTruthy();
+    expect(screen.getByText('“Fresh ones please”')).toBeTruthy();
   });
-  it('Accept request sends the price (pre-filled from the menu, adjusted with the steppers)', async () => {
+  it('Accept request sends the price (pre-filled from the menu, changed on the price wheel) and the note', async () => {
     const onAnswer = jest.fn(async () => undefined);
     await renderUi(view([req({})], { onAnswer }), { mode: 'vendor' });
     expect(screen.getByTestId('price-Drumsticks-value')).toHaveTextContent('₹60');
-    await fireEvent.press(screen.getByTestId('price-Drumsticks-step-5'));
+    expect(screen.queryByTestId('price-Drumsticks-step-5')).toBeNull();
+    await fireEvent.press(screen.getByTestId('price-Drumsticks-open'));
+    await fireEvent.press(screen.getByTestId('price-Drumsticks-stepper-wheel-row-55'));
+    await fireEvent.press(screen.getByTestId('price-Drumsticks-done'));
+    expect(screen.getByTestId('price-Drumsticks-value')).toHaveTextContent('₹55');
+    await fireEvent.changeText(screen.getByTestId('vnote-Drumsticks'), 'Fresh stock, may be 10 min late');
     await fireEvent.press(screen.getByText('Accept request'));
-    await waitFor(() => expect(onAnswer).toHaveBeenCalledWith(expect.objectContaining({ status: 'will_bring', price: 55, unit: 'kg' })));
+    await waitFor(() => expect(onAnswer).toHaveBeenCalledWith(expect.objectContaining({ status: 'will_bring', price: 55, unit: 'kg', note: 'Fresh stock, may be 10 min late' })));
     expect(screen.getByText('Deny request')).toBeTruthy();
   });
   it('accepted item shows the price and the buyer counts; Deny after confirmations asks first', async () => {

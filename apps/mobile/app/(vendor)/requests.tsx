@@ -29,8 +29,8 @@ export default function VendorRequests() {
           await markDelivery(ids, outcome, reason);
           await qc.invalidateQueries({ queryKey: ['vendor', 'requests'] });
         }}
-        onAnswer={async ({ slot, group, status, price, unit }) => {
-          await answerRequest({ key: group.key, status, forDate: slot.for_date, stopId: slot.stop_id, price, unit });
+        onAnswer={async ({ slot, group, status, price, unit, note }) => {
+          await answerRequest({ key: group.key, status, forDate: slot.for_date, stopId: slot.stop_id, price, unit, note });
           track('request_answered', { status });
           await qc.invalidateQueries({ queryKey: ['vendor', 'requests'] });
         }}

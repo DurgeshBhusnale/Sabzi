@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button, EmptyState, Screen, SkeletonBlock, TopAppBar } from '../../src/ui';
 import { MenuEditor } from '../../src/features/vendor/MenuEditor';
 import { buildDraft } from '../../src/features/vendor/menuLogic';
-import { useInvalidateVendor, useTodayMenu, useUsualItems, useYesterdayMenu, vendorKeys } from '../../src/features/vendor/hooks';
+import { useInvalidateVendor, useLastMenu, useTodayMenu, useUsualItems, vendorKeys } from '../../src/features/vendor/hooks';
 import { publishMenu } from '../../src/features/vendor/api';
 import { useOffline } from '../../src/lib/offline/OfflineProvider';
 import { NetworkBanner } from '../../src/features/system/NetworkBanner';
@@ -15,12 +15,12 @@ import { en } from '../../src/i18n/en';
 export default function SetMenu() {
   const usual = useUsualItems();
   const today = useTodayMenu();
-  const yesterday = useYesterdayMenu();
+  const last = useLastMenu();
   const invalidate = useInvalidateVendor();
   const offline = useOffline();
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const loading = usual.isLoading || today.isLoading || yesterday.isLoading;
+  const loading = usual.isLoading || today.isLoading || last.isLoading;
 
   return (
     <Screen header={<TopAppBar title={en.vendor.menuTitle} onBack={() => router.back()} />}>
@@ -31,8 +31,8 @@ export default function SetMenu() {
         <EmptyState title={en.vendor.noUsualItems} actionLabel={en.vendor.editUsual} onAction={() => router.push('/vendor-setup/items')} />
       ) : (
         <MenuEditor
-          initial={buildDraft(usual.data, today.data?.lines ?? null, yesterday.data?.lines ?? null)}
-          yesterday={yesterday.data?.lines ?? null}
+          initial={buildDraft(usual.data, today.data?.lines ?? null, last.data?.lines ?? null)}
+          lastMenu={last.data?.lines ?? null}
           publishing={publishing}
           offlineNote={error}
           onPublish={async (items) => {

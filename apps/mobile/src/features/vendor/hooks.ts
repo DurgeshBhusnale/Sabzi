@@ -7,7 +7,8 @@ export const vendorKeys = {
   usual: ['vendor', 'usual'] as const,
   items: ['vendor', 'items'] as const,
   today: ['vendor', 'menu', 'today'] as const,
-  yesterday: ['vendor', 'menu', 'yesterday'] as const,
+  // The day is part of the key: the cache is persisted, so yesterday's answer must not show the next morning.
+  lastMenu: (today: string) => ['vendor', 'menu', 'last', today] as const,
   stops: ['vendor', 'stops', 'today'] as const,
   week: ['vendor', 'stops', 'week'] as const,
   stats: ['vendor', 'stats'] as const,
@@ -19,7 +20,7 @@ export const useMyVendor = () => useQuery({ queryKey: vendorKeys.me, queryFn: ()
 export const useUsualItems = () => useQuery({ queryKey: vendorKeys.usual, queryFn: () => api.getUsualItems() });
 export const useAllItems = () => useQuery({ queryKey: vendorKeys.items, queryFn: () => api.listItems() });
 export const useTodayMenu = () => useQuery({ queryKey: vendorKeys.today, queryFn: () => api.getMenu(api.todayIst()) });
-export const useYesterdayMenu = () => useQuery({ queryKey: vendorKeys.yesterday, queryFn: () => api.getMenu(api.yesterdayIst()) });
+export const useLastMenu = () => useQuery({ queryKey: vendorKeys.lastMenu(api.todayIst()), queryFn: () => api.getLastMenu() });
 export const useStopsToday = () => useQuery({ queryKey: vendorKeys.stops, queryFn: () => api.getStopsToday(), refetchInterval: 60_000 });
 export const useStopsWeek = () => useQuery({ queryKey: vendorKeys.week, queryFn: () => api.getStopsWeek() });
 export const useStats = () => useQuery({ queryKey: vendorKeys.stats, queryFn: () => api.getStats() });

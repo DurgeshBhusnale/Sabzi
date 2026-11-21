@@ -30,7 +30,8 @@ import {
   Toggle,
   TopAppBar,
   VendorCard,
-  stepPrice,
+  clampPrice,
+  wheelIndex,
   isValidPrice,
 } from '../src/ui';
 import { Home } from 'lucide-react-native';
@@ -243,26 +244,46 @@ describe('ItemTile', () => {
   });
 });
 
-describe('PriceStepper', () => {
-  it('steps and shows was hint', async () => {
+describe('PriceStepper (price wheel, owner review 2026-11-21)', () => {
+  it('has no −5/−1/+1/+5 buttons; tapping a row picks that price; shows the was hint', async () => {
     const onChange = jest.fn();
     await renderUi(<PriceStepper price={40} unit="kg" wasPrice={35} onChange={onChange} onUnitChange={() => undefined} />, { mode: 'vendor' });
     expect(screen.getByTestId('was-hint')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('step-5'));
+    expect(screen.queryByTestId('step-5')).toBeNull();
+    expect(screen.getByTestId('price-value')).toHaveTextContent('₹40');
+    await fireEvent.press(screen.getByTestId('price-stepper-wheel-row-45'));
     expect(onChange).toHaveBeenCalledWith(45);
-    await fireEvent.press(screen.getByTestId('step--1'));
-    expect(onChange).toHaveBeenCalledWith(39);
+  });
+  it('tapping the selected price opens the number keypad', async () => {
+    const onChange = jest.fn();
+    await renderUi(<PriceStepper price={40} unit="kg" onChange={onChange} />, { mode: 'vendor' });
+    await fireEvent.press(screen.getByTestId('price-stepper-wheel-selected'));
+    const input = screen.getByTestId('price-typing');
+    await fireEvent.changeText(input, '62');
+    expect(onChange).toHaveBeenCalledWith(62);
+  });
+  it('scrolling settles on the row under the centre line', async () => {
+    const onChange = jest.fn();
+    await renderUi(<PriceStepper price={40} unit="kg" onChange={onChange} />, { mode: 'vendor' });
+    const scroll = screen.getByTestId('price-stepper-wheel-scroll');
+    await fireEvent(scroll, 'momentumScrollEnd', { nativeEvent: { contentOffset: { x: 0, y: 64 * 52 } } });
+    expect(onChange).toHaveBeenCalledWith(52);
+  });
+  it('screen readers can step the wheel', async () => {
+    const onChange = jest.fn();
+    await renderUi(<PriceStepper price={40} unit="kg" onChange={onChange} />, { mode: 'vendor' });
+    await fireEvent(screen.getByTestId('price-stepper-wheel'), 'accessibilityAction', { nativeEvent: { actionName: 'increment' } });
+    expect(onChange).toHaveBeenCalledWith(41);
   });
   it('invalid shows an error', async () => {
     await renderUi(<PriceStepper price={0} unit="kg" onChange={() => undefined} />);
     expect(screen.getByText('Price must be between ₹1 and ₹999.')).toBeTruthy();
   });
-  it('step buttons are 56 dp', async () => {
-    await renderUi(<PriceStepper price={40} unit="kg" onChange={() => undefined} />, { mode: 'vendor' });
-    expect(flat(screen.getByTestId('step-1').props.style).minHeight).toBeGreaterThanOrEqual(56);
-  });
   it('helpers clamp and validate', () => {
-    expect(stepPrice(3, -5)).toBe(0);
+    expect(clampPrice(-3)).toBe(0);
+    expect(clampPrice(1200)).toBe(999);
+    expect(wheelIndex(64 * 12 + 20, 64)).toBe(12);
+    expect(wheelIndex(64 * 12 + 40, 64)).toBe(13);
     expect(isValidPrice(0)).toBe(false);
     expect(isValidPrice(999)).toBe(true);
     expect(isValidPrice(1000)).toBe(false);

@@ -27,6 +27,10 @@ export type RequestLite = {
   qty: string | null;
   note: string | null;
   buyer_first_name: string;
+  /** Full name, shown to the vendor so he knows whom to hand the order to (owner review 2026-11-21). */
+  buyer_name?: string | null;
+  /** Vendor's optional note with his answer, shown to the buyer. */
+  vendor_note?: string | null;
   society_name: string;
   status: RequestStatus;
   default_unit?: PriceUnit | null;
@@ -43,6 +47,10 @@ export type RequestGroup = {
   totalLabel: string | null;
   societies: string[];
   notes: { buyer: string; society: string; qty: string | null; note: string }[];
+  /** Everyone who asked for this item on this visit, by full name (owner review 2026-11-21). */
+  buyers: { buyer: string; society: string; qty: string | null; note: string | null }[];
+  /** The vendor's note from his last answer for this item. */
+  vendorNote: string | null;
   status: 'open' | 'will_bring' | 'cant_bring' | 'mixed';
   /** What the vendor has decided for this item: still to answer, accepted (with a price) or denied. */
   decision: 'pending' | 'accepted' | 'denied';
@@ -105,6 +113,9 @@ export function sumQuantities(qtys: (string | null)[]): string | null {
   return parts.length ? parts.join(' + ') : null;
 }
 
+/** Full name when the server sends it, else the first name (older servers). */
+export const buyerNameOf = (r: Pick<RequestLite, 'buyer_name' | 'buyer_first_name'>) => r.buyer_name?.trim() || r.buyer_first_name;
+
 export function requestKey(r: Pick<RequestLite, 'item_id' | 'free_text'>): string {
   return r.item_id ?? `free:${(r.free_text ?? '').trim().toLowerCase()}`;
 }
@@ -126,7 +137,12 @@ export function groupRequests(rows: RequestLite[]): RequestGroup[] {
       count: rs.length,
       totalLabel: sumQuantities(rs.map((r) => r.qty)),
       societies: [...new Set(rs.map((r) => r.society_name))],
-      notes: rs.filter((r) => r.note).map((r) => ({ buyer: r.buyer_first_name, society: r.society_name, qty: r.qty, note: r.note! })),
+      notes: rs.filter((r) => r.note).map((r) => ({ buyer: buyerNameOf(r), society: r.society_name, qty: r.qty, note: r.note! })),
+      buyers: rs
+        .filter((r) => r.status !== 'expired')
+        .map((r) => ({ buyer: buyerNameOf(r), society: r.society_name, qty: r.qty, note: r.note }))
+        .sort((a, b) => a.buyer.localeCompare(b.buyer)),
+      vendorNote: rs.find((r) => r.vendor_note)?.vendor_note ?? null,
       status: statuses.size === 1 ? (rs[0]!.status as RequestGroup['status']) : 'mixed',
       ...decide(rs),
     });
@@ -156,7 +172,7 @@ function decide(rs: RequestLite[]): Pick<RequestGroup, 'decision' | 'counts' | '
     counts,
     price: price == null ? null : Number(price),
     unit,
-    confirmed: conf.map((r) => ({ buyer: r.buyer_first_name, society: r.society_name, qty: r.qty, note: r.note })),
+    confirmed: conf.map((r) => ({ buyer: buyerNameOf(r), society: r.society_name, qty: r.qty, note: r.note })),
     confirmedTotal: sumQuantities(conf.map((r) => r.qty)),
   };
 }
@@ -287,7 +303,7 @@ function ordersOf(rs: VendorRequestRow[]): DeliveryOrder[] {
     const name = (x: VendorRequestRow) => x.item_name ?? (x.free_text ?? '').trim().replace(/^./, (c) => c.toUpperCase());
     return {
       ref,
-      buyer: xs[0]!.buyer_first_name,
+      buyer: buyerNameOf(xs[0]!),
       society: xs[0]!.society_name,
       ids: xs.map((x) => x.id),
       items: xs.map((x) => ({ id: x.id, name: name(x), qty: x.qty, price: x.quoted_price == null ? null : Number(x.quoted_price), unit: x.quoted_unit ?? null })),

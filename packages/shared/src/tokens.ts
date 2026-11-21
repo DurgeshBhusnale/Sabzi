@@ -368,6 +368,8 @@ export const layout = {
   /** Forest header: rounded top corners of the cream body sheet */
   headerSheetRadius: 28,
   stateArt: 112,
+  /** Vendor price wheel: height of one row (three rows are visible) */
+  priceWheelRow: 64,
 } as const;
 
 export const motion = {

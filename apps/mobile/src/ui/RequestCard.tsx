@@ -56,6 +56,7 @@ export function RequestCard({
   priceLabel,
   priceNote,
   actions,
+  vendorNote,
   onPress,
   testID,
 }: {
@@ -73,6 +74,8 @@ export function RequestCard({
   priceLabel?: string;
   priceNote?: string;
   actions?: React.ReactNode;
+  /** "Note from Ramesh" + the vendor's note with his answer */
+  vendorNote?: { label: string; text: string } | null;
   onPress?: () => void;
   testID?: string;
 }) {
@@ -95,6 +98,12 @@ export function RequestCard({
         {onPress ? <Icon icon={ChevronRight} size={20} color="textMuted" /> : null}
       </View>
       <RequestStatusBlock tone={tone} headline={headline} detail={price ? null : detail} />
+      {vendorNote ? (
+        <View style={{ backgroundColor: t.colors.surface2, borderRadius: t.radius.button, padding: t.spacing.sm, gap: 2 }} testID="request-vendor-note">
+          <Text variant="caption" color="textSecondary">{vendorNote.label}</Text>
+          <Text variant="bodySmall">{`“${vendorNote.text}”`}</Text>
+        </View>
+      ) : null}
       {price ? (
         <View style={[styles.priceRow, { gap: t.spacing.xs }]} testID="request-price">
           <Text variant="bodySmall" color="textSecondary">{priceLabel}</Text>

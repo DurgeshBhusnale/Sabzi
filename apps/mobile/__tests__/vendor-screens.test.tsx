@@ -25,35 +25,37 @@ const yesterday = usual.slice(0, 12).map((u, i) => ({ itemId: u.id, price: 20 + 
 const menu: DayMenu = { id: 'm', date: '2026-11-05', publishedAt: '2026-11-05T01:12:00Z', updatedAt: '2026-11-05T01:12:00Z', stockPhotoPath: null, stockPhotoAt: null, lines: yesterday.map((y, i) => ({ ...y, name: names[i]!, dealPrice: null, soldOut: false })) };
 const actions = { onSetMenu: jest.fn(), onAddPhoto: jest.fn(), onOpenLive: jest.fn(), onSendDeal: jest.fn() };
 
-describe('V-05: publish 12 items from "Same as yesterday" in ≤ 3 taps', () => {
-  it('Today → Set menu → Yesterday → Publish', async () => {
+describe('V-05: publish 12 items from "Last menu" in ≤ 3 taps', () => {
+  it('Today → Set menu → Last menu → Publish', async () => {
     let taps = 0;
     const onPublish = jest.fn();
     await renderUi(<TodayView vendor={vendor} name="Ramesh Pawar" menu={null} stops={[stop({})]} stats={stats} loading={false} now={now} actions={{ ...actions, onSetMenu: () => undefined }} />, { mode: 'vendor' });
     await fireEvent.press(screen.getByTestId('set-menu'));
     taps++;
-    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} yesterday={yesterday} onPublish={onPublish} publishing={false} />, { mode: 'vendor' });
+    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} lastMenu={yesterday} onPublish={onPublish} publishing={false} />, { mode: 'vendor' });
     expect(screen.getByTestId('publish').props.accessibilityState.disabled).toBe(true);
-    await fireEvent.press(screen.getByTestId('same-as-yesterday'));
+    await fireEvent.press(screen.getByTestId('copy-last-menu'));
     taps++;
-    expect(screen.getByText('Copied 12 items from yesterday')).toBeTruthy();
+    expect(screen.getByText('12 items added from your last menu. Check prices, then publish.')).toBeTruthy();
+    expect(screen.queryByTestId('copy-last-menu')).toBeNull();
     expect(screen.getByText('Publish menu (12 items)')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('publish'));
     taps++;
     expect(taps).toBeLessThanOrEqual(3);
     expect(onPublish).toHaveBeenCalledTimes(1);
     expect(onPublish.mock.calls[0][0]).toHaveLength(12);
-  });
+    // First render in the file loads every screen module; on a busy machine that alone can pass 5 s.
+  }, 20_000);
 
-  it('first time (no yesterday): nothing selected, publish disabled', async () => {
-    await renderUi(<MenuEditor initial={buildDraft(usual, null, null)} yesterday={null} onPublish={jest.fn()} publishing={false} />);
-    expect(screen.queryByTestId('same-as-yesterday')).toBeNull();
+  it('first time (no last menu): nothing selected, publish disabled', async () => {
+    await renderUi(<MenuEditor initial={buildDraft(usual, null, null)} lastMenu={null} onPublish={jest.fn()} publishing={false} />);
+    expect(screen.queryByTestId('copy-last-menu')).toBeNull();
     expect(screen.getByText('Pick items to publish')).toBeTruthy();
   });
 
   it('some prices missing: red outline and hint, publish disabled', async () => {
-    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} yesterday={yesterday} onPublish={jest.fn()} publishing={false} />);
-    await fireEvent.press(screen.getByTestId('same-as-yesterday'));
+    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} lastMenu={yesterday} onPublish={jest.fn()} publishing={false} />);
+    await fireEvent.press(screen.getByTestId('copy-last-menu'));
     await fireEvent.press(screen.getByTestId('tile-Drumsticks'));
     await fireEvent.press(screen.getByText('Cancel'));
     await fireEvent.press(screen.getByTestId('tile-Carrot'));
@@ -62,16 +64,18 @@ describe('V-05: publish 12 items from "Same as yesterday" in ≤ 3 taps', () => 
   });
 
   it('price editor: step and save with "was" hint', async () => {
-    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} yesterday={yesterday} onPublish={jest.fn()} publishing={false} />, { mode: 'vendor' });
+    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} lastMenu={yesterday} onPublish={jest.fn()} publishing={false} />, { mode: 'vendor' });
     await fireEvent.press(screen.getByTestId('tile-Tomato'));
-    await fireEvent.press(screen.getByTestId('step-5'));
+    // owner review 2026-11-21: a price wheel instead of −5/−1/+1/+5; tapping a row picks it
+    expect(screen.queryByTestId('step-5')).toBeNull();
+    await fireEvent.press(screen.getByTestId('price-stepper-wheel-row-25'));
     expect(screen.getByTestId('was-hint')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('save-price'));
     expect(screen.getByText('₹25 / kg')).toBeTruthy();
   });
 
   it('publishing and offline states', async () => {
-    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} yesterday={yesterday} onPublish={jest.fn()} publishing offlineNote="No internet. Your menu will publish when you're back online." />);
+    await renderUi(<MenuEditor initial={buildDraft(usual, null, yesterday)} lastMenu={yesterday} onPublish={jest.fn()} publishing offlineNote="No internet. Your menu will publish when you're back online." />);
     expect(screen.getByText("No internet. Your menu will publish when you're back online.")).toBeTruthy();
   });
 });

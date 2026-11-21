@@ -1,46 +1,90 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { cutoffPhrase, formatIstTime, formatPrice, LIMITS, PRICE_UNITS, shortSociety, slotDayLabel, slotWindowLabel, UNIT_LABELS, type PriceUnit, type RequestGroup, type SlotGroup } from '@sabzi/shared';
+import { cutoffPhrase, formatIstTime, formatPrice, shortSociety, slotDayLabel, slotWindowLabel, UNIT_LABELS, type PriceUnit, type RequestGroup, type SlotGroup } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Banner, Button, Card, Chip, Dialog, EmptyState, ItemArt, RequestStatusBlock, SegmentedControl, SkeletonBlock, Text } from '../../ui';
+import { Banner, BottomSheet, Button, Card, Chip, Dialog, EmptyState, ItemArt, PriceStepper, RequestStatusBlock, SegmentedControl, SkeletonBlock, Text, TextInput, isValidPrice } from '../../ui';
 import { en } from '../../i18n/en';
 import { DeliveryOrders, type MarkFn } from './DeliveryOrders';
 
 export type VendorTab = 'requests' | 'confirmed';
-export type AnswerInput = { slot: SlotGroup; group: RequestGroup; status: 'will_bring' | 'cant_bring'; price?: number; unit?: PriceUnit };
+export type AnswerInput = { slot: SlotGroup; group: RequestGroup; status: 'will_bring' | 'cant_bring'; price?: number; unit?: PriceUnit; note?: string };
 
-const STEPS = [-5, -1, 1, 5] as const;
-
-/** Compact price box for a request card: −5 −1 ₹40 +1 +5, unit chips only for free-text items. */
+/**
+ * Price on a request card: the price as a tappable box; tapping opens the same price wheel the menu uses
+ * (owner review 2026-11-21: no −5/−1/+1/+5 buttons anywhere). Unit chips only for free-text items.
+ */
 function PriceBox({ price, unit, onChange, onUnit, showUnits, testID }: { price: number; unit: PriceUnit; onChange: (p: number) => void; onUnit: (u: PriceUnit) => void; showUnits: boolean; testID: string }) {
   const t = useTheme();
   const c = t.colors;
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(price);
+  const [draftUnit, setDraftUnit] = useState(unit);
   return (
     <View style={{ gap: t.spacing.xs }} testID={testID}>
       <Text variant="bodySmall" weight="600">{en.req.vPriceLabel(UNIT_LABELS[unit])}</Text>
-      <View style={[styles.row, { gap: t.spacing.xs }]}>
-        {STEPS.slice(0, 2).map((d) => (
-          <Pressable key={d} testID={`${testID}-step${d}`} accessibilityRole="button" accessibilityLabel={`Subtract ${-d} rupees`} onPress={() => onChange(Math.max(LIMITS.priceMin, price + d))}
-            style={[styles.step, { minWidth: t.layout.minTouch, minHeight: t.layout.minTouch, borderRadius: t.radius.button, backgroundColor: c.surface2 }]}>
-            <Text weight="600">{`${d}`}</Text>
-          </Pressable>
-        ))}
-        <View style={[styles.value, { minHeight: t.layout.minTouch, borderRadius: t.radius.button, borderColor: c.primary, borderWidth: 2 }]}>
-          <Text variant="price" weight="600" testID={`${testID}-value`}>{`₹${price}`}</Text>
-        </View>
-        {STEPS.slice(2).map((d) => (
-          <Pressable key={d} testID={`${testID}-step+${d}`} accessibilityRole="button" accessibilityLabel={`Add ${d} rupees`} onPress={() => onChange(Math.min(LIMITS.priceMax, price + d))}
-            style={[styles.step, { minWidth: t.layout.minTouch, minHeight: t.layout.minTouch, borderRadius: t.radius.button, backgroundColor: c.surface2 }]}>
-            <Text weight="600">{`+${d}`}</Text>
-          </Pressable>
-        ))}
-      </View>
-      {showUnits ? (
-        <View style={[styles.row, { gap: t.spacing.xs, flexWrap: 'wrap' }]}>
-          {PRICE_UNITS.map((u) => <Chip key={u} label={UNIT_LABELS[u]} selected={u === unit} onPress={() => onUnit(u)} />)}
-        </View>
-      ) : null}
+      <Pressable
+        testID={`${testID}-open`}
+        accessibilityRole="button"
+        accessibilityLabel={en.req.vPriceA11y(price, UNIT_LABELS[unit])}
+        onPress={() => {
+          setDraft(price);
+          setDraftUnit(unit);
+          setOpen(true);
+        }}
+        style={({ pressed }) => [
+          styles.value,
+          { minHeight: t.heights.vendorXL, borderRadius: t.radius.button, borderColor: c.primary, borderWidth: 2, backgroundColor: pressed ? c.primaryTint : c.surface, gap: t.spacing.xs },
+        ]}
+      >
+        <Text variant="price" weight="600" testID={`${testID}-value`}>{`₹${price}`}</Text>
+        <Text variant="bodySmall" color="textSecondary">{`/ ${UNIT_LABELS[unit]}`}</Text>
+        <Text variant="label" color="primary">{en.req.vPriceChange}</Text>
+      </Pressable>
       <Text variant="caption" color="textSecondary">{en.req.vPriceHint}</Text>
+      <BottomSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title={en.req.vPriceLabel(UNIT_LABELS[draftUnit])}
+        testID={`${testID}-sheet`}
+        footer={
+          <Button
+            size="xl"
+            label={en.req.vPriceDone(formatPrice(draft, draftUnit))}
+            disabled={!isValidPrice(draft)}
+            testID={`${testID}-done`}
+            onPress={() => {
+              onChange(draft);
+              onUnit(draftUnit);
+              setOpen(false);
+            }}
+          />
+        }
+      >
+        <PriceStepper price={draft} unit={draftUnit} onChange={setDraft} onUnitChange={showUnits ? setDraftUnit : undefined} testID={`${testID}-stepper`} />
+      </BottomSheet>
+    </View>
+  );
+}
+
+/** Everyone who asked for this item on this visit: full name, society, quantity and their note. */
+function BuyerList({ g }: { g: RequestGroup }) {
+  const t = useTheme();
+  const [all, setAll] = useState(false);
+  const LIMIT = 4;
+  const shown = all ? g.buyers : g.buyers.slice(0, LIMIT);
+  if (!g.buyers.length) return null;
+  return (
+    <View style={{ gap: t.spacing.xs }} testID={`vr-buyers-${g.name}`}>
+      {shown.map((b, i) => (
+        <View key={i} style={{ gap: 2 }}>
+          <Text variant="bodySmall" weight="600">{b.buyer}</Text>
+          <Text variant="caption" color="textSecondary">{[shortSociety(b.society), b.qty].filter(Boolean).join(' · ')}</Text>
+          {b.note ? <Text variant="caption" color="textSecondary">{`“${b.note}”`}</Text> : null}
+        </View>
+      ))}
+      {g.buyers.length > LIMIT ? (
+        <Button label={all ? en.req.showFewer : en.req.showAllBuyers(g.buyers.length)} variant="tertiary" fullWidth={false} onPress={() => setAll(!all)} />
+      ) : null}
     </View>
   );
 }
@@ -71,7 +115,7 @@ function ItemRequestCard({ slot, g, onAnswer }: { slot: SlotGroup; g: RequestGro
   const [price, setPrice] = useState<number>(g.price ?? 40);
   const [unit, setUnit] = useState<PriceUnit>(g.unit);
   const [editing, setEditing] = useState(false);
-  const [notes, setNotes] = useState(false);
+  const [note, setNote] = useState(g.vendorNote ?? '');
   const [busy, setBusy] = useState<'accept' | 'deny' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeny, setConfirmDeny] = useState(false);
@@ -81,7 +125,7 @@ function ItemRequestCard({ slot, g, onAnswer }: { slot: SlotGroup; g: RequestGro
     setBusy(status === 'will_bring' ? 'accept' : 'deny');
     setError(null);
     try {
-      await onAnswer({ slot, group: g, status, ...(status === 'will_bring' ? { price, unit } : {}) });
+      await onAnswer({ slot, group: g, status, note: note.trim(), ...(status === 'will_bring' ? { price, unit } : {}) });
       setEditing(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : en.errors.unknown);
@@ -100,21 +144,25 @@ function ItemRequestCard({ slot, g, onAnswer }: { slot: SlotGroup; g: RequestGro
         </View>
       </View>
       <CountChips g={g} />
-      {g.notes.length ? (
-        <Button label={notes ? en.eng.hideNotes : `${en.eng.showNotes} (${g.notes.length})`} variant="tertiary" fullWidth={false} onPress={() => setNotes(!notes)} testID={`notes-${g.name}`} />
-      ) : null}
-      {notes
-        ? g.notes.map((n, i) => (
-            <Text key={i} variant="bodySmall" color="textSecondary">{`${n.buyer} · ${shortSociety(n.society)}${n.qty ? ` · ${n.qty}` : ''}: “${n.note}”`}</Text>
-          ))
-        : null}
+      <BuyerList g={g} />
 
       {g.decision === 'accepted' && !editing ? (
         <RequestStatusBlock tone="success" headline={en.req.acceptedAt(formatPrice(g.price ?? price, g.unit))} testID="vr-accepted" />
       ) : null}
       {g.decision === 'denied' && !editing ? <RequestStatusBlock tone="error" headline={en.req.denied} testID="vr-denied" /> : null}
+      {g.vendorNote && !showEditor ? <Text variant="bodySmall" color="textSecondary" testID={`vr-note-${g.name}`}>{en.req.yourNote(g.vendorNote)}</Text> : null}
 
       {showEditor ? <PriceBox price={price} unit={unit} onChange={setPrice} onUnit={setUnit} showUnits={isFree} testID={`price-${g.name}`} /> : null}
+      {showEditor ? (
+        <TextInput
+          label={en.req.vNoteLabel}
+          placeholder={en.req.vNotePh}
+          value={note}
+          onChangeText={setNote}
+          maxChars={140}
+          testID={`vnote-${g.name}`}
+        />
+      ) : null}
 
       {showEditor ? (
         <View style={[styles.row, { gap: t.spacing.xs }]}>
@@ -287,7 +335,6 @@ export function VendorRequestsView({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
-  step: { alignItems: 'center', justifyContent: 'center' },
-  value: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  value: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   buyerRow: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: StyleSheet.hairlineWidth },
 });

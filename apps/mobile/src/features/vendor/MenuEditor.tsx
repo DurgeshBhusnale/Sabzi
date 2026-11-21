@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { formatPrice, UNIT_LABELS, type PriceUnit } from '@sabzi/shared';
+import { formatPrice, type PriceUnit } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Banner, BottomSheet, Button, ItemArt, ItemTile, PriceStepper, Snackbar, Text, TextInput, isValidPrice } from '../../ui';
-import { canPublish, copyYesterday, missingPrices, selectedItems, setPrice, toggleItem, toPublishItems, type Draft, type MenuLine } from './menuLogic';
+import { Banner, BottomSheet, Button, ItemArt, ItemTile, PriceStepper, Snackbar, Text, isValidPrice } from '../../ui';
+import { canPublish, copyLastMenu, matchesLastMenu, missingPrices, selectedItems, setPrice, toggleItem, toPublishItems, type Draft, type MenuLine } from './menuLogic';
 import { en } from '../../i18n/en';
 
 /**
@@ -12,13 +12,14 @@ import { en } from '../../i18n/en';
  */
 export function MenuEditor({
   initial,
-  yesterday,
+  lastMenu,
   onPublish,
   publishing,
   offlineNote,
 }: {
   initial: Draft;
-  yesterday: MenuLine[] | null;
+  /** Most recent published menu before today (owner review 2026-11-21: "Last menu", not only yesterday's). */
+  lastMenu: MenuLine[] | null;
   onPublish: (items: ReturnType<typeof toPublishItems>) => void;
   publishing: boolean;
   offlineNote?: string | null;
@@ -28,7 +29,6 @@ export function MenuEditor({
   const [editing, setEditing] = useState<string | null>(null);
   const [price, setPriceState] = useState(0);
   const [unit, setUnit] = useState<PriceUnit>('kg');
-  const [typing, setTyping] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const all = useMemo(() => Object.values(draft), [draft]);
@@ -42,7 +42,6 @@ export function MenuEditor({
     if (!d.selected) setDraft(toggleItem(draft, id));
     setPriceState(d.price ?? d.wasPrice ?? 0);
     setUnit(d.unit);
-    setTyping(false);
     setEditing(id);
   };
   const cur = editing ? draft[editing] : null;
@@ -51,15 +50,15 @@ export function MenuEditor({
     <View style={{ flex: 1 }}>
       <View style={{ gap: t.spacing.sm, marginBottom: t.spacing.sm }}>
         <Text variant="bodySmall" color="textSecondary">{en.vendor.usualCount(selected.length, all.length)}</Text>
-        {/* UX-34: the fastest path to the 60-second menu, full width until something is picked */}
-        {yesterday?.length && selected.length === 0 ? (
+        {/* UX-34: the fastest path to the 60-second menu. Fills the last menu's items and prices; never publishes. */}
+        {lastMenu?.length && !matchesLastMenu(draft, lastMenu) ? (
           <Button
             size="xl"
             variant="secondary"
-            label={en.vendor.copyYesterday(yesterday.length)}
-            testID="same-as-yesterday"
+            label={en.vendor.lastMenu(lastMenu.length)}
+            testID="copy-last-menu"
             onPress={() => {
-              const r = copyYesterday(draft, yesterday);
+              const r = copyLastMenu(draft, lastMenu);
               setDraft(r.draft);
               setToast(en.vendor.copied(r.copied));
             }}
@@ -136,10 +135,7 @@ export function MenuEditor({
               <ItemArt name={cur.name} size={48} />
               <Text variant="cardTitle">{cur.name}</Text>
             </View>
-            {typing ? (
-              <TextInput kind="price" label={en.vendor.perUnit(UNIT_LABELS[unit])} value={price ? String(price) : ''} onChangeText={(v) => setPriceState(Number(v.replace(/\D/g, '')) || 0)} autoFocus testID="price-typing" />
-            ) : null}
-            <PriceStepper price={price} unit={unit} wasPrice={cur.wasPrice} onChange={setPriceState} onUnitChange={setUnit} onEditNumber={() => setTyping(true)} />
+            <PriceStepper key={cur.itemId} price={price} unit={unit} wasPrice={cur.wasPrice} onChange={setPriceState} onUnitChange={setUnit} />
             {cur.selected && cur.price != null ? (
               <Button
                 label={en.vendor.removeFromToday(cur.name)}
