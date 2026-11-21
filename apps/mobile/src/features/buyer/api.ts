@@ -1,3 +1,4 @@
+import { societyRequestSchema } from '@sabzi/shared';
 import { getSupabase, type Client } from '../../lib/supabase';
 import { raise } from '../../lib/errors';
 import type { HomeVendor, MenuJson, SavedSociety, Society } from './types';
@@ -35,9 +36,13 @@ export async function societyServed(id: string, c: Client = getSupabase()): Prom
   return !!data;
 }
 
-export async function joinWaitlist(societyName: string, societyId: string | null, vendorHint?: string, c: Client = getSupabase()) {
-  const { data: u } = await c.auth.getUser();
-  const { error } = await c.from('waitlist').insert({ user_id: u.user!.id, society_name: societyName, society_id: societyId, vendor_hint: vendorHint ?? null });
+/**
+ * Owner review 2026-11-21: ask the team to add a society (name + address). This never adds the society to the
+ * buyer's account; the team adds it and the buyer is notified.
+ */
+export async function requestSociety(input: { name: string; address: string; societyId: string | null }, c: Client = getSupabase()) {
+  const v = societyRequestSchema.parse({ name: input.name, address: input.address, society_id: input.societyId });
+  const { error } = await c.rpc('request_society', { p_name: v.name, p_address: v.address, p_society_id: v.society_id ?? undefined });
   if (error) raise(error);
 }
 

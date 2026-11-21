@@ -6,12 +6,13 @@ import { APP_NAME } from '@sabzi/shared/constants';
 import { AdminProvider, useAdmin } from '../../lib/admin';
 import { canAccess, navFor } from '../../lib/nav';
 import { Empty, Skeleton } from '../../components/ui';
-import { ShoppingBasket as Basket, Building2, LayoutGrid, LogOut, MapPin, Settings, ShieldCheck, Store, UsersRound } from 'lucide-react';
+import { ShoppingBasket as Basket, Building2, Inbox, LayoutGrid, LogOut, MapPin, Settings, ShieldCheck, Store, UsersRound } from 'lucide-react';
 import type { NavIcon } from '../../lib/nav';
 
 const NAV_ICONS: Record<NavIcon, typeof Store> = {
   dashboard: LayoutGrid,
   societies: Building2,
+  requests: Inbox,
   vendors: Store,
   stops: MapPin,
   items: Basket,

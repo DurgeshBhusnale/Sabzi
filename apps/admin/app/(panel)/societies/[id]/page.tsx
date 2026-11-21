@@ -1,5 +1,5 @@
 'use client';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { PILOT_AREAS, PILOT_AREA_LABELS } from '@sabzi/shared/constants';
 import { gateSchema, societySchema } from '@sabzi/shared/schemas';
@@ -19,17 +19,20 @@ export default function SocietyDetail() {
   const { id } = useParams<{ id: string }>();
   const isNew = id === 'new';
   const router = useRouter();
+  // Society requests → "Add society" pre-fills the name and address the buyer gave.
+  const search = useSearchParams();
+  const prefill = isNew ? { name: search.get('name') ?? '', address: search.get('address') ?? '' } : null;
   const all = useData(() => (isNew ? Promise.resolve([] as SocietyRow[]) : rpc<SocietyRow[]>('admin_societies')), [id]);
   const s = all.data?.find((x) => x.id === id);
   if (!isNew && all.loading) return <Skeleton rows={6} />;
-  return <SocietyForm key={s?.id ?? 'new'} society={s ?? null} onSaved={(newId) => (isNew ? router.replace(`/societies/${newId}`) : all.reload())} />;
+  return <SocietyForm key={s?.id ?? 'new'} society={s ?? null} prefill={prefill} onSaved={(newId) => (isNew ? router.replace(`/societies/${newId}`) : all.reload())} />;
 }
 
-function SocietyForm({ society, onSaved }: { society: SocietyRow | null; onSaved: (id: string) => void }) {
+function SocietyForm({ society, prefill, onSaved }: { society: SocietyRow | null; prefill?: { name: string; address: string } | null; onSaved: (id: string) => void }) {
   const [f, setF] = useState<Form>({
-    name: society?.name ?? '',
+    name: society?.name ?? prefill?.name ?? '',
     area: society?.area ?? 'karve_nagar',
-    address: society?.address ?? '',
+    address: society?.address ?? prefill?.address ?? '',
     lat: society ? String(society.lat) : '',
     lng: society ? String(society.lng) : '',
     flats_count: society ? String(society.flats_count) : '',

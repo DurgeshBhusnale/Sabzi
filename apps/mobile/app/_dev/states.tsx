@@ -46,7 +46,7 @@ export const X_SCREENS: { id: string; title: string; render: () => React.ReactEl
   { id: 'X-14', title: 'Page not found', render: () => <SystemScreen illustration="search" title={en.system.notFound} actionLabel={en.common.goHome} onAction={noop} testID="x14" /> },
   { id: 'X-15', title: 'Vendor account suspended', render: () => <SystemScreen illustration="lock" title={en.vendor.suspendedTitle} actionLabel={en.common.callSupport} onAction={noop} testID="x15" /> },
   { id: 'X-16', title: 'OTP limit reached', render: () => <X16OtpLimit wait="59 min" onEmail={noop} /> },
-  { id: 'X-17', title: 'Society outside pilot area', render: () => <SystemScreen illustration="pin" title={en.buyer.notServedTitle('Rohan Leher')} body={en.buyer.notServedBody} actionLabel={en.buyer.notifyMe} onAction={noop} testID="x17" /> },
+  { id: 'X-17', title: 'Society outside pilot area', render: () => <SystemScreen illustration="pin" title={en.buyer.notServedTitle('Rohan Leher')} body={en.buyer.notServedBody} actionLabel={en.buyer.notifyMe('Rohan Leher')} onAction={noop} testID="x17" /> },
 ];
 
 export default function DevStates() {

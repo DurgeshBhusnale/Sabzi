@@ -22,7 +22,7 @@ end $$;
 grant usage on schema tests to anon, authenticated;
 grant execute on all functions in schema tests to anon, authenticated;
 
-select plan(87);
+select plan(88);
 
 -- ids
 \set ramesh '''10000000-0000-4000-8000-000000000001'''
@@ -201,7 +201,9 @@ select tests.logout();
 select tests.login(:priya);
 select is((select count(*)::int from notifications), 1, 'user reads own notifications');
 select throws_ok($$ insert into notifications (user_id, type) values ('20000000-0000-4000-8000-000000000001', 'arrival') $$, '42501', null, 'users cannot create notifications');
-select lives_ok($$ insert into waitlist (user_id, society_name) values ('20000000-0000-4000-8000-000000000001', 'Rohan Leher') $$, 'buyer joins waitlist');
+-- 2026-11-21: buyers request a society through request_society (name + address), never by a direct insert
+select lives_ok($$ select request_society('Rohan Leher', 'Baner Road, Pune') $$, 'buyer requests a society');
+select throws_ok($$ insert into waitlist (user_id, society_name) values ('20000000-0000-4000-8000-000000000001', 'Rohan Leher') $$, '42501', null, 'no direct insert, even for yourself');
 select throws_ok($$ insert into waitlist (user_id, society_name) values ('20000000-0000-4000-8000-000000000002', 'Rohan Leher') $$, '42501', null, 'cannot join waitlist as someone else');
 select tests.login(:ramesh);
 select is((select count(*)::int from notifications), 0, 'vendor cannot read buyer notifications');

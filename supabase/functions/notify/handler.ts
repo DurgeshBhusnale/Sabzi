@@ -6,6 +6,7 @@ import {
   notComingMessage,
   pushAllowedNow,
   requestReplyMessage,
+  societyAddedMessage,
   vendorRatingMessage,
   vendorRequestsMessage,
   type Message,
@@ -33,7 +34,8 @@ export type Context = {
   deal?: { id: string };
   request?: { id: string; status: 'will_bring' | 'cant_bring' | 'vendor_cancelled' | 'not_delivered'; qty: string | null; item: string; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null; missed_reason?: 'buyer_not_there' | 'vendor_unavailable' | 'other' | null };
   review?: { id: string; stars: number; tags: string[]; text: string | null; society: string | null };
-  vendor: { id: string; display_name: string; verified: boolean };
+  /** Absent for society_added (no vendor involved). */
+  vendor?: { id: string; display_name: string; verified: boolean };
   gate?: { id: string; name: string };
   society?: { id: string; name: string };
   menu?: Menu;
@@ -89,6 +91,10 @@ export function selectRecipients(kind: NotifKind, recipients: Recipient[]): Reci
       case 'vendor_new_rating':
         ok = pref(r, 'vendor_ratings');
         break;
+      case 'society_added':
+        // The buyer asked for exactly this message.
+        ok = true;
+        break;
     }
     if (ok) seen.add(r.user_id);
     return ok;
@@ -96,7 +102,7 @@ export function selectRecipients(kind: NotifKind, recipients: Recipient[]): Reci
 }
 
 export function buildMessage(kind: NotifKind, c: Context, now: Date = new Date()): Message {
-  const vendor = c.vendor.display_name;
+  const vendor = c.vendor?.display_name ?? '';
   const items = c.menu?.items ?? [];
   switch (kind) {
     case 'arrival':
@@ -111,6 +117,8 @@ export function buildMessage(kind: NotifKind, c: Context, now: Date = new Date()
       return requestReplyMessage(vendor, c.request!, now);
     case 'vendor_new_requests':
       return vendorRequestsMessage(c.groups ?? []);
+    case 'society_added':
+      return societyAddedMessage(c.society!.name);
     case 'vendor_new_rating':
       return vendorRatingMessage(c.review!.stars, c.review!.society, c.review!.text, c.review!.tags.map((t) => REVIEW_TAG_LABELS[t as ReviewTag] ?? t));
   }
@@ -122,6 +130,7 @@ function kindFor(input: string, c: Context): NotifKind | null {
   if (input === 'request_reply') return 'request_reply';
   if (input === 'rating') return 'vendor_new_rating';
   if (input === 'vendor_requests') return 'vendor_new_requests';
+  if (input === 'society_added') return 'society_added';
   return null;
 }
 
@@ -151,7 +160,8 @@ export async function handleNotify(req: Request, deps: NotifyDeps): Promise<Resp
     ctx = await deps.context(body.kind, body.ref);
     if (!ctx) return json({ skipped: 'undone' });
   }
-  if (!ctx.vendor.verified) return json({ skipped: 'vendor_not_verified' });
+  if (ctx.vendor && !ctx.vendor.verified) return json({ skipped: 'vendor_not_verified' });
+  if (!ctx.vendor && body.kind !== 'society_added') return json({ skipped: 'not_found' });
 
   const kind = kindFor(body.kind, ctx);
   if (!kind) return json({ skipped: 'no_notification_for_event' });
@@ -159,7 +169,8 @@ export async function handleNotify(req: Request, deps: NotifyDeps): Promise<Resp
   if (recipients.length === 0) return json({ sent: 0, recipients: 0 });
 
   const msg = buildMessage(kind, ctx, deps.now());
-  const payloadBase: Record<string, string> = { title: msg.title, body: msg.body, vendor_id: ctx.vendor.id };
+  const payloadBase: Record<string, string> = { title: msg.title, body: msg.body };
+  if (ctx.vendor) payloadBase.vendor_id = ctx.vendor.id;
   if (ctx.society) payloadBase.society_id = ctx.society.id;
   if (ctx.event) payloadBase.event_id = ctx.event.id;
   if (ctx.deal) payloadBase.deal_id = ctx.deal.id;

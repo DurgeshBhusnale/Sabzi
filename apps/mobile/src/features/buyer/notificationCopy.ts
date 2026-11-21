@@ -20,6 +20,9 @@ export function notificationTarget(n: NotificationRow): { pathname: string; para
       return { pathname: '/(vendor)/requests' };
     case 'vendor_new_rating':
       return { pathname: '/vendor/reviews' };
+    case 'society_added':
+      // The society the buyer asked for is on the app: open the picker so they can add it.
+      return { pathname: '/buyer-setup/society' };
     default:
       return p.vendor_id ? { pathname: '/buyer/vendor/[id]', params: { id: p.vendor_id, ...(p.society_id ? { society: p.society_id } : {}) } } : { pathname: '/' };
   }

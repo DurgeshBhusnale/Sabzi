@@ -12,7 +12,7 @@ describe('ADM-8: field staff cannot open Team or Settings', () => {
     expect(canAccess(null, '/dashboard')).toBe(false);
   });
   it('sidebar hides owner-only links for field staff', () => {
-    expect(navFor('field_staff').map((n) => n.label)).toEqual(['Dashboard', 'Societies', 'Vendors', 'Stops', 'Items', 'Moderation']);
+    expect(navFor('field_staff').map((n) => n.label)).toEqual(['Dashboard', 'Societies', 'Society requests', 'Vendors', 'Stops', 'Items', 'Moderation']);
     expect(navFor('owner').map((n) => n.label)).toContain('Team');
   });
 });

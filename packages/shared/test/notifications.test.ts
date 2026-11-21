@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { societyRequestSchema } from '../src/schemas.ts';
 import {
   arrivalMessage,
+  societyAddedMessage,
   dealMessage,
   leavingSoonMessage,
   notComingMessage,
@@ -108,5 +110,23 @@ describe('quiet hours (NOT-3)', () => {
   it('always allows arrival alerts', () => {
     expect(pushAllowedNow('arrival', night)).toBe(true);
     expect(pushAllowedNow('leaving_soon', night)).toBe(true);
+  });
+});
+
+describe('society added (owner review 2026-11-21)', () => {
+  it('names the society and the app', () => {
+    expect(societyAddedMessage('Suyash Towers').title).toBe('Suyash Towers is now on Pheri');
+  });
+  it('waits for the morning in quiet hours', () => {
+    expect(pushAllowedNow('society_added', new Date('2026-11-05T17:00:00Z'))).toBe(false); // 10:30 PM IST
+    expect(pushAllowedNow('society_added', new Date('2026-11-05T06:30:00Z'))).toBe(true);
+  });
+});
+
+describe('society request schema', () => {
+  it('a new society needs name and address; a listed one only the name', () => {
+    expect(societyRequestSchema.safeParse({ name: 'Suyash Towers', address: '', society_id: null }).success).toBe(false);
+    expect(societyRequestSchema.safeParse({ name: 'Suyash Towers', address: 'Paud Road, Pune', society_id: null }).success).toBe(true);
+    expect(societyRequestSchema.safeParse({ name: 'Suyash Towers', address: '', society_id: '40000000-0000-4000-8000-000000000001' }).success).toBe(true);
   });
 });

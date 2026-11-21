@@ -119,6 +119,16 @@ export const societySchema = z.object({
   active: z.boolean(),
 });
 
+/** Owner review 2026-11-21: "My society isn't listed" asks for the society's name and address, both required. */
+export const societyRequestSchema = z
+  .object({
+    name: z.string().trim().min(2, 'Enter your society name').max(80, 'Society name is too long'),
+    address: z.string().trim().max(200, 'Address is too long'),
+    society_id: z.string().uuid().nullable(),
+  })
+  // A listed society (society_id) already has an address; a new one needs it.
+  .refine((v) => v.society_id !== null || v.address.length >= 5, { path: ['address'], message: 'Enter your society address' });
+
 export const gateSchema = z.object({
   name: z.string().trim().min(1).max(40),
   lat: z.number().min(-90).max(90),

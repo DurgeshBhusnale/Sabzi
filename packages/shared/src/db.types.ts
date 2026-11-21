@@ -761,17 +761,41 @@ isOneToOne: false
                   ]
                 },"waitlist": {
                   Row: {
-                    "created_at": string,"id": string,"society_id": string | null,"society_name": string,"user_id": string,"vendor_hint": string | null
+                    "created_at": string,"id": string,"resolve_batch": string | null,"resolved_at": string | null,"resolved_by": string | null,"resolved_society_id": string | null,"society_address": string | null,"society_id": string | null,"society_name": string,"status": string,"user_id": string,"vendor_hint": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"society_id"?: string | null,"society_name": string,"user_id": string,"vendor_hint"?: string | null
+                    "created_at"?: string,"id"?: string,"resolve_batch"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"resolved_society_id"?: string | null,"society_address"?: string | null,"society_id"?: string | null,"society_name": string,"status"?: string,"user_id": string,"vendor_hint"?: string | null
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"society_id"?: string | null,"society_name"?: string,"user_id"?: string,"vendor_hint"?: string | null
+                    "created_at"?: string,"id"?: string,"resolve_batch"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"resolved_society_id"?: string | null,"society_address"?: string | null,"society_id"?: string | null,"society_name"?: string,"status"?: string,"user_id"?: string,"vendor_hint"?: string | null
                   }
                   Relationships: [
                     {
+      foreignKeyName: "waitlist_resolved_by_fkey"
+      columns: ["resolved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["user_id"]
+    },{
+      foreignKeyName: "waitlist_resolved_society_id_fkey"
+      columns: ["resolved_society_id"]
+isOneToOne: false
+      referencedRelation: "societies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "waitlist_resolved_society_id_fkey"
+      columns: ["resolved_society_id"]
+isOneToOne: false
+      referencedRelation: "v_metric_society_adoption"
+      referencedColumns: ["society_id"]
+    },{
+      foreignKeyName: "waitlist_resolved_society_id_fkey"
+      columns: ["resolved_society_id"]
+isOneToOne: false
+      referencedRelation: "v_vendor_requests"
+      referencedColumns: ["society_id"]
+    },{
       foreignKeyName: "waitlist_society_id_fkey"
       columns: ["society_id"]
 isOneToOne: false
@@ -931,6 +955,9 @@ isOneToOne: false
                            },
 "admin_societies":
 { Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"admin_society_requests":
+{ Args: { "p_status"?: string }; Returns: Json
                            },
 "admin_team":
 { Args: Record<PropertyKey, never>; Returns: Json
@@ -1133,6 +1160,9 @@ isOneToOne: false
 "request_slots":
 { Args: { "p_society_id": string,"p_vendor_id": string }; Returns: Json
                            },
+"request_society":
+{ Args: { "p_address": string,"p_name": string,"p_society_id"?: string }; Returns: string
+                           },
 "require_admin":
 { Args: { "p_owner_only"?: boolean }; Returns: string
                            },
@@ -1141,6 +1171,9 @@ isOneToOne: false
                            },
 "resolve_report":
 { Args: { "p_note"?: string,"p_report_id": string,"p_status": Database["public"]['Enums']["report_status"] }; Returns: undefined
+                           },
+"resolve_society_requests":
+{ Args: { "p_dismiss"?: boolean,"p_ids": (string)[],"p_society_id"?: string }; Returns: number
                            },
 "respond_to_quote":
 { Args: { "p_accept": boolean,"p_request_id": string }; Returns: undefined
@@ -1265,7 +1298,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "admin_level": "owner"|"field_staff","notif_type": "arrival"|"leaving_soon"|"deal"|"not_coming"|"request_reply"|"vendor_new_requests"|"vendor_new_rating","pilot_area": "karve_nagar"|"sus_pashan","price_unit": "kg"|"g500"|"g250"|"bunch"|"piece","report_reason": "wrong_weight"|"bad_quality"|"rude"|"fake_listing"|"other","report_status": "open"|"actioned"|"dismissed","request_miss_reason": "buyer_not_there"|"vendor_unavailable"|"other","request_status": "open"|"will_bring"|"cant_bring"|"cancelled"|"accepted"|"declined"|"vendor_cancelled"|"delivered"|"not_delivered","review_status": "visible"|"hidden","stop_event_type": "arrived"|"leaving_soon"|"left"|"not_going","user_role": "buyer"|"vendor"|"admin","vehicle_type": "tempo"|"thela","vendor_status": "pending"|"needs_info"|"verified"|"rejected"|"suspended"
+            "admin_level": "owner"|"field_staff","notif_type": "arrival"|"leaving_soon"|"deal"|"not_coming"|"request_reply"|"vendor_new_requests"|"vendor_new_rating"|"society_added","pilot_area": "karve_nagar"|"sus_pashan","price_unit": "kg"|"g500"|"g250"|"bunch"|"piece","report_reason": "wrong_weight"|"bad_quality"|"rude"|"fake_listing"|"other","report_status": "open"|"actioned"|"dismissed","request_miss_reason": "buyer_not_there"|"vendor_unavailable"|"other","request_status": "open"|"will_bring"|"cant_bring"|"cancelled"|"accepted"|"declined"|"vendor_cancelled"|"delivered"|"not_delivered","review_status": "visible"|"hidden","stop_event_type": "arrived"|"leaving_soon"|"left"|"not_going","user_role": "buyer"|"vendor"|"admin","vehicle_type": "tempo"|"thela","vendor_status": "pending"|"needs_info"|"verified"|"rejected"|"suspended"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1385,7 +1418,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "admin_level": ["owner", "field_staff"],"notif_type": ["arrival", "leaving_soon", "deal", "not_coming", "request_reply", "vendor_new_requests", "vendor_new_rating"],"pilot_area": ["karve_nagar", "sus_pashan"],"price_unit": ["kg", "g500", "g250", "bunch", "piece"],"report_reason": ["wrong_weight", "bad_quality", "rude", "fake_listing", "other"],"report_status": ["open", "actioned", "dismissed"],"request_miss_reason": ["buyer_not_there", "vendor_unavailable", "other"],"request_status": ["open", "will_bring", "cant_bring", "cancelled", "accepted", "declined", "vendor_cancelled", "delivered", "not_delivered"],"review_status": ["visible", "hidden"],"stop_event_type": ["arrived", "leaving_soon", "left", "not_going"],"user_role": ["buyer", "vendor", "admin"],"vehicle_type": ["tempo", "thela"],"vendor_status": ["pending", "needs_info", "verified", "rejected", "suspended"]
+            "admin_level": ["owner", "field_staff"],"notif_type": ["arrival", "leaving_soon", "deal", "not_coming", "request_reply", "vendor_new_requests", "vendor_new_rating", "society_added"],"pilot_area": ["karve_nagar", "sus_pashan"],"price_unit": ["kg", "g500", "g250", "bunch", "piece"],"report_reason": ["wrong_weight", "bad_quality", "rude", "fake_listing", "other"],"report_status": ["open", "actioned", "dismissed"],"request_miss_reason": ["buyer_not_there", "vendor_unavailable", "other"],"request_status": ["open", "will_bring", "cant_bring", "cancelled", "accepted", "declined", "vendor_cancelled", "delivered", "not_delivered"],"review_status": ["visible", "hidden"],"stop_event_type": ["arrived", "leaving_soon", "left", "not_going"],"user_role": ["buyer", "vendor", "admin"],"vehicle_type": ["tempo", "thela"],"vendor_status": ["pending", "needs_info", "verified", "rejected", "suspended"]
           }
         }
 } as const
