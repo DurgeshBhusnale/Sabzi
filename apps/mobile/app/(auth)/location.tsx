@@ -13,7 +13,7 @@ export default function LocationRationale() {
     <PermissionRationale
       kind="location"
       title={role === 'vendor' ? en.permissions.locTitleVendor : en.permissions.locTitleBuyer}
-      body={en.permissions.locBody}
+      body={role === 'vendor' ? en.permissions.locBodyVendor : en.permissions.locBodyBuyer}
       busy={busy}
       onAllow={async () => {
         setBusy(true);

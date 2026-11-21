@@ -14,7 +14,7 @@ export default function NotifyRationale() {
     <PermissionRationale
       kind="notifications"
       title={role === 'vendor' ? en.permissions.notifTitleVendor : en.permissions.notifTitleBuyer}
-      body={en.permissions.notifBody}
+      body={role === 'vendor' ? en.permissions.notifBodyVendor : en.permissions.notifBodyBuyer}
       busy={busy}
       onAllow={async () => {
         setBusy(true);
