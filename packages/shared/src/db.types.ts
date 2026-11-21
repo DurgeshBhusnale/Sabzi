@@ -482,6 +482,12 @@ isOneToOne: false
       referencedRelation: "v_vendor_requests"
       referencedColumns: ["society_id"]
     },{
+      foreignKeyName: "requests_stop_id_fkey"
+      columns: ["stop_id"]
+isOneToOne: false
+      referencedRelation: "stops"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "requests_vendor_id_fkey"
       columns: ["vendor_id"]
 isOneToOne: false
@@ -872,7 +878,7 @@ isOneToOne: false
                   ]
                 },"v_vendor_requests": {
                   Row: {
-                    "answered_at": string | null,"buyer_first_name": string | null,"created_at": string,"cutoff_at": string | null,"default_unit": Database["public"]['Enums']["price_unit"] | null,"for_date": string,"free_text": string | null,"gate_name": string | null,"id": string,"item_id": string | null,"item_name": string | null,"last_price": number | null,"last_unit": Database["public"]['Enums']["price_unit"] | null,"note": string | null,"qty": string | null,"quoted_price": number | null,"quoted_unit": Database["public"]['Enums']["price_unit"] | null,"responded_at": string | null,"slot_end": string | null,"slot_start": string | null,"society_id": string,"society_name": string,"status": Database["public"]['Enums']["request_status"],"stop_id": string | null,"vendor_id": string
+                    "answered_at": string | null,"buyer_first_name": string | null,"created_at": string,"cutoff_at": string,"default_unit": Database["public"]['Enums']["price_unit"] | null,"for_date": string,"free_text": string | null,"gate_name": string | null,"id": string,"item_id": string | null,"item_name": string | null,"last_price": number | null,"last_unit": Database["public"]['Enums']["price_unit"] | null,"note": string | null,"qty": string | null,"quoted_price": number | null,"quoted_unit": Database["public"]['Enums']["price_unit"] | null,"responded_at": string | null,"slot_end": string,"slot_start": string,"society_id": string,"society_name": string,"status": Database["public"]['Enums']["request_status"],"stop_id": string | null,"vendor_id": string
                   }
                   ComputedFields: never
                   Relationships: [
@@ -881,6 +887,12 @@ isOneToOne: false
       columns: ["item_id"]
 isOneToOne: false
       referencedRelation: "items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "requests_stop_id_fkey"
+      columns: ["stop_id"]
+isOneToOne: false
+      referencedRelation: "stops"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "requests_vendor_id_fkey"
@@ -1094,15 +1106,6 @@ isOneToOne: false
 "record_qr_scan":
 { Args: { "p_code": string,"p_source": string }; Returns: undefined
                            },
-"request_cutoff":
-{ Args: { "p_date": string,"p_start": string }; Returns: string
-                           },
-"request_slots":
-{ Args: { "p_society_id": string,"p_vendor_id": string }; Returns: Json
-                           },
-"respond_to_quote":
-{ Args: { "p_accept": boolean,"p_request_id": string }; Returns: undefined
-                           },
 "record_vendor_view":
 { Args: { "p_vendor_id": string }; Returns: undefined
                            },
@@ -1112,6 +1115,12 @@ isOneToOne: false
 "report_vendor":
 { Args: { "p_photo_path"?: string,"p_reason": Database["public"]['Enums']["report_reason"],"p_text"?: string,"p_vendor_id": string }; Returns: string
                            },
+"request_cutoff":
+{ Args: { "p_date": string,"p_start": string }; Returns: string
+                           },
+"request_slots":
+{ Args: { "p_society_id": string,"p_vendor_id": string }; Returns: Json
+                           },
 "require_admin":
 { Args: { "p_owner_only"?: boolean }; Returns: string
                            },
@@ -1120,6 +1129,9 @@ isOneToOne: false
                            },
 "resolve_report":
 { Args: { "p_note"?: string,"p_report_id": string,"p_status": Database["public"]['Enums']["report_status"] }; Returns: undefined
+                           },
+"respond_to_quote":
+{ Args: { "p_accept": boolean,"p_request_id": string }; Returns: undefined
                            },
 "review_eligibility":
 { Args: { "p_vendor_id": string }; Returns: Json
