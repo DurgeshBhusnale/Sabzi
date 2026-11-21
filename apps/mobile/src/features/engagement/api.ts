@@ -1,4 +1,4 @@
-import type { PriceUnit, RequestSlot, RequestStatus, ReviewInput, VendorRequestRow } from '@sabzi/shared';
+import type { MissReason, PriceUnit, RequestSlot, RequestStatus, ReviewInput, VendorRequestRow } from '@sabzi/shared';
 import { getSupabase, type Client } from '../../lib/supabase';
 import { raise } from '../../lib/errors';
 import { newClientId } from '../../lib/ids';
@@ -81,6 +81,9 @@ export type MyRequest = {
   created_at: string;
   answered_at: string | null;
   responded_at: string | null;
+  delivered_at: string | null;
+  missed_reason: MissReason | null;
+  buyer_disputed_at: string | null;
 };
 export async function myRequests(c: Client = getSupabase()): Promise<MyRequest[]> {
   const { data, error } = await c.rpc('my_requests');
@@ -91,6 +94,12 @@ export async function myRequests(c: Client = getSupabase()): Promise<MyRequest[]
 /** Buyer answers the vendor's price: Confirm order (true) or Not now (false). */
 export async function respondToQuote(id: string, accept: boolean, c: Client = getSupabase()) {
   const { error } = await c.rpc('respond_to_quote', { p_request_id: id, p_accept: accept });
+  if (error) raise(error);
+}
+
+/** Buyer: the vendor marked it Delivered but it never arrived (within 24 h). Files a report for the admin queue. */
+export async function reportNotReceived(id: string, c: Client = getSupabase()) {
+  const { error } = await c.rpc('report_not_received', { p_request_id: id });
   if (error) raise(error);
 }
 
@@ -113,7 +122,7 @@ export async function reportVendor(vendorId: string, reason: string, text: strin
 
 // ---- vendor side
 const VENDOR_REQUEST_COLUMNS =
-  'id, item_id, item_name, default_unit, free_text, qty, note, buyer_first_name, society_name, status, for_date, stop_id, slot_start, slot_end, gate_name, quoted_price, quoted_unit, last_price, last_unit';
+  'id, item_id, item_name, default_unit, free_text, qty, note, buyer_first_name, society_name, status, for_date, stop_id, slot_start, slot_end, gate_name, quoted_price, quoted_unit, last_price, last_unit, delivered_at, missed_reason, buyer_ref';
 export async function vendorRequests(c: Client = getSupabase()): Promise<VendorRequestRow[]> {
   const { data, error } = await c.from('v_vendor_requests').select(VENDOR_REQUEST_COLUMNS).order('slot_start');
   if (error) raise(error);
@@ -133,6 +142,14 @@ export async function answerRequest(
     p_price: p.price ?? undefined,
     p_unit: p.unit ?? undefined,
   });
+  if (error) raise(error);
+  return data as number;
+}
+
+export type DeliveryOutcome = 'delivered' | 'not_delivered' | 'reset';
+/** Vendor closes confirmed orders: Delivered, Not delivered (reason required) or reset (undo). Accepts many ids at once. */
+export async function markDelivery(ids: string[], outcome: DeliveryOutcome, reason?: MissReason | null, c: Client = getSupabase()) {
+  const { data, error } = await c.rpc('mark_delivery', { p_request_ids: ids, p_outcome: outcome, p_reason: reason ?? undefined });
   if (error) raise(error);
   return data as number;
 }

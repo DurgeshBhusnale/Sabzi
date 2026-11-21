@@ -7,7 +7,16 @@ import type { PriceUnit } from './constants.ts';
  * open → cant_bring (vendor denied); accepted → vendor_cancelled (vendor denied later); cancelled by the buyer.
  * open / will_bring rows whose visit has started read as expired.
  */
-export type RequestStatus = 'open' | 'will_bring' | 'cant_bring' | 'accepted' | 'declined' | 'vendor_cancelled' | 'cancelled' | 'expired';
+export type RequestStatus =
+  | 'open' | 'will_bring' | 'cant_bring' | 'accepted' | 'declined' | 'vendor_cancelled' | 'cancelled'
+  | 'delivered' | 'not_delivered'
+  /** derived on read */
+  | 'expired' | 'not_recorded';
+
+export type MissReason = 'buyer_not_there' | 'vendor_unavailable' | 'other';
+
+/** Confirmed by the buyer, whatever happened at the visit. */
+export const isConfirmedStatus = (s: RequestStatus) => s === 'accepted' || s === 'delivered' || s === 'not_delivered' || s === 'not_recorded';
 
 /** VEN-10: group requests by item and sum quantities. */
 export type RequestLite = {
@@ -130,7 +139,7 @@ function decide(rs: RequestLite[]): Pick<RequestGroup, 'decision' | 'counts' | '
   const counts = {
     waiting: n((r) => r.status === 'open'),
     quoted: n((r) => r.status === 'will_bring'),
-    confirmed: n((r) => r.status === 'accepted'),
+    confirmed: n((r) => isConfirmedStatus(r.status)),
     declined: n((r) => r.status === 'declined'),
     denied: n((r) => r.status === 'cant_bring' || r.status === 'vendor_cancelled'),
     expired: n((r) => r.status === 'expired'),
@@ -141,7 +150,7 @@ function decide(rs: RequestLite[]): Pick<RequestGroup, 'decision' | 'counts' | '
   const first = rs[0]!;
   const price = quoted?.quoted_price ?? first.last_price ?? null;
   const unit: PriceUnit = quoted?.quoted_unit ?? first.last_unit ?? first.default_unit ?? 'kg';
-  const conf = rs.filter((r) => r.status === 'accepted');
+  const conf = rs.filter((r) => isConfirmedStatus(r.status));
   return {
     decision,
     counts,
@@ -223,6 +232,22 @@ export type VendorRequestRow = RequestLite & {
   slot_start: string;
   slot_end: string;
   gate_name: string | null;
+  delivered_at?: string | null;
+  missed_reason?: MissReason | null;
+  /** Stable per buyer (not the buyer id): groups one buyer's items into one order */
+  buyer_ref?: string | null;
+};
+
+/** One buyer's confirmed items on one visit: what the vendor marks Delivered / Not delivered. */
+export type DeliveryOrder = {
+  ref: string;
+  buyer: string;
+  society: string;
+  ids: string[];
+  items: { id: string; name: string; qty: string | null; price: number | null; unit: PriceUnit | null }[];
+  state: 'pending' | 'delivered' | 'not_delivered';
+  delivered_at: string | null;
+  missed_reason: MissReason | null;
 };
 
 export type SlotGroup = {
@@ -234,19 +259,62 @@ export type SlotGroup = {
   gate_name: string | null;
   societies: string[];
   items: RequestGroup[];
+  orders: DeliveryOrder[];
+  /** Delivery can be marked now: from 1 hour before the visit until the end of the next day (IST) */
+  deliverable: boolean;
 };
+
+/** End of the day after the visit, IST (same rule as public.delivery_deadline). */
+export function deliveryDeadline(slotStart: string | Date): Date {
+  const d = toIstDate(asDate(slotStart));
+  return new Date(`${addDays(d, 2)}T00:00:00+05:30`);
+}
+
+export function canMarkDelivery(slotStart: string, now: Date = new Date()): boolean {
+  const t = now.getTime();
+  return t >= Date.parse(slotStart) - 3_600_000 && t < deliveryDeadline(slotStart).getTime();
+}
+
+function ordersOf(rs: VendorRequestRow[]): DeliveryOrder[] {
+  const map = new Map<string, VendorRequestRow[]>();
+  for (const r of rs) {
+    if (!isConfirmedStatus(r.status)) continue;
+    const k = r.buyer_ref ?? `${r.buyer_first_name}|${r.society_name}`;
+    map.set(k, [...(map.get(k) ?? []), r]);
+  }
+  return [...map.entries()].map(([ref, xs]) => {
+    const all = (s: RequestStatus) => xs.every((x) => x.status === s);
+    const name = (x: VendorRequestRow) => x.item_name ?? (x.free_text ?? '').trim().replace(/^./, (c) => c.toUpperCase());
+    return {
+      ref,
+      buyer: xs[0]!.buyer_first_name,
+      society: xs[0]!.society_name,
+      ids: xs.map((x) => x.id),
+      items: xs.map((x) => ({ id: x.id, name: name(x), qty: x.qty, price: x.quoted_price == null ? null : Number(x.quoted_price), unit: x.quoted_unit ?? null })),
+      state: all('delivered') ? 'delivered' : all('not_delivered') ? 'not_delivered' : 'pending',
+      delivered_at: xs.find((x) => x.delivered_at)?.delivered_at ?? null,
+      missed_reason: xs.find((x) => x.missed_reason)?.missed_reason ?? null,
+    } satisfies DeliveryOrder;
+  }).sort((a, b) => a.buyer.localeCompare(b.buyer));
+}
 
 /** Read-side "expired": unanswered or unconfirmed when the visit starts. */
 export function effectiveStatus(r: { status: RequestStatus; slot_start: string }, now: Date = new Date()): RequestStatus {
   if ((r.status === 'open' || r.status === 'will_bring') && Date.parse(r.slot_start) <= now.getTime()) return 'expired';
+  if (r.status === 'accepted' && now.getTime() >= deliveryDeadline(r.slot_start).getTime()) return 'not_recorded';
   return r.status;
 }
 
-/** Vendor screen: visits not yet over, soonest first, each with its requests grouped by item. */
+/**
+ * Vendor screen: visits not yet over (or, with confirmed orders, until the delivery window closes), soonest first,
+ * each with its requests grouped by item and its confirmed orders grouped by buyer.
+ */
 export function groupBySlot(rows: VendorRequestRow[], now: Date = new Date()): SlotGroup[] {
   const map = new Map<string, VendorRequestRow[]>();
   for (const r of rows) {
-    if (r.status === 'cancelled' || Date.parse(r.slot_end) <= now.getTime()) continue;
+    if (r.status === 'cancelled') continue;
+    const over = Date.parse(r.slot_end) <= now.getTime();
+    if (over && !(isConfirmedStatus(r.status) && now.getTime() < deliveryDeadline(r.slot_start).getTime())) continue;
     const k = `${r.stop_id ?? 'none'}|${r.for_date}`;
     map.set(k, [...(map.get(k) ?? []), { ...r, status: effectiveStatus(r, now) }]);
   }
@@ -260,6 +328,8 @@ export function groupBySlot(rows: VendorRequestRow[], now: Date = new Date()): S
       gate_name: rs[0]!.gate_name,
       societies: [...new Set(rs.map((r) => r.society_name))],
       items: groupRequests(rs),
+      orders: ordersOf(rs),
+      deliverable: canMarkDelivery(rs[0]!.slot_start, now),
     }))
     .sort((a, b) => Date.parse(a.slot_start) - Date.parse(b.slot_start));
 }

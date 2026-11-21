@@ -31,7 +31,7 @@ type Menu = { stock_photo_path: string | null; items: MsgItem[] } | null;
 export type Context = {
   event?: { id: string; type: 'arrived' | 'leaving_soon' | 'not_going'; created_at: string };
   deal?: { id: string };
-  request?: { id: string; status: 'will_bring' | 'cant_bring' | 'vendor_cancelled'; qty: string | null; item: string; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null };
+  request?: { id: string; status: 'will_bring' | 'cant_bring' | 'vendor_cancelled' | 'not_delivered'; qty: string | null; item: string; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null; missed_reason?: 'buyer_not_there' | 'vendor_unavailable' | 'other' | null };
   review?: { id: string; stars: number; tags: string[]; text: string | null; society: string | null };
   vendor: { id: string; display_name: string; verified: boolean };
   gate?: { id: string; name: string };

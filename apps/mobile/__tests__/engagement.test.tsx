@@ -79,7 +79,7 @@ const req = (o: Partial<VendorRequestRow>): VendorRequestRow => ({
 describe('V-13 vendor requests (request flow v2)', () => {
   const evening = new Date('2026-11-05T11:00:00Z'); // 4:30 PM IST, the day before the visit
   const view = (rows: VendorRequestRow[], o: Partial<Parameters<typeof VendorRequestsView>[0]> = {}) => (
-    <VendorRequestsView slots={groupBySlot(rows, evening)} loading={false} now={evening} tab="requests" onTab={jest.fn()} onAnswer={jest.fn(async () => undefined)} onShareQr={jest.fn()} {...o} />
+    <VendorRequestsView slots={groupBySlot(rows, evening)} loading={false} now={evening} tab="requests" onTab={jest.fn()} onAnswer={jest.fn(async () => undefined)} onMark={jest.fn(async () => undefined)} onShareQr={jest.fn()} {...o} />
   );
   it('groups by visit then item, with totals, notes and the visit header', async () => {
     await renderUi(view([req({}), req({ qty: '1 kg', buyer_first_name: 'Arjun', society_name: 'Sahyadri Heights', note: 'Fresh ones please' }), req({ item_id: 'b', item_name: 'Broccoli', qty: '1 piece' })]), { mode: 'vendor' });
@@ -123,7 +123,9 @@ describe('V-13 vendor requests (request flow v2)', () => {
     ], { tab: 'confirmed' }), { mode: 'vendor' });
     expect(screen.getByTestId('vc-total')).toHaveTextContent('1.5 kg');
     expect(screen.getByText('2 orders · about ₹50 / kg')).toBeTruthy();
+    expect(screen.getByText('You can mark these from 7:00 AM.')).toBeTruthy();
     expect(screen.getByText('Arjun · Green Park')).toBeTruthy();
+    expect(screen.getByText('What to carry')).toBeTruthy();
   });
   it('tabs show counts and switch', async () => {
     const onTab = jest.fn();
@@ -142,8 +144,56 @@ describe('V-13 vendor requests (request flow v2)', () => {
   });
   it('load error offers retry', async () => {
     const onRetry = jest.fn();
-    await renderUi(<VendorRequestsView slots={undefined} loading={false} tab="requests" onTab={jest.fn()} onAnswer={jest.fn()} onShareQr={jest.fn()} onRetry={onRetry} />);
+    await renderUi(<VendorRequestsView slots={undefined} loading={false} tab="requests" onTab={jest.fn()} onAnswer={jest.fn()} onMark={jest.fn()} onShareQr={jest.fn()} onRetry={onRetry} />);
     await fireEvent.press(screen.getByText('Retry'));
     expect(onRetry).toHaveBeenCalled();
+  });
+});
+
+describe('V-13 Confirmed list: delivery (last step)', () => {
+  const during = new Date('2026-11-06T02:45:00Z'); // 8:15 AM IST, during the 8:00 visit
+  const view = (rows: VendorRequestRow[], onMark = jest.fn(async () => undefined), now = during) => (
+    <VendorRequestsView slots={groupBySlot(rows, now)} loading={false} now={now} tab="confirmed" onTab={jest.fn()} onAnswer={jest.fn()} onMark={onMark} onShareQr={jest.fn()} />
+  );
+  const ok = (o: Partial<VendorRequestRow>) => req({ status: 'accepted', quoted_price: 50, quoted_unit: 'kg', ...o });
+  it('each order has Delivered and Not delivered buttons; Delivered marks all of that buyer\u2019s items', async () => {
+    const onMark = jest.fn(async () => undefined);
+    await renderUi(view([ok({ id: 'a', buyer_ref: 'p' }), ok({ id: 'b', buyer_ref: 'p', item_id: 'o', item_name: 'Onion' }), ok({ id: 'c', buyer_ref: 'r', buyer_first_name: 'Arjun' })], onMark), { mode: 'vendor' });
+    expect(screen.getByTestId('not-deliver-Priya')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('deliver-Priya'));
+    await waitFor(() => expect(onMark).toHaveBeenCalledWith(['a', 'b'], 'delivered', undefined));
+    expect(screen.getByText('Undo')).toBeTruthy();
+  });
+  it('Not delivered asks for a reason in one tap', async () => {
+    const onMark = jest.fn(async () => undefined);
+    await renderUi(view([ok({ id: 'a', buyer_ref: 'p' })], onMark), { mode: 'vendor' });
+    await fireEvent.press(screen.getByTestId('not-deliver-Priya'));
+    expect(onMark).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByText("Buyer wasn't there"));
+    await waitFor(() => expect(onMark).toHaveBeenCalledWith(['a'], 'not_delivered', 'buyer_not_there'));
+  });
+  it('Mark all delivered for the visit', async () => {
+    const onMark = jest.fn(async () => undefined);
+    await renderUi(view([ok({ id: 'a', buyer_ref: 'p' }), ok({ id: 'c', buyer_ref: 'r', buyer_first_name: 'Arjun' })], onMark), { mode: 'vendor' });
+    await fireEvent.press(screen.getByText('Mark all 2 delivered'));
+    await waitFor(() => expect(onMark).toHaveBeenCalledWith(['c', 'a'], 'delivered', undefined));
+  });
+  it('shows the recorded result with Change', async () => {
+    await renderUi(view([ok({ id: 'a', buyer_ref: 'p', status: 'not_delivered', missed_reason: 'vendor_unavailable', delivered_at: '2026-11-06T02:40:00Z' })]), { mode: 'vendor' });
+    expect(screen.getByText("Not delivered · I couldn't get it")).toBeTruthy();
+    expect(screen.getByTestId('change-Priya')).toBeTruthy();
+  });
+  it('before the visit the buttons wait, with the time they open', async () => {
+    await renderUi(view([ok({ id: 'a', buyer_ref: 'p' })], jest.fn(), new Date('2026-11-05T11:00:00Z')), { mode: 'vendor' });
+    expect(screen.queryByTestId('deliver-Priya')).toBeNull();
+    expect(screen.getByText('You can mark these from 7:00 AM.')).toBeTruthy();
+  });
+  it('filter by visit (society + day)', async () => {
+    const other = { stop_id: 's2', gate_name: 'Main Gate', society_name: 'Sahyadri Heights', slot_start: '2026-11-06T03:30:00Z', slot_end: '2026-11-06T04:10:00Z', buyer_first_name: 'Meera', buyer_ref: 'm' };
+    await renderUi(view([ok({ id: 'a', buyer_ref: 'p' }), ok({ id: 'm', ...other })]), { mode: 'vendor' });
+    expect(screen.getByTestId('order-Priya')).toBeTruthy();
+    expect(screen.queryByTestId('order-Meera')).toBeNull();
+    await fireEvent.press(screen.getByText('All visits'));
+    expect(screen.getByTestId('order-Meera')).toBeTruthy();
   });
 });

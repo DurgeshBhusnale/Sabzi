@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cutoffPhrase, dayPart, effectiveStatus, groupBySlot, slotDayLabel, slotPhrase, slotWindowLabel, type VendorRequestRow } from '../src/requests.ts';
+import { canMarkDelivery, cutoffPhrase, dayPart, effectiveStatus, groupBySlot, slotDayLabel, slotPhrase, slotWindowLabel, type VendorRequestRow } from '../src/requests.ts';
 
 // 21 Nov 2026 is a Saturday. 08:00 IST = 02:30Z, 18:00 IST = 12:30Z.
 const morning = new Date('2026-11-21T03:30:00Z'); // 09:00 IST Sat
@@ -92,5 +92,31 @@ describe('effectiveStatus', () => {
     expect(effectiveStatus({ status: 'will_bring', slot_start: '2026-11-22T02:30:00Z' }, after)).toBe('expired');
     expect(effectiveStatus({ status: 'accepted', slot_start: '2026-11-22T02:30:00Z' }, after)).toBe('accepted');
     expect(effectiveStatus({ status: 'open', slot_start: '2026-11-22T02:30:00Z' }, morning)).toBe('open');
+  });
+});
+
+describe('delivery (vendor marks each confirmed order)', () => {
+  const during = new Date('2026-11-22T02:40:00Z'); // 8:10 AM IST, during the visit
+  it('groups one buyer’s confirmed items into one order and keeps the visit after it ends', () => {
+    const after = new Date('2026-11-22T06:00:00Z'); // 11:30 AM IST, visit over
+    const [slot] = groupBySlot([
+      row({ status: 'accepted', buyer_ref: 'p', quoted_price: 40, quoted_unit: 'kg' }),
+      row({ status: 'accepted', buyer_ref: 'p', item_id: 'onion', item_name: 'Onion', qty: '1 kg' }),
+      row({ status: 'delivered', buyer_ref: 'a', buyer_first_name: 'Arjun', delivered_at: '2026-11-22T02:35:00Z' }),
+      row({ status: 'open', buyer_ref: 'm', buyer_first_name: 'Meera' }),
+    ], after);
+    expect(slot!.orders.map((o) => [o.buyer, o.ids.length, o.state])).toEqual([['Arjun', 1, 'delivered'], ['Priya', 2, 'pending']]);
+    expect(slot!.deliverable).toBe(true);
+  });
+  it('can be marked from 1 hour before the visit until the end of the next day', () => {
+    expect(canMarkDelivery('2026-11-22T02:30:00Z', new Date('2026-11-22T01:00:00Z'))).toBe(false);
+    expect(canMarkDelivery('2026-11-22T02:30:00Z', during)).toBe(true);
+    expect(canMarkDelivery('2026-11-22T02:30:00Z', new Date('2026-11-23T18:29:00Z'))).toBe(true);
+    expect(canMarkDelivery('2026-11-22T02:30:00Z', new Date('2026-11-23T18:31:00Z'))).toBe(false);
+  });
+  it('unmarked confirmed orders read "not recorded" after the window, and the visit drops off', () => {
+    const late = new Date('2026-11-24T00:00:00Z');
+    expect(effectiveStatus({ status: 'accepted', slot_start: '2026-11-22T02:30:00Z' }, late)).toBe('not_recorded');
+    expect(groupBySlot([row({ status: 'accepted' })], late)).toEqual([]);
   });
 });

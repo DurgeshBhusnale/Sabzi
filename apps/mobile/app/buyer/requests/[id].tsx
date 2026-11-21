@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StyleSheet, View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
 import { firstName, formatIstRelative, shortSociety, slotDayLabel, slotWindowLabel } from '@sabzi/shared';
 import { useTheme } from '../../../src/theme/ThemeProvider';
 import { Banner, Button, Card, Dialog, EmptyState, ItemArt, RequestStatusBlock, Screen, SectionLabel, SkeletonBlock, StatusPill, Text, TopAppBar } from '../../../src/ui';
-import { myRequests } from '../../../src/features/engagement/api';
+import { myRequests, reportNotReceived } from '../../../src/features/engagement/api';
 import { buyerRequestView, requestSteps, type Step } from '../../../src/features/engagement/requestView';
 import { QuoteActions, useRequestActions } from '../../../src/features/engagement/BuyerRequestCard';
 import { en } from '../../../src/i18n/en';
@@ -52,6 +52,9 @@ export default function RequestDetail() {
   const q = useQuery({ queryKey: ['eng', 'my-requests'], queryFn: () => myRequests(), refetchInterval: 60_000 });
   const actions = useRequestActions(id);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmMissing, setConfirmMissing] = useState(false);
+  const [missingState, setMissingState] = useState<'idle' | 'sending' | 'sent' | string>('idle');
+  const qc = useQueryClient();
   const r = q.data?.find((x) => x.id === id);
   const header = <TopAppBar title={en.req.detailTitle} onBack={() => router.back()} />;
   if (q.isLoading) return <Screen header={header}><SkeletonBlock kind="list" count={3} /></Screen>;
@@ -70,7 +73,9 @@ export default function RequestDetail() {
       refreshing={q.isRefetching}
       onRefresh={() => q.refetch()}
       footer={
-        v.needsReply ? <QuoteActions id={r.id} size="xl" /> : v.canCancel ? (
+        v.needsReply ? <QuoteActions id={r.id} size="xl" /> : v.canReportNotReceived ? (
+          <Button label={en.req.notReceived} variant="secondary" loading={missingState === 'sending'} onPress={() => setConfirmMissing(true)} testID="not-received" />
+        ) : v.canCancel ? (
           <Button label={r.status === 'accepted' ? en.req.cancelOrder : en.req.cancelRequest} variant="destructive" loading={actions.busy === 'cancel'} onPress={() => setConfirmCancel(true)} testID="cancel-request" />
         ) : undefined
       }
@@ -96,6 +101,8 @@ export default function RequestDetail() {
         ) : null}
 
         {actions.error ? <Banner kind="error" message={actions.error} /> : null}
+        {missingState === 'sent' || (r.buyer_disputed_at && r.status === 'delivered') ? <Banner kind="success" message={en.req.notReceivedSent} /> : null}
+        {missingState !== 'idle' && missingState !== 'sending' && missingState !== 'sent' ? <Banner kind="error" message={missingState} /> : null}
 
         <View style={{ gap: t.spacing.sm }}>
           <SectionLabel>{en.req.detailTitle}</SectionLabel>
@@ -112,6 +119,26 @@ export default function RequestDetail() {
           {r.note ? <DetailRow label={en.req.noteLabel} value={`“${r.note}”`} /> : null}
         </Card>
       </View>
+      <Dialog
+        visible={confirmMissing}
+        title={en.req.notReceivedTitle}
+        body={en.req.notReceivedBody(n)}
+        confirmLabel={en.req.notReceivedSend}
+        cancelLabel={en.common.cancel}
+        onConfirm={async () => {
+          setConfirmMissing(false);
+          setMissingState('sending');
+          try {
+            await reportNotReceived(r.id);
+            setMissingState('sent');
+          } catch (e) {
+            setMissingState(e instanceof Error ? e.message : en.errors.unknown);
+          } finally {
+            await qc.invalidateQueries({ queryKey: ['eng', 'my-requests'] });
+          }
+        }}
+        onCancel={() => setConfirmMissing(false)}
+      />
       <Dialog
         visible={confirmCancel}
         title={en.req.cancelTitle}

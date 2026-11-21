@@ -10,6 +10,7 @@ import { PendingActionsChip } from '../../src/features/system/PendingActions';
 import { NetworkBanner } from '../../src/features/system/NetworkBanner';
 import { NotificationsBlockedBanner } from '../../src/features/notifications/BlockedBanner';
 import { TodayView } from '../../src/features/vendor/TodayView';
+import { UnmarkedOrdersCard } from '../../src/features/engagement/UnmarkedOrdersCard';
 import { useInvalidateVendor, useMyVendor, useStats, useStopsToday, useTodayMenu, vendorKeys } from '../../src/features/vendor/hooks';
 import { currentStop } from '../../src/features/vendor/arrival';
 import { eventOpenCount } from '../../src/features/vendor/api';
@@ -40,6 +41,7 @@ export default function VendorToday() {
         <NetworkBanner dataUpdatedAt={menu.dataUpdatedAt || undefined} />
         <PendingActionsChip />
         <NotificationsBlockedBanner role="vendor" />
+        <UnmarkedOrdersCard onOpen={() => router.push({ pathname: '/(vendor)/requests', params: { tab: 'confirmed' } })} />
       </View>
       <TodayView
         vendor={vendor.data}

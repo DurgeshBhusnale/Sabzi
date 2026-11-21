@@ -22,7 +22,7 @@ const r = (o: Partial<MyRequest> = {}): MyRequest => ({
   id: 'q1', vendor_id: 'v', vendor_name: 'Ramesh Sabzi', society_name: 'Green Park Residency', item_id: 't', item_name: 'Tomato',
   qty: '2 kg', note: null, for_date: '2026-11-22', status: 'open', quoted_price: null, quoted_unit: null,
   slot_start: '2026-11-22T02:30:00Z', slot_end: '2026-11-22T03:15:00Z', cutoff_at: '2026-11-21T17:00:00Z', gate_name: 'Gate 1',
-  created_at: '2026-11-21T10:00:00Z', answered_at: null, responded_at: null, ...o,
+  created_at: '2026-11-21T10:00:00Z', answered_at: null, responded_at: null, delivered_at: null, missed_reason: null, buyer_disputed_at: null, ...o,
 });
 
 describe('buyer request wording (owner copy)', () => {
@@ -102,5 +102,30 @@ describe('SlotTile', () => {
     expect(screen.getByText('Order by 10:30 PM tonight')).toBeTruthy();
     await fireEvent.press(tile);
     expect(onPress).toHaveBeenCalled();
+  });
+});
+
+describe('delivery, buyer side', () => {
+  const after = new Date('2026-11-22T04:00:00Z'); // 9:30 AM IST, after the visit
+  it.each([
+    [r({ status: 'delivered', quoted_price: 40, delivered_at: '2026-11-22T02:50:00Z' }), 'Delivered', 'Ramesh handed it over at 8:20 AM.'],
+    [r({ status: 'not_delivered', quoted_price: 40, missed_reason: 'buyer_not_there' }), "Sorry, Ramesh couldn't hand it over", 'Ramesh says no one was at the gate.'],
+    [r({ status: 'not_recorded', quoted_price: 40 }), 'Delivery not recorded', "Ramesh didn't mark this order."],
+  ])('%#', (req, headline, detail) => {
+    const v = buyerRequestView(req, after);
+    expect(v.headline).toBe(headline);
+    expect(v.detail).toBe(detail);
+  });
+  it('"I didn\u2019t get it" only within 24 h of Delivered and only once', () => {
+    const d = r({ status: 'delivered', delivered_at: '2026-11-22T02:50:00Z' });
+    expect(buyerRequestView(d, after).canReportNotReceived).toBe(true);
+    expect(buyerRequestView(d, new Date('2026-11-23T03:00:00Z')).canReportNotReceived).toBe(false);
+    expect(buyerRequestView({ ...d, buyer_disputed_at: '2026-11-22T03:30:00Z' }, after).canReportNotReceived).toBe(false);
+  });
+  it('timeline ends with the hand-over', () => {
+    const steps = requestSteps(r({ status: 'delivered', quoted_price: 40, delivered_at: '2026-11-22T02:50:00Z' }));
+    expect(steps.map((s) => s.state)).toEqual(['done', 'done', 'done', 'done']);
+    expect(steps[3]!.label).toBe('Ramesh handed it over');
+    expect(requestSteps(r({ status: 'not_delivered', quoted_price: 40 })).at(-1)!.state).toBe('failed');
   });
 });
