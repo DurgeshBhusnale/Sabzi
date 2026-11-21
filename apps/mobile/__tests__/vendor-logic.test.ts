@@ -1,5 +1,5 @@
 import { allStopsDone, cooldownUntil, currentStop, remainingFollowers, stopPhase, suggestStop, type TodayStop } from '../src/features/vendor/arrival';
-import { buildDraft, canPublish, copyYesterday, missingPrices, setPrice, toggleItem, toPublishItems, type UsualItem } from '../src/features/vendor/menuLogic';
+import { buildDraft, canPublish, copyLastMenu, matchesLastMenu, missingPrices, setPrice, toggleItem, toPublishItems, type UsualItem } from '../src/features/vendor/menuLogic';
 
 const stop = (o: Partial<TodayStop>): TodayStop => ({
   stopId: 's',
@@ -91,8 +91,8 @@ describe('menu draft (V-05)', () => {
     expect(Object.values(d).every((x) => !x.selected && x.price === null)).toBe(true);
     expect(canPublish(d)).toBe(false);
   });
-  it('"Same as yesterday" copies 12 items ready to publish', () => {
-    const { draft, copied } = copyYesterday(buildDraft(usual, null, yesterday), yesterday);
+  it('"Last menu" copies 12 items ready to publish', () => {
+    const { draft, copied } = copyLastMenu(buildDraft(usual, null, yesterday), yesterday);
     expect(copied).toBe(12);
     expect(canPublish(draft)).toBe(true);
     expect(toPublishItems(draft)).toHaveLength(12);
@@ -105,6 +105,22 @@ describe('menu draft (V-05)', () => {
     expect(canPublish(d)).toBe(false);
     d = setPrice(d, 'i13', 25, 'bunch');
     expect(canPublish(d)).toBe(true);
+  });
+  // Owner review 2026-11-21: "Last menu" (not only yesterday), works with items picked, includes non-usual items.
+  it('the last menu can hold items no longer in the usual list; they get a tile and are copied', () => {
+    const last = [{ itemId: 'gone', price: 80, unit: 'kg' as const, name: 'Mushroom' }, ...yesterday.slice(0, 2)];
+    const d = buildDraft(usual, null, last);
+    expect(d.gone?.name).toBe('Mushroom');
+    const { draft, copied } = copyLastMenu(d, last);
+    expect(copied).toBe(3);
+    expect(draft.gone).toMatchObject({ selected: true, price: 80 });
+  });
+  it('the Last menu button hides only when the draft already matches it', () => {
+    const d = buildDraft(usual, null, yesterday);
+    expect(matchesLastMenu(d, yesterday)).toBe(false);
+    const withOne = toggleItem(d, 'i20');
+    expect(matchesLastMenu(withOne, yesterday)).toBe(false);
+    expect(matchesLastMenu(copyLastMenu(withOne, yesterday).draft, yesterday)).toBe(true);
   });
   it('keeps yesterday as the "was" hint', () => {
     const d = setPrice(buildDraft(usual, null, yesterday), 'i0', 40, 'kg');

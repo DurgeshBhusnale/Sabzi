@@ -91,6 +91,11 @@ describe('B-12 card: Confirm order is a real button on the card', () => {
     expect(screen.getByTestId('request-status-success')).toBeTruthy();
     expect(screen.queryByTestId('confirm-q1')).toBeNull();
   });
+  it("shows the vendor's note with his answer (owner review 2026-11-21)", async () => {
+    await renderUi(wrap(<BuyerRequestCard request={r({ status: 'cant_bring', vendor_note: 'Not in season this week' })} onPress={jest.fn()} now={now} />));
+    expect(screen.getByTestId('request-vendor-note')).toBeTruthy();
+    expect(screen.getByText('“Not in season this week”')).toBeTruthy();
+  });
 });
 
 describe('SlotTile', () => {

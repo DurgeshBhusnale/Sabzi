@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Banner, Button, RequestCard } from '../../ui';
 import { useTheme } from '../../theme/ThemeProvider';
 import { AppErrorException } from '../../lib/errors';
+import { firstName } from '@sabzi/shared';
 import { en } from '../../i18n/en';
 import { cancelRequest, respondToQuote, type MyRequest } from './api';
 import { buyerRequestView } from './requestView';
@@ -65,6 +66,7 @@ export function BuyerRequestCard({ request: r, onPress, now }: { request: MyRequ
       priceLabel={en.req.approxPrice}
       priceNote={v.needsReply ? en.req.priceNote : undefined}
       actions={v.needsReply ? <QuoteActions id={r.id} /> : undefined}
+      vendorNote={r.vendor_note ? { label: en.req.vendorNoteFrom(firstName(r.vendor_name)), text: r.vendor_note } : null}
       onPress={onPress}
     />
   );

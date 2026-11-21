@@ -119,6 +119,25 @@ export async function getMenu(date: string, c: Client = getSupabase()): Promise<
 export const todayIst = () => toIstDate();
 export const yesterdayIst = () => addDays(toIstDate(), -1);
 
+/**
+ * Owner review 2026-11-21: the vendor's most recent published menu before today (yesterday, or the last day he
+ * worked), for the "Last menu" button.
+ */
+export async function getLastMenu(c: Client = getSupabase()): Promise<DayMenu | null> {
+  const { data: u } = await c.auth.getUser();
+  const { data, error } = await c
+    .from('daily_menus')
+    .select('date')
+    .eq('vendor_id', u.user!.id)
+    .lt('date', todayIst())
+    .not('published_at', 'is', null)
+    .order('date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) raise(error);
+  return data ? getMenu(data.date, c) : null;
+}
+
 export async function publishMenu(items: { item_id: string; price: number; unit: PriceUnit }[], clientId = newClientId(), c: Client = getSupabase()) {
   const { data, error } = await c.rpc('publish_menu', { p_date: todayIst(), p_items: items, p_client_id: clientId });
   if (error) raise(error);

@@ -84,6 +84,8 @@ export type MyRequest = {
   delivered_at: string | null;
   missed_reason: MissReason | null;
   buyer_disputed_at: string | null;
+  /** Vendor's optional note with his answer (owner review 2026-11-21) */
+  vendor_note?: string | null;
 };
 export async function myRequests(c: Client = getSupabase()): Promise<MyRequest[]> {
   const { data, error } = await c.rpc('my_requests');
@@ -122,7 +124,7 @@ export async function reportVendor(vendorId: string, reason: string, text: strin
 
 // ---- vendor side
 const VENDOR_REQUEST_COLUMNS =
-  'id, item_id, item_name, default_unit, free_text, qty, note, buyer_first_name, society_name, status, for_date, stop_id, slot_start, slot_end, gate_name, quoted_price, quoted_unit, last_price, last_unit, delivered_at, missed_reason, buyer_ref';
+  'id, item_id, item_name, default_unit, free_text, qty, note, buyer_first_name, society_name, status, for_date, stop_id, slot_start, slot_end, gate_name, quoted_price, quoted_unit, last_price, last_unit, delivered_at, missed_reason, buyer_ref, buyer_name, vendor_note';
 export async function vendorRequests(c: Client = getSupabase()): Promise<VendorRequestRow[]> {
   const { data, error } = await c.from('v_vendor_requests').select(VENDOR_REQUEST_COLUMNS).order('slot_start');
   if (error) raise(error);
@@ -131,7 +133,7 @@ export async function vendorRequests(c: Client = getSupabase()): Promise<VendorR
 
 /** Vendor answers every request for one item on one visit: accept with an approximate price, or deny. */
 export async function answerRequest(
-  p: { key: string; status: 'will_bring' | 'cant_bring'; forDate: string; stopId: string | null; price?: number | null; unit?: PriceUnit | null },
+  p: { key: string; status: 'will_bring' | 'cant_bring'; forDate: string; stopId: string | null; price?: number | null; unit?: PriceUnit | null; note?: string | null },
   c: Client = getSupabase(),
 ) {
   const { data, error } = await c.rpc('answer_request', {
@@ -141,6 +143,7 @@ export async function answerRequest(
     p_stop_id: p.stopId ?? undefined,
     p_price: p.price ?? undefined,
     p_unit: p.unit ?? undefined,
+    p_note: p.note?.trim() || undefined,
   });
   if (error) raise(error);
   return data as number;

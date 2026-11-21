@@ -92,6 +92,13 @@ export default function RequestDetail() {
 
         <RequestStatusBlock tone={v.tone} headline={v.headline} detail={v.detail} large />
 
+        {r.vendor_note ? (
+          <Card testID="detail-vendor-note" style={{ gap: t.spacing.xxs }}>
+            <Text variant="bodySmall" color="textSecondary">{en.req.vendorNoteFrom(n)}</Text>
+            <Text>{`“${r.vendor_note}”`}</Text>
+          </Card>
+        ) : null}
+
         {v.price ? (
           <Card tint={v.needsReply ? 'amber' : 'primary'} testID="detail-price">
             <Text variant="bodySmall" color="textSecondary">{en.req.approxPrice}</Text>

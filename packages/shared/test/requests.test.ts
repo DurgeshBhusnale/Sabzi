@@ -59,3 +59,18 @@ describe('grouping', () => {
     expect(groupRequests([r({ status: 'will_bring' }), r({ status: 'open' })])[0]!.status).toBe('mixed');
   });
 });
+
+describe('buyer names and vendor note (owner review 2026-11-21)', () => {
+  it('lists every buyer by full name, falling back to the first name', () => {
+    const [g] = groupRequests([
+      r({ buyer_first_name: 'Priya', buyer_name: 'Priya Kulkarni', qty: '500 g', note: 'Small ones' }),
+      r({ buyer_first_name: 'Arjun', buyer_name: null, qty: '1 kg' }),
+    ]);
+    expect(g!.buyers.map((b) => b.buyer)).toEqual(['Arjun', 'Priya Kulkarni']);
+    expect(g!.buyers[1]).toMatchObject({ qty: '500 g', note: 'Small ones' });
+  });
+  it("carries the vendor's note", () => {
+    const [g] = groupRequests([r({ vendor_note: 'Fresh stock tomorrow' }), r({})]);
+    expect(g!.vendorNote).toBe('Fresh stock tomorrow');
+  });
+});

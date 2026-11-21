@@ -6,12 +6,17 @@ export type Draft = Record<string, DraftItem>;
 export type UsualItem = { id: string; name: string; defaultUnit: PriceUnit };
 export type MenuLine = { itemId: string; price: number; unit: PriceUnit; soldOut?: boolean };
 
-/** V-05: usual items as tiles; today's published menu (if any) pre-selects; yesterday gives "was" prices. */
-export function buildDraft(usual: UsualItem[], today: MenuLine[] | null, yesterday: MenuLine[] | null): Draft {
+/**
+ * V-05: usual items as tiles; today's published menu (if any) pre-selects; the last menu gives "was" prices.
+ * Items from the last menu that are no longer in the usual list still get a tile, so "Last menu" copies them all.
+ */
+export function buildDraft(usual: UsualItem[], today: MenuLine[] | null, last: (MenuLine & { name?: string })[] | null): Draft {
   const t = new Map((today ?? []).map((m) => [m.itemId, m]));
-  const y = new Map((yesterday ?? []).map((m) => [m.itemId, m]));
+  const y = new Map((last ?? []).map((m) => [m.itemId, m]));
+  const known = new Set(usual.map((u) => u.id));
+  const extra: UsualItem[] = (last ?? []).filter((m) => !known.has(m.itemId) && m.name).map((m) => ({ id: m.itemId, name: m.name!, defaultUnit: m.unit }));
   const draft: Draft = {};
-  for (const u of usual) {
+  for (const u of [...usual, ...extra]) {
     const cur = t.get(u.id);
     const prev = y.get(u.id);
     draft[u.id] = {
@@ -27,11 +32,11 @@ export function buildDraft(usual: UsualItem[], today: MenuLine[] | null, yesterd
   return draft;
 }
 
-/** "Same as yesterday": select yesterday's items with yesterday's prices and units. */
-export function copyYesterday(draft: Draft, yesterday: MenuLine[]): { draft: Draft; copied: number } {
+/** "Last menu": select the last menu's items with its prices and units. Nothing is published. */
+export function copyLastMenu(draft: Draft, last: MenuLine[]): { draft: Draft; copied: number } {
   const next: Draft = { ...draft };
   let copied = 0;
-  for (const y of yesterday) {
+  for (const y of last) {
     const d = next[y.itemId];
     if (!d) continue;
     next[y.itemId] = { ...d, selected: true, price: y.price, unit: y.unit };
@@ -69,4 +74,12 @@ export function canPublish(draft: Draft): boolean {
 
 export function toPublishItems(draft: Draft): { item_id: string; price: number; unit: PriceUnit }[] {
   return selectedItems(draft).map((d) => ({ item_id: d.itemId, price: d.price as number, unit: d.unit }));
+}
+
+/** True when every item of the last menu is already selected at its price and unit (the button has nothing to do). */
+export function matchesLastMenu(draft: Draft, last: MenuLine[]): boolean {
+  return last.every((y) => {
+    const d = draft[y.itemId];
+    return !d || (d.selected && d.price === y.price && d.unit === y.unit);
+  });
 }
