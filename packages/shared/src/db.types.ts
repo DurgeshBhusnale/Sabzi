@@ -441,14 +441,14 @@ isOneToOne: false
                   ]
                 },"requests": {
                   Row: {
-                    "answered_at": string | null,"buyer_id": string,"created_at": string,"for_date": string,"free_text": string | null,"id": string,"item_id": string | null,"note": string | null,"qty": string | null,"society_id": string,"status": Database["public"]['Enums']["request_status"],"vendor_id": string
+                    "answered_at": string | null,"buyer_id": string,"created_at": string,"cutoff_at": string,"for_date": string,"free_text": string | null,"id": string,"item_id": string | null,"note": string | null,"qty": string | null,"quoted_price": number | null,"quoted_unit": Database["public"]['Enums']["price_unit"] | null,"responded_at": string | null,"slot_end": string,"slot_start": string,"society_id": string,"status": Database["public"]['Enums']["request_status"],"stop_id": string | null,"vendor_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "answered_at"?: string | null,"buyer_id": string,"created_at"?: string,"for_date": string,"free_text"?: string | null,"id"?: string,"item_id"?: string | null,"note"?: string | null,"qty"?: string | null,"society_id": string,"status"?: Database["public"]['Enums']["request_status"],"vendor_id": string
+                    "answered_at"?: string | null,"buyer_id": string,"created_at"?: string,"cutoff_at": string,"for_date": string,"free_text"?: string | null,"id"?: string,"item_id"?: string | null,"note"?: string | null,"qty"?: string | null,"quoted_price"?: number | null,"quoted_unit"?: Database["public"]['Enums']["price_unit"] | null,"responded_at"?: string | null,"slot_end": string,"slot_start": string,"society_id": string,"status"?: Database["public"]['Enums']["request_status"],"stop_id"?: string | null,"vendor_id": string
                   }
                   Update: {
-                    "answered_at"?: string | null,"buyer_id"?: string,"created_at"?: string,"for_date"?: string,"free_text"?: string | null,"id"?: string,"item_id"?: string | null,"note"?: string | null,"qty"?: string | null,"society_id"?: string,"status"?: Database["public"]['Enums']["request_status"],"vendor_id"?: string
+                    "answered_at"?: string | null,"buyer_id"?: string,"created_at"?: string,"cutoff_at"?: string,"for_date"?: string,"free_text"?: string | null,"id"?: string,"item_id"?: string | null,"note"?: string | null,"qty"?: string | null,"quoted_price"?: number | null,"quoted_unit"?: Database["public"]['Enums']["price_unit"] | null,"responded_at"?: string | null,"slot_end"?: string,"slot_start"?: string,"society_id"?: string,"status"?: Database["public"]['Enums']["request_status"],"stop_id"?: string | null,"vendor_id"?: string
                   }
                   Relationships: [
                     {
@@ -872,7 +872,7 @@ isOneToOne: false
                   ]
                 },"v_vendor_requests": {
                   Row: {
-                    "answered_at": string | null,"buyer_first_name": string | null,"created_at": string,"default_unit": Database["public"]['Enums']["price_unit"] | null,"for_date": string,"free_text": string | null,"id": string,"item_id": string | null,"item_name": string | null,"note": string | null,"qty": string | null,"society_id": string,"society_name": string,"status": Database["public"]['Enums']["request_status"],"vendor_id": string
+                    "answered_at": string | null,"buyer_first_name": string | null,"created_at": string,"cutoff_at": string | null,"default_unit": Database["public"]['Enums']["price_unit"] | null,"for_date": string,"free_text": string | null,"gate_name": string | null,"id": string,"item_id": string | null,"item_name": string | null,"last_price": number | null,"last_unit": Database["public"]['Enums']["price_unit"] | null,"note": string | null,"qty": string | null,"quoted_price": number | null,"quoted_unit": Database["public"]['Enums']["price_unit"] | null,"responded_at": string | null,"slot_end": string | null,"slot_start": string | null,"society_id": string,"society_name": string,"status": Database["public"]['Enums']["request_status"],"stop_id": string | null,"vendor_id": string
                   }
                   ComputedFields: never
                   Relationships: [
@@ -930,7 +930,7 @@ isOneToOne: false
 { Args: { "p_status"?: Database["public"]['Enums']["vendor_status"] }; Returns: Json
                            },
 "answer_request":
-{ Args: { "p_for_date"?: string,"p_item_key": string,"p_status": Database["public"]['Enums']["request_status"] }; Returns: number
+{ Args: { "p_for_date"?: string,"p_item_key": string,"p_price"?: number,"p_status": Database["public"]['Enums']["request_status"],"p_stop_id"?: string,"p_unit"?: Database["public"]['Enums']["price_unit"] }; Returns: number
                            },
 "approve_item":
 { Args: { "p_item_id": string,"p_name"?: string }; Returns: undefined
@@ -951,7 +951,7 @@ isOneToOne: false
 { Args: { "p_name": string,"p_phone": string }; Returns: undefined
                            },
 "create_request":
-{ Args: { "p_free_text"?: string,"p_item_id"?: string,"p_note"?: string,"p_qty"?: string,"p_society_id": string,"p_vendor_id": string }; Returns: string
+{ Args: { "p_for_date"?: string,"p_free_text"?: string,"p_item_id"?: string,"p_note"?: string,"p_qty"?: string,"p_society_id": string,"p_stop_id"?: string,"p_vendor_id": string }; Returns: string
                            },
 "delete_my_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
@@ -1094,6 +1094,15 @@ isOneToOne: false
 "record_qr_scan":
 { Args: { "p_code": string,"p_source": string }; Returns: undefined
                            },
+"request_cutoff":
+{ Args: { "p_date": string,"p_start": string }; Returns: string
+                           },
+"request_slots":
+{ Args: { "p_society_id": string,"p_vendor_id": string }; Returns: Json
+                           },
+"respond_to_quote":
+{ Args: { "p_accept": boolean,"p_request_id": string }; Returns: undefined
+                           },
 "record_vendor_view":
 { Args: { "p_vendor_id": string }; Returns: undefined
                            },
@@ -1232,7 +1241,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "admin_level": "owner"|"field_staff","notif_type": "arrival"|"leaving_soon"|"deal"|"not_coming"|"request_reply"|"vendor_new_requests"|"vendor_new_rating","pilot_area": "karve_nagar"|"sus_pashan","price_unit": "kg"|"g500"|"g250"|"bunch"|"piece","report_reason": "wrong_weight"|"bad_quality"|"rude"|"fake_listing"|"other","report_status": "open"|"actioned"|"dismissed","request_status": "open"|"will_bring"|"cant_bring"|"cancelled","review_status": "visible"|"hidden","stop_event_type": "arrived"|"leaving_soon"|"left"|"not_going","user_role": "buyer"|"vendor"|"admin","vehicle_type": "tempo"|"thela","vendor_status": "pending"|"needs_info"|"verified"|"rejected"|"suspended"
+            "admin_level": "owner"|"field_staff","notif_type": "arrival"|"leaving_soon"|"deal"|"not_coming"|"request_reply"|"vendor_new_requests"|"vendor_new_rating","pilot_area": "karve_nagar"|"sus_pashan","price_unit": "kg"|"g500"|"g250"|"bunch"|"piece","report_reason": "wrong_weight"|"bad_quality"|"rude"|"fake_listing"|"other","report_status": "open"|"actioned"|"dismissed","request_status": "open"|"will_bring"|"cant_bring"|"cancelled"|"accepted"|"declined"|"vendor_cancelled","review_status": "visible"|"hidden","stop_event_type": "arrived"|"leaving_soon"|"left"|"not_going","user_role": "buyer"|"vendor"|"admin","vehicle_type": "tempo"|"thela","vendor_status": "pending"|"needs_info"|"verified"|"rejected"|"suspended"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1352,7 +1361,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "admin_level": ["owner", "field_staff"],"notif_type": ["arrival", "leaving_soon", "deal", "not_coming", "request_reply", "vendor_new_requests", "vendor_new_rating"],"pilot_area": ["karve_nagar", "sus_pashan"],"price_unit": ["kg", "g500", "g250", "bunch", "piece"],"report_reason": ["wrong_weight", "bad_quality", "rude", "fake_listing", "other"],"report_status": ["open", "actioned", "dismissed"],"request_status": ["open", "will_bring", "cant_bring", "cancelled"],"review_status": ["visible", "hidden"],"stop_event_type": ["arrived", "leaving_soon", "left", "not_going"],"user_role": ["buyer", "vendor", "admin"],"vehicle_type": ["tempo", "thela"],"vendor_status": ["pending", "needs_info", "verified", "rejected", "suspended"]
+            "admin_level": ["owner", "field_staff"],"notif_type": ["arrival", "leaving_soon", "deal", "not_coming", "request_reply", "vendor_new_requests", "vendor_new_rating"],"pilot_area": ["karve_nagar", "sus_pashan"],"price_unit": ["kg", "g500", "g250", "bunch", "piece"],"report_reason": ["wrong_weight", "bad_quality", "rude", "fake_listing", "other"],"report_status": ["open", "actioned", "dismissed"],"request_status": ["open", "will_bring", "cant_bring", "cancelled", "accepted", "declined", "vendor_cancelled"],"review_status": ["visible", "hidden"],"stop_event_type": ["arrived", "leaving_soon", "left", "not_going"],"user_role": ["buyer", "vendor", "admin"],"vehicle_type": ["tempo", "thela"],"vendor_status": ["pending", "needs_info", "verified", "rejected", "suspended"]
           }
         }
 } as const

@@ -2,21 +2,30 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { REQUEST_QTY_CHIPS } from '@sabzi/shared';
+import { cutoffPhrase, REQUEST_QTY_CHIPS, slotDayLabel, slotPhrase, slotWindowLabel, type RequestSlot } from '@sabzi/shared';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Banner, Button, Chip, EmptyState, ItemTile, Screen, SkeletonBlock, Text, TextInput, TopAppBar } from '../../src/ui';
-import { createRequest, itemsList } from '../../src/features/engagement/api';
+import { Banner, Button, Chip, EmptyState, ItemTile, Screen, SkeletonBlock, SlotTile, Text, TextInput, TopAppBar } from '../../src/ui';
+import { createRequest, itemsList, requestSlots } from '../../src/features/engagement/api';
 import { usePrimarySociety } from '../../src/features/buyer/hooks';
 import { AppErrorException } from '../../src/lib/errors';
 import { track } from '../../src/lib/analytics';
 import { en } from '../../src/i18n/en';
 
-/** B-11: item grid + search + "Something else", quantity chips, note; sent and limit-reached states. */
-export default function RequestTomorrow() {
+/**
+ * B-11 (request flow v2): pick one of the vendor's next visits (slot tiles, the next one pre-selected), the item,
+ * quantity and note. States: loading, no open visits, error, sent, limit reached, visit just closed.
+ */
+export default function RequestItem() {
   const t = useTheme();
   const { vendorId, name = '' } = useLocalSearchParams<{ vendorId: string; name: string }>();
   const { primary } = usePrimarySociety();
   const items = useQuery({ queryKey: ['items'], queryFn: () => itemsList(), staleTime: 3_600_000 });
+  const slots = useQuery({ queryKey: ['eng', 'slots', vendorId, primary?.id], queryFn: () => requestSlots(vendorId, primary!.id), enabled: !!primary, refetchInterval: 60_000 });
+  const [slotKey, setSlotKey] = useState<string | null>(null);
+  const keyOf = (s: RequestSlot) => `${s.stop_id}|${s.date}`;
+  // The next visit is pre-selected; if the chosen one closes while the screen is open, fall back to the next.
+  const slot = slots.data?.find((s) => keyOf(s) === slotKey) ?? slots.data?.[0] ?? null;
+  const [sentFor, setSentFor] = useState<string>('');
   const qc = useQueryClient();
   const [q, setQ] = useState('');
   const [itemId, setItemId] = useState<string | null>(null);
@@ -34,7 +43,7 @@ export default function RequestTomorrow() {
   if (state === 'sent') {
     return (
       <Screen header={<TopAppBar onBack={() => router.back()} />}>
-        <EmptyState illustration="list" art="success" title={en.eng.sentTitle} body={en.eng.sentBody(first)} actionLabel={en.common.done} onAction={() => router.back()} testID="request-sent" />
+        <EmptyState illustration="list" art="success" title={en.eng.sentTitle} body={en.req.sentBody(first, sentFor)} actionLabel={en.common.done} onAction={() => router.back()} testID="request-sent" />
       </Screen>
     );
   }
@@ -45,7 +54,28 @@ export default function RequestTomorrow() {
       </Screen>
     );
   }
-  const ready = !!(itemId || (freeText && freeText.trim().length >= 2));
+  if (slots.isLoading || !primary) {
+    return (
+      <Screen header={<TopAppBar title={en.eng.requestTitle} onBack={() => router.back()} />}>
+        <SkeletonBlock kind="list" count={3} />
+      </Screen>
+    );
+  }
+  if (slots.isError) {
+    return (
+      <Screen header={<TopAppBar title={en.eng.requestTitle} onBack={() => router.back()} />}>
+        <EmptyState illustration="list" title={en.req.loadError} body={en.errors.unknown} actionLabel={en.common.retry} onAction={() => slots.refetch()} testID="slots-error" />
+      </Screen>
+    );
+  }
+  if (!slots.data?.length) {
+    return (
+      <Screen header={<TopAppBar title={en.eng.requestTitle} onBack={() => router.back()} />}>
+        <EmptyState illustration="list" title={en.req.noSlotsTitle} body={en.req.noSlotsBody(first)} actionLabel={en.common.done} onAction={() => router.back()} testID="no-slots" />
+      </Screen>
+    );
+  }
+  const ready = !!slot && !!(itemId || (freeText && freeText.trim().length >= 2));
   return (
     <Screen
       header={<TopAppBar title={en.eng.requestTitle} onBack={() => router.back()} />}
@@ -59,12 +89,19 @@ export default function RequestTomorrow() {
             setState('sending');
             setError(null);
             try {
-              await createRequest({ vendor_id: vendorId, society_id: primary!.id, item_id: itemId, free_text: itemId ? null : freeText, qty: qty === 'custom' ? customQty : qty, note });
+              await createRequest({ vendor_id: vendorId, society_id: primary!.id, item_id: itemId, free_text: itemId ? null : freeText, qty: qty === 'custom' ? customQty : qty, note, stop_id: slot!.stop_id, for_date: slot!.date });
+              setSentFor(slotPhrase(slot!.slot_start));
               track('request_created');
               qc.invalidateQueries({ queryKey: ['eng', 'my-requests'] });
               setState('sent');
             } catch (e) {
               if (e instanceof AppErrorException && e.appError.code === 'request_limit') return setState('limit');
+              if (e instanceof AppErrorException && e.appError.code === 'slot_closed') {
+                setError(en.req.slotClosed);
+                setState('form');
+                await slots.refetch();
+                return;
+              }
               setError(e instanceof AppErrorException ? e.message : en.errors.unknown);
               setState('form');
             }
@@ -73,6 +110,23 @@ export default function RequestTomorrow() {
       }
     >
       <Text variant="h2">{en.eng.requestFrom(name)}</Text>
+      <View style={{ gap: t.spacing.xs }}>
+        <Text weight="600">{en.req.whenTitle}</Text>
+        <Text variant="bodySmall" color="textSecondary">{en.req.whenHint(first)}</Text>
+      </View>
+      <View accessibilityRole="radiogroup" style={{ gap: t.spacing.xs }} testID="slot-list">
+        {slots.data.map((s) => (
+          <SlotTile
+            key={keyOf(s)}
+            testID={`slot-${s.stop_id}-${s.date}`}
+            day={slotDayLabel(s.slot_start)}
+            window={`${slotWindowLabel(s.slot_start, `${s.date}T${s.window_end}+05:30`)} · ${s.gate_name}`}
+            cutoff={en.req.orderBy(cutoffPhrase(s.cutoff_at))}
+            selected={!!slot && keyOf(s) === keyOf(slot)}
+            onPress={() => setSlotKey(keyOf(s))}
+          />
+        ))}
+      </View>
       <Text weight="600">{en.eng.whatItem}</Text>
       <TextInput kind="search" placeholder={en.eng.searchItems} value={q} onChangeText={setQ} />
       {items.isLoading ? <SkeletonBlock kind="list" count={2} /> : rows.map((row, i) => (

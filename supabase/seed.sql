@@ -191,12 +191,20 @@ insert into public.reviews (id, vendor_id, buyer_id, stars, tags, text, vendor_r
   ('90000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000003', 5,
    '{polite}', 'Sunita tai keeps methi aside for me if I''m late.', null, null, now() - interval '7 days', now() - interval '7 days');
 
--- ---------------------------------------------------------------- requests for tomorrow
-insert into public.requests (buyer_id, vendor_id, society_id, item_id, free_text, qty, note, for_date) values
-  ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', '70000000-0000-4000-8000-000000000013', null, '500 g', null, public.ist_today() + 1),
-  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000002', '70000000-0000-4000-8000-000000000013', null, '1 kg', 'Fresh ones please', public.ist_today() + 1),
-  ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', '70000000-0000-4000-8000-000000000014', null, null, null, public.ist_today() + 1),
-  ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000002', null, 'Baby spinach', '250 g', null, public.ist_today() + 1);
+-- ---------------------------------------------------------------- requests for tomorrow morning's visits
+-- Each request belongs to one visit (stop + date). Ramesh: Green Park Gate 1 at 08:00, the second society at 09:00.
+insert into public.requests (buyer_id, vendor_id, society_id, item_id, free_text, qty, note, for_date, stop_id, slot_start, slot_end, cutoff_at)
+select r.buyer_id::uuid, r.vendor_id::uuid, r.society_id::uuid, r.item_id::uuid, r.free_text, r.qty, r.note, public.ist_today() + 1, st.id,
+       ((public.ist_today() + 1) + st.window_start) at time zone 'Asia/Kolkata',
+       ((public.ist_today() + 1) + st.window_end) at time zone 'Asia/Kolkata',
+       public.request_cutoff(public.ist_today() + 1, st.window_start)
+  from (values
+    ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', '70000000-0000-4000-8000-000000000013', null, '500 g', null, '60000000-0000-4000-8000-000000000001'),
+    ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000002', '70000000-0000-4000-8000-000000000013', null, '1 kg', 'Fresh ones please', '60000000-0000-4000-8000-000000000002'),
+    ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', '70000000-0000-4000-8000-000000000014', null, null, null, '60000000-0000-4000-8000-000000000001'),
+    ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000002', null, 'Baby spinach', '250 g', null, '60000000-0000-4000-8000-000000000002')
+  ) as r(buyer_id, vendor_id, society_id, item_id, free_text, qty, note, stop_id)
+  join public.stops st on st.id = r.stop_id::uuid;
 
 -- ---------------------------------------------------------------- a sample report for the moderation queue
 insert into public.reports (reporter_id, vendor_id, reason, text) values

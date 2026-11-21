@@ -125,14 +125,14 @@ Deno.test('leaving soon and not coming copy', async () => {
 
 Deno.test('request reply respects notify_requests and replies pref', async () => {
   const ctx = (rec: Recipient): Context => ({
-    request: { id: 'q1', status: 'will_bring', qty: '500 g', item: 'Drumsticks' },
+    request: { id: 'q1', status: 'will_bring', qty: '500 g', item: 'Drumsticks', price: 40, unit: 'kg', slot_start: '2026-11-06T02:30:00Z' },
     vendor: { id: 'v1', display_name: 'Ramesh Sabzi', verified: true },
     recipients: [rec],
   });
   const on = deps(ctx(r('priya')), { now: () => new Date('2026-11-05T11:00:00Z') });
   await handleNotify(req({ kind: 'request_reply', ref: 'q1' }), on.d);
-  assertEquals(on.sent[0]![0]!.title, 'Ramesh will bring drumsticks tomorrow');
-  assertEquals(on.sent[0]![0]!.body, 'Your request for 500 g');
+  assertEquals(on.sent[0]![0]!.title, 'Ramesh accepted your request for drumsticks');
+  assertEquals(on.sent[0]![0]!.body, 'About ₹40/kg for tomorrow morning. Tap to confirm your order.');
   const off = deps(ctx(r('priya', { prefs: { replies: false } })));
   await handleNotify(req({ kind: 'request_reply', ref: 'q1' }), off.d);
   assertEquals(off.inserted.length, 0);
@@ -141,7 +141,7 @@ Deno.test('request reply respects notify_requests and replies pref', async () =>
 Deno.test('vendor digest and rating copy', async () => {
   const digest = deps({ vendor: { id: 'v1', display_name: 'Ramesh Sabzi', verified: true }, groups: [{ name: 'Drumsticks', count: 3 }, { name: 'Broccoli', count: 2 }, { name: 'Baby corn', count: 1 }], recipients: [r('v1')] }, { now: () => new Date('2026-11-05T10:30:00Z') });
   await handleNotify(req({ kind: 'vendor_requests', ref: 'v1' }), digest.d);
-  assertEquals(digest.sent[0]![0]!.title, '6 requests for tomorrow');
+  assertEquals(digest.sent[0]![0]!.title, '6 requests need your reply');
   assertEquals(digest.sent[0]![0]!.body, 'Drumsticks ×3, Broccoli ×2, Baby corn ×1');
   const rating = deps({ vendor: { id: 'v1', display_name: 'Ramesh Sabzi', verified: true }, review: { id: 'rv', stars: 5, tags: [], text: 'Always fresh, correct weight', society: 'Green Park Residency' }, recipients: [r('v1')] }, { now: () => new Date('2026-11-05T10:30:00Z') });
   await handleNotify(req({ kind: 'rating', ref: 'rv' }), rating.d);

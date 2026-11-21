@@ -314,9 +314,14 @@ describe('ReviewCard', () => {
 });
 
 describe('RequestCard', () => {
-  it.each(['open', 'will_bring', 'cant_bring'] as const)('%s', async (status) => {
-    await renderUi(<RequestCard item="Drumsticks" qty="500 g" vendorName="Ramesh Sabzi" status={status} />);
-    expect(screen.getByTestId(`request-${status}`)).toBeTruthy();
+  it.each(['waiting', 'action', 'success', 'error', 'muted'] as const)('%s tone renders a status block', async (tone) => {
+    await renderUi(<RequestCard item="Drumsticks" qty="500 g" vendorName="Ramesh Sabzi" when="Tomorrow morning · 8:00–8:45 AM" pill={{ status: 'waiting', label: 'x' }} tone={tone} headline="Headline" />);
+    expect(screen.getByTestId(`request-${tone}`)).toBeTruthy();
+    expect(screen.getByTestId(`request-status-${tone}`)).toBeTruthy();
+  });
+  it('shows the quoted price', async () => {
+    await renderUi(<RequestCard item="Tomato" vendorName="Ramesh Sabzi" when="Tomorrow morning" pill={{ status: 'deal', label: 'Confirm price' }} tone="action" headline="Ramesh can bring it" price="₹40 / kg" priceLabel="Approx. price" />);
+    expect(screen.getByTestId('request-price')).toHaveTextContent('Approx. price₹40 / kg');
   });
 });
 

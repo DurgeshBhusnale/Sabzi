@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
-import { groupRequests, type RequestLite } from '@sabzi/shared';
+import { groupBySlot, type VendorRequestRow } from '@sabzi/shared';
 import { renderUi } from '../src/test/render';
 import { WriteReviewView } from '../src/features/engagement/WriteReviewView';
 import { DealComposer, pctOff, type DealLine } from '../src/features/engagement/DealComposer';
@@ -70,35 +70,80 @@ describe('V-11 evening price drop (one deal a day)', () => {
   });
 });
 
-const req = (o: Partial<RequestLite>): RequestLite => ({ id: Math.random().toString(), item_id: 'drum', item_name: 'Drumsticks', free_text: null, qty: '500 g', note: null, buyer_first_name: 'Priya', society_name: 'Green Park', status: 'open', ...o });
+const req = (o: Partial<VendorRequestRow>): VendorRequestRow => ({
+  id: Math.random().toString(), item_id: 'drum', item_name: 'Drumsticks', free_text: null, qty: '500 g', note: null,
+  buyer_first_name: 'Priya', society_name: 'Green Park Residency', status: 'open', default_unit: 'kg', last_price: 60, last_unit: 'kg',
+  for_date: '2026-11-06', stop_id: 's1', slot_start: '2026-11-06T02:30:00Z', slot_end: '2026-11-06T03:15:00Z', gate_name: 'Gate 1', ...o,
+});
 
-describe('V-13 vendor requests', () => {
-  const evening = new Date('2026-11-05T11:00:00Z'); // 4:30 PM IST
-  const morning = new Date('2026-11-05T03:00:00Z'); // 8:30 AM IST
-  it('groups by item with summed quantity and answers per item', async () => {
-    const onAnswer = jest.fn(async () => undefined);
-    const groups = groupRequests([req({}), req({ qty: '1 kg', buyer_first_name: 'Arjun', society_name: 'Sahyadri Heights', note: 'Fresh ones please' }), req({ item_id: 'b', item_name: 'Broccoli', qty: '1 piece' })]);
-    await renderUi(<VendorRequestsView groups={groups} loading={false} dateLabel="Friday, 6 November" now={evening} onAnswer={onAnswer} onShareQr={jest.fn()} />, { mode: 'vendor' });
+describe('V-13 vendor requests (request flow v2)', () => {
+  const evening = new Date('2026-11-05T11:00:00Z'); // 4:30 PM IST, the day before the visit
+  const view = (rows: VendorRequestRow[], o: Partial<Parameters<typeof VendorRequestsView>[0]> = {}) => (
+    <VendorRequestsView slots={groupBySlot(rows, evening)} loading={false} now={evening} tab="requests" onTab={jest.fn()} onAnswer={jest.fn(async () => undefined)} onShareQr={jest.fn()} {...o} />
+  );
+  it('groups by visit then item, with totals, notes and the visit header', async () => {
+    await renderUi(view([req({}), req({ qty: '1 kg', buyer_first_name: 'Arjun', society_name: 'Sahyadri Heights', note: 'Fresh ones please' }), req({ item_id: 'b', item_name: 'Broccoli', qty: '1 piece' })]), { mode: 'vendor' });
+    expect(screen.getByText('Tomorrow morning')).toBeTruthy();
     expect(screen.getByText('Drumsticks · 1.5 kg')).toBeTruthy();
-    expect(screen.getByText('2 buyers · Green Park, Sahyadri Heights')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Show notes'));
-    expect(screen.getByText('Arjun · Sahyadri Heights · 1 kg: "Fresh ones please"')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('will-Drumsticks'));
-    expect(onAnswer).toHaveBeenCalledWith('drum', 'will_bring');
-    expect(screen.queryByTestId('vr-before-4')).toBeNull();
+    expect(screen.getByText('2 people · Green Park, Sahyadri Heights')).toBeTruthy();
+    expect(screen.getByText('2 waiting for you')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Show notes (1)'));
+    expect(screen.getByText('Arjun · Sahyadri Heights · 1 kg: “Fresh ones please”')).toBeTruthy();
   });
-  it('before 4 PM shows requests so far', async () => {
-    await renderUi(<VendorRequestsView groups={groupRequests([req({})])} loading={false} dateLabel="Friday" now={morning} onAnswer={jest.fn()} onShareQr={jest.fn()} />);
-    expect(screen.getByTestId('vr-before-4')).toBeTruthy();
+  it('Accept request sends the price (pre-filled from the menu, adjusted with the steppers)', async () => {
+    const onAnswer = jest.fn(async () => undefined);
+    await renderUi(view([req({})], { onAnswer }), { mode: 'vendor' });
+    expect(screen.getByTestId('price-Drumsticks-value')).toHaveTextContent('₹60');
+    await fireEvent.press(screen.getByTestId('price-Drumsticks-step-5'));
+    await fireEvent.press(screen.getByText('Accept request'));
+    await waitFor(() => expect(onAnswer).toHaveBeenCalledWith(expect.objectContaining({ status: 'will_bring', price: 55, unit: 'kg' })));
+    expect(screen.getByText('Deny request')).toBeTruthy();
   });
-  it('all answered', async () => {
-    await renderUi(<VendorRequestsView groups={groupRequests([req({ status: 'will_bring' }), req({ item_id: 'b', item_name: 'Broccoli', status: 'cant_bring' })])} loading={false} dateLabel="Friday" now={evening} onAnswer={jest.fn()} onShareQr={jest.fn()} />);
-    expect(screen.getByText('All 2 requests answered. Buyers have been told.')).toBeTruthy();
+  it('accepted item shows the price and the buyer counts; Deny after confirmations asks first', async () => {
+    const onAnswer = jest.fn(async () => undefined);
+    await renderUi(view([req({ status: 'accepted', quoted_price: 50, quoted_unit: 'kg' }), req({ status: 'will_bring', quoted_price: 50, quoted_unit: 'kg' })], { onAnswer }), { mode: 'vendor' });
+    expect(screen.getByText('Accepted at about ₹50 / kg')).toBeTruthy();
+    expect(screen.getByText('1 confirmed')).toBeTruthy();
+    expect(screen.getByText('1 deciding')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('deny-Drumsticks'));
+    expect(screen.getByText('1 buyer has confirmed. Deny anyway?')).toBeTruthy();
+    expect(onAnswer).not.toHaveBeenCalled();
   });
-  it('no requests', async () => {
+  it('denied item can be accepted instead', async () => {
+    await renderUi(view([req({ status: 'cant_bring' })]), { mode: 'vendor' });
+    expect(screen.getByText('You denied this request')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Accept instead'));
+    expect(screen.getByText('Accept request')).toBeTruthy();
+  });
+  it('Confirmed list: what to carry per visit, updated from confirmed orders', async () => {
+    await renderUi(view([
+      req({ status: 'accepted', quoted_price: 50, quoted_unit: 'kg', qty: '1 kg' }),
+      req({ status: 'accepted', quoted_price: 50, quoted_unit: 'kg', qty: '500 g', buyer_first_name: 'Arjun' }),
+      req({ status: 'will_bring', quoted_price: 50, quoted_unit: 'kg' }),
+    ], { tab: 'confirmed' }), { mode: 'vendor' });
+    expect(screen.getByTestId('vc-total')).toHaveTextContent('1.5 kg');
+    expect(screen.getByText('2 orders · about ₹50 / kg')).toBeTruthy();
+    expect(screen.getByText('Arjun · Green Park')).toBeTruthy();
+  });
+  it('tabs show counts and switch', async () => {
+    const onTab = jest.fn();
+    await renderUi(view([req({}), req({ item_id: 'b', item_name: 'Broccoli', status: 'accepted', quoted_price: 30 })], { onTab }), { mode: 'vendor' });
+    expect(screen.getByText('Requests (1)')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Confirmed list (1)'));
+    expect(onTab).toHaveBeenCalledWith('confirmed');
+  });
+  it('empty states for both tabs', async () => {
     const onShareQr = jest.fn();
-    await renderUi(<VendorRequestsView groups={[]} loading={false} dateLabel="Friday" now={evening} onAnswer={jest.fn()} onShareQr={onShareQr} />);
+    const r = await renderUi(view([], { onShareQr }));
     await fireEvent.press(screen.getByText('Share my QR'));
     expect(onShareQr).toHaveBeenCalled();
+    await r.rerender(view([req({})], { tab: 'confirmed' }));
+    expect(screen.getByText('No confirmed orders yet')).toBeTruthy();
+  });
+  it('load error offers retry', async () => {
+    const onRetry = jest.fn();
+    await renderUi(<VendorRequestsView slots={undefined} loading={false} tab="requests" onTab={jest.fn()} onAnswer={jest.fn()} onShareQr={jest.fn()} onRetry={onRetry} />);
+    await fireEvent.press(screen.getByText('Retry'));
+    expect(onRetry).toHaveBeenCalled();
   });
 });

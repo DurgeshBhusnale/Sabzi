@@ -1,77 +1,269 @@
 import { useState } from 'react';
-import { View } from 'react-native';
-import { istHour, LIMITS, type RequestGroup } from '@sabzi/shared';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { cutoffPhrase, formatPrice, LIMITS, PRICE_UNITS, shortSociety, slotDayLabel, slotWindowLabel, UNIT_LABELS, type PriceUnit, type RequestGroup, type SlotGroup } from '@sabzi/shared';
 import { useTheme } from '../../theme/ThemeProvider';
-import { Banner, Button, Card, EmptyState, ItemArt, SkeletonBlock, StatusPill, Text } from '../../ui';
+import { Banner, Button, Card, Chip, Dialog, EmptyState, ItemArt, RequestStatusBlock, SegmentedControl, SkeletonBlock, Text } from '../../ui';
 import { en } from '../../i18n/en';
 
-/** V-13: grouped by item with picture, total quantity, buyers, societies; notes; Will bring / Can't bring. */
+export type VendorTab = 'requests' | 'confirmed';
+export type AnswerInput = { slot: SlotGroup; group: RequestGroup; status: 'will_bring' | 'cant_bring'; price?: number; unit?: PriceUnit };
+
+const STEPS = [-5, -1, 1, 5] as const;
+
+/** Compact price box for a request card: −5 −1 ₹40 +1 +5, unit chips only for free-text items. */
+function PriceBox({ price, unit, onChange, onUnit, showUnits, testID }: { price: number; unit: PriceUnit; onChange: (p: number) => void; onUnit: (u: PriceUnit) => void; showUnits: boolean; testID: string }) {
+  const t = useTheme();
+  const c = t.colors;
+  return (
+    <View style={{ gap: t.spacing.xs }} testID={testID}>
+      <Text variant="bodySmall" weight="600">{en.req.vPriceLabel(UNIT_LABELS[unit])}</Text>
+      <View style={[styles.row, { gap: t.spacing.xs }]}>
+        {STEPS.slice(0, 2).map((d) => (
+          <Pressable key={d} testID={`${testID}-step${d}`} accessibilityRole="button" accessibilityLabel={`Subtract ${-d} rupees`} onPress={() => onChange(Math.max(LIMITS.priceMin, price + d))}
+            style={[styles.step, { minWidth: t.layout.minTouch, minHeight: t.layout.minTouch, borderRadius: t.radius.button, backgroundColor: c.surface2 }]}>
+            <Text weight="600">{`${d}`}</Text>
+          </Pressable>
+        ))}
+        <View style={[styles.value, { minHeight: t.layout.minTouch, borderRadius: t.radius.button, borderColor: c.primary, borderWidth: 2 }]}>
+          <Text variant="price" weight="600" testID={`${testID}-value`}>{`₹${price}`}</Text>
+        </View>
+        {STEPS.slice(2).map((d) => (
+          <Pressable key={d} testID={`${testID}-step+${d}`} accessibilityRole="button" accessibilityLabel={`Add ${d} rupees`} onPress={() => onChange(Math.min(LIMITS.priceMax, price + d))}
+            style={[styles.step, { minWidth: t.layout.minTouch, minHeight: t.layout.minTouch, borderRadius: t.radius.button, backgroundColor: c.surface2 }]}>
+            <Text weight="600">{`+${d}`}</Text>
+          </Pressable>
+        ))}
+      </View>
+      {showUnits ? (
+        <View style={[styles.row, { gap: t.spacing.xs, flexWrap: 'wrap' }]}>
+          {PRICE_UNITS.map((u) => <Chip key={u} label={UNIT_LABELS[u]} selected={u === unit} onPress={() => onUnit(u)} />)}
+        </View>
+      ) : null}
+      <Text variant="caption" color="textSecondary">{en.req.vPriceHint}</Text>
+    </View>
+  );
+}
+
+function CountChips({ g }: { g: RequestGroup }) {
+  const t = useTheme();
+  const items: { key: string; label: string; bg: 'primaryTint' | 'dealAmberTint' | 'surface2'; fg: 'onPrimaryTint' | 'dealAmberText' | 'textSecondary' }[] = [];
+  if (g.counts.waiting) items.push({ key: 'waiting', label: en.req.counts.waiting(g.counts.waiting), bg: 'dealAmberTint', fg: 'dealAmberText' });
+  if (g.counts.confirmed) items.push({ key: 'confirmed', label: en.req.counts.confirmed(g.counts.confirmed), bg: 'primaryTint', fg: 'onPrimaryTint' });
+  if (g.counts.quoted) items.push({ key: 'quoted', label: en.req.counts.quoted(g.counts.quoted), bg: 'surface2', fg: 'textSecondary' });
+  if (g.counts.declined) items.push({ key: 'declined', label: en.req.counts.declined(g.counts.declined), bg: 'surface2', fg: 'textSecondary' });
+  if (g.counts.expired) items.push({ key: 'expired', label: en.req.counts.expired(g.counts.expired), bg: 'surface2', fg: 'textSecondary' });
+  if (!items.length) return null;
+  return (
+    <View style={[styles.row, { gap: t.spacing.xs, flexWrap: 'wrap' }]} testID="vr-counts">
+      {items.map((i) => (
+        <View key={i.key} style={{ backgroundColor: t.colors[i.bg], borderRadius: t.radius.pill, paddingHorizontal: 10, paddingVertical: 3 }}>
+          <Text variant="caption" color={i.fg}>{i.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** One item on one visit: who asked, notes, and the vendor's answer. */
+function ItemRequestCard({ slot, g, onAnswer }: { slot: SlotGroup; g: RequestGroup; onAnswer: (a: AnswerInput) => Promise<void> }) {
+  const t = useTheme();
+  const [price, setPrice] = useState<number>(g.price ?? 40);
+  const [unit, setUnit] = useState<PriceUnit>(g.unit);
+  const [editing, setEditing] = useState(false);
+  const [notes, setNotes] = useState(false);
+  const [busy, setBusy] = useState<'accept' | 'deny' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmDeny, setConfirmDeny] = useState(false);
+  const isFree = g.key.startsWith('free:');
+  const showEditor = g.decision === 'pending' || editing;
+  const run = async (status: 'will_bring' | 'cant_bring') => {
+    setBusy(status === 'will_bring' ? 'accept' : 'deny');
+    setError(null);
+    try {
+      await onAnswer({ slot, group: g, status, ...(status === 'will_bring' ? { price, unit } : {}) });
+      setEditing(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : en.errors.unknown);
+    } finally {
+      setBusy(null);
+    }
+  };
+  const deny = () => (g.counts.confirmed > 0 ? setConfirmDeny(true) : run('cant_bring'));
+  return (
+    <Card style={[{ gap: t.spacing.sm }, g.decision === 'pending' ? { borderColor: t.colors.dealAmber, borderWidth: 2 } : null]} testID={`vr-group-${g.name}`}>
+      <View style={[styles.row, { gap: t.spacing.sm }]}>
+        <ItemArt name={g.name} size={48} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text variant="label" weight="700">{g.totalLabel ? `${g.name} · ${g.totalLabel}` : g.name}</Text>
+          <Text variant="bodySmall" color="textSecondary">{`${en.req.people(g.count)} · ${g.societies.map(shortSociety).join(', ')}`}</Text>
+        </View>
+      </View>
+      <CountChips g={g} />
+      {g.notes.length ? (
+        <Button label={notes ? en.eng.hideNotes : `${en.eng.showNotes} (${g.notes.length})`} variant="tertiary" fullWidth={false} onPress={() => setNotes(!notes)} testID={`notes-${g.name}`} />
+      ) : null}
+      {notes
+        ? g.notes.map((n, i) => (
+            <Text key={i} variant="bodySmall" color="textSecondary">{`${n.buyer} · ${shortSociety(n.society)}${n.qty ? ` · ${n.qty}` : ''}: “${n.note}”`}</Text>
+          ))
+        : null}
+
+      {g.decision === 'accepted' && !editing ? (
+        <RequestStatusBlock tone="success" headline={en.req.acceptedAt(formatPrice(g.price ?? price, g.unit))} testID="vr-accepted" />
+      ) : null}
+      {g.decision === 'denied' && !editing ? <RequestStatusBlock tone="error" headline={en.req.denied} testID="vr-denied" /> : null}
+
+      {showEditor ? <PriceBox price={price} unit={unit} onChange={setPrice} onUnit={setUnit} showUnits={isFree} testID={`price-${g.name}`} /> : null}
+
+      {showEditor ? (
+        <View style={[styles.row, { gap: t.spacing.xs }]}>
+          <View style={{ flex: 1 }}>
+            <Button size="xl" label={g.decision === 'accepted' ? en.req.updatePrice : en.req.accept} loading={busy === 'accept'} disabled={!!busy} onPress={() => run('will_bring')} testID={`accept-${g.name}`} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button size="xl" label={en.req.deny} variant="destructive" loading={busy === 'deny'} disabled={!!busy} onPress={deny} testID={`deny-${g.name}`} />
+          </View>
+        </View>
+      ) : g.decision === 'accepted' ? (
+        <View style={[styles.row, { gap: t.spacing.xs }]}>
+          <View style={{ flex: 1 }}>
+            <Button label={en.req.updatePrice} variant="secondary" onPress={() => setEditing(true)} testID={`edit-${g.name}`} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button label={en.req.deny} variant="destructive" loading={busy === 'deny'} disabled={!!busy} onPress={deny} testID={`deny-${g.name}`} />
+          </View>
+        </View>
+      ) : (
+        <Button label={en.req.undoDeny} variant="secondary" onPress={() => setEditing(true)} testID={`undo-deny-${g.name}`} />
+      )}
+      {error ? <Banner kind="error" message={error} /> : null}
+      <Dialog
+        visible={confirmDeny}
+        kind="destructive"
+        title={en.req.denyConfirmTitle(g.counts.confirmed)}
+        body={en.req.denyConfirmBody}
+        confirmLabel={en.req.denyAnyway}
+        cancelLabel={en.req.keep}
+        onConfirm={() => { setConfirmDeny(false); void run('cant_bring'); }}
+        onCancel={() => setConfirmDeny(false)}
+      />
+    </Card>
+  );
+}
+
+function SlotHeader({ slot, now, sub }: { slot: SlotGroup; now: Date; sub?: string }) {
+  const t = useTheme();
+  return (
+    <View style={{ gap: 2, marginTop: t.spacing.xs }} testID={`vr-slot-${slot.key}`}>
+      <Text variant="sectionTitle">{slotDayLabel(slot.slot_start, now)}</Text>
+      <Text variant="bodySmall" color="textSecondary">
+        {`${slotWindowLabel(slot.slot_start, slot.slot_end)}${slot.gate_name ? ` · ${slot.gate_name}` : ''} · ${slot.societies.map(shortSociety).join(', ')}`}
+      </Text>
+      {sub ? <Text variant="caption" color="dealAmberText">{sub}</Text> : null}
+    </View>
+  );
+}
+
+/** Confirmed list: what to carry on each visit, built from the orders buyers have confirmed. */
+function ConfirmedList({ slots, now }: { slots: SlotGroup[]; now: Date }) {
+  const t = useTheme();
+  const withOrders = slots.map((s) => ({ s, items: s.items.filter((g) => g.counts.confirmed > 0) })).filter((x) => x.items.length);
+  if (!withOrders.length) {
+    return <EmptyState illustration="list" art="noRequests" title={en.req.cNone} body={en.req.cNoneBody} testID="vc-empty" />;
+  }
+  return (
+    <View style={{ gap: t.spacing.md }} testID="vendor-confirmed">
+      <Text variant="bodySmall" color="textSecondary">{en.req.cSub}</Text>
+      {withOrders.map(({ s, items }) => (
+        <View key={s.key} style={{ gap: t.spacing.sm }}>
+          <SlotHeader slot={s} now={now} />
+          {items.map((g) => (
+            <Card key={g.key} style={{ gap: t.spacing.xs }} testID={`vc-item-${g.name}`}>
+              <View style={[styles.row, { gap: t.spacing.sm }]}>
+                <ItemArt name={g.name} size={40} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="label" weight="700">{g.name}</Text>
+                  <Text variant="bodySmall" color="textSecondary">{`${en.req.cBuyers(g.counts.confirmed)}${g.price != null ? ` · ${en.req.cAt(formatPrice(g.price, g.unit))}` : ''}`}</Text>
+                </View>
+                {g.confirmedTotal ? <Text variant="price" weight="600" testID="vc-total">{g.confirmedTotal}</Text> : null}
+              </View>
+              {g.confirmed.map((b, i) => (
+                <View key={i} style={[styles.buyerRow, { borderTopColor: t.colors.divider, paddingTop: t.spacing.xs }]}>
+                  <Text variant="bodySmall">{`${b.buyer} · ${shortSociety(b.society)}`}</Text>
+                  <Text variant="bodySmall" weight="600">{b.qty ?? '—'}</Text>
+                </View>
+              ))}
+            </Card>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** V-13 (request flow v2): Requests tab (accept with a price / deny, per item per visit) and Confirmed list tab. */
 export function VendorRequestsView({
-  groups,
+  slots,
   loading,
-  dateLabel,
+  error,
   now = new Date(),
+  tab,
+  onTab,
   onAnswer,
   onShareQr,
+  onRetry,
 }: {
-  groups: RequestGroup[] | undefined;
+  slots: SlotGroup[] | undefined;
   loading: boolean;
-  dateLabel: string;
+  error?: boolean;
   now?: Date;
-  onAnswer: (key: string, status: 'will_bring' | 'cant_bring') => Promise<void>;
+  tab: VendorTab;
+  onTab: (t: VendorTab) => void;
+  onAnswer: (a: AnswerInput) => Promise<void>;
   onShareQr: () => void;
+  onRetry?: () => void;
 }) {
   const t = useTheme();
-  const [open, setOpen] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  if (loading || !groups) return <SkeletonBlock kind="list" count={3} />;
-  const before4 = istHour(now) < LIMITS.requestsVisibleFromHourIst;
-  const total = groups.reduce((n, g) => n + g.count, 0);
-  const allAnswered = groups.length > 0 && groups.every((g) => g.status === 'will_bring' || g.status === 'cant_bring');
+  if (loading) return <SkeletonBlock kind="list" count={3} />;
+  if (!slots) {
+    return <EmptyState illustration="list" title={en.req.loadError} body={en.errors.unknown} actionLabel={en.common.retry} onAction={onRetry} testID="vr-error" />;
+  }
+  const toAnswer = slots.reduce((n, s) => n + s.items.filter((g) => g.decision === 'pending').length, 0);
+  const confirmed = slots.reduce((n, s) => n + s.items.reduce((m, g) => m + g.counts.confirmed, 0), 0);
   return (
     <View style={{ gap: t.spacing.md }} testID="vendor-requests">
-      <View>
-        <Text variant="h1">{en.eng.vrTitle}</Text>
-        <Text color="textSecondary">{dateLabel}</Text>
-      </View>
-      {groups.length === 0 ? (
-        <EmptyState illustration="list" art="noRequests" title={en.eng.vrNone} body={en.eng.vrNoneBody} actionLabel={en.eng.vrShareQr} onAction={onShareQr} testID="vr-empty" />
+      <SegmentedControl
+        testID="vr-tabs"
+        value={tab}
+        onChange={onTab}
+        options={[
+          { value: 'requests', label: toAnswer ? `${en.req.tabRequests} (${toAnswer})` : en.req.tabRequests },
+          { value: 'confirmed', label: confirmed ? `${en.req.tabConfirmed} (${confirmed})` : en.req.tabConfirmed },
+        ]}
+      />
+      {error ? <Banner kind="error" message={en.req.loadError} /> : null}
+      {tab === 'confirmed' ? (
+        <ConfirmedList slots={slots} now={now} />
+      ) : slots.length === 0 ? (
+        <EmptyState illustration="list" art="noRequests" title={en.req.vNone} body={en.req.vNoneBody} actionLabel={en.eng.vrShareQr} onAction={onShareQr} testID="vr-empty" />
       ) : (
         <>
-          {before4 ? <Banner kind="info" message={en.eng.vrBefore4} testID="vr-before-4" /> : null}
-          {allAnswered ? <Banner kind="success" message={en.eng.vrAllAnswered(total)} testID="vr-all-answered" /> : null}
-          {groups.map((g) => (
-            <Card key={g.key} style={{ gap: t.spacing.sm }} testID={`vr-group-${g.name}`}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.sm }}>
-                <ItemArt name={g.name} size={48} />
-                <View style={{ flex: 1 }}>
-                  <Text weight="700">{g.totalLabel ? `${g.name} · ${g.totalLabel}` : g.name}</Text>
-                  <Text variant="bodySmall" color="textSecondary">{`${en.eng.vrBuyers(g.count)} · ${g.societies.join(', ')}`}</Text>
-                </View>
-                {g.status === 'will_bring' ? <StatusPill status="will_bring" label={en.eng.willBring} /> : g.status === 'cant_bring' ? <StatusPill status="cant_bring" label={en.eng.cantBring} /> : null}
-              </View>
-              {g.notes.length ? (
-                <Button label={open === g.key ? en.eng.hideNotes : en.eng.showNotes} variant="tertiary" fullWidth={false} onPress={() => setOpen(open === g.key ? null : g.key)} />
-              ) : null}
-              {open === g.key
-                ? g.notes.map((n, i) => (
-                    <Text key={i} variant="bodySmall" color="textSecondary">{`${n.buyer} · ${n.society}${n.qty ? ` · ${n.qty}` : ''}: "${n.note}"`}</Text>
-                  ))
-                : null}
-              <View style={{ flexDirection: 'row', gap: t.spacing.xs }}>
-                <View style={{ flex: 1 }}>
-                  <Button size="xl" label={en.eng.willBring} variant={g.status === 'will_bring' ? 'primary' : 'secondary'} loading={busy === `${g.key}:w`} testID={`will-${g.name}`}
-                    onPress={async () => { setBusy(`${g.key}:w`); try { await onAnswer(g.key, 'will_bring'); } finally { setBusy(null); } }} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Button size="xl" label={en.eng.cantBring} variant={g.status === 'cant_bring' ? 'destructive' : 'secondary'} loading={busy === `${g.key}:c`} testID={`cant-${g.name}`}
-                    onPress={async () => { setBusy(`${g.key}:c`); try { await onAnswer(g.key, 'cant_bring'); } finally { setBusy(null); } }} />
-                </View>
-              </View>
-            </Card>
+          <Text variant="bodySmall" color="textSecondary">{en.req.vSub}</Text>
+          {slots.map((s) => (
+            <View key={s.key} style={{ gap: t.spacing.sm }}>
+              <SlotHeader slot={s} now={now} sub={s.items.some((g) => g.decision === 'pending') ? en.req.vReplyBy(cutoffPhrase(s.slot_start, now)) : undefined} />
+              {s.items.map((g) => <ItemRequestCard key={`${s.key}:${g.key}`} slot={s} g={g} onAnswer={onAnswer} />)}
+            </View>
           ))}
         </>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center' },
+  step: { alignItems: 'center', justifyContent: 'center' },
+  value: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  buyerRow: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: StyleSheet.hairlineWidth },
+});

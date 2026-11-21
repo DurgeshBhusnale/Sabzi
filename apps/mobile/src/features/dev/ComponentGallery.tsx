@@ -23,6 +23,7 @@ import {
   RatingDisplay,
   RatingInput,
   RequestCard,
+  SlotTile,
   ReviewCard,
   Section,
   SegmentedControl,
@@ -186,9 +187,11 @@ export function ComponentGallery() {
         <ReviewCard review={{ id: '3', reviewerName: 'Meera Joshi', stars: 1, tags: [], text: 'Abusive text removed.', date: '1 Nov', hidden: true }} />
       </Section>
       <Section title="Request card">
-        <RequestCard item="Drumsticks" qty="500 g" vendorName="Ramesh Sabzi" society="Green Park" status="open" />
-        <RequestCard item="Broccoli" qty="1 piece" vendorName="Ramesh Sabzi" note="Medium size please" status="will_bring" />
-        <RequestCard item="Baby corn" qty="250 g" vendorName="Ramesh Sabzi" status="cant_bring" />
+        <RequestCard item="Drumsticks" qty="500 g" vendorName="Ramesh Sabzi" when="Tomorrow morning · 8:00–8:45 AM" pill={{ status: 'waiting', label: 'Waiting for reply' }} tone="waiting" headline="Waiting for Ramesh's reply" detail="Ramesh will reply before 8:00 AM tomorrow." />
+        <RequestCard item="Broccoli" qty="1 piece" vendorName="Ramesh Sabzi" when="This evening · 6:00–6:45 PM" pill={{ status: 'deal', label: 'Confirm price' }} tone="action" headline="Ramesh can bring it" price="₹60 / piece" priceLabel="Approx. price" />
+        <RequestCard item="Tomato" qty="2 kg" vendorName="Ramesh Sabzi" when="Tomorrow morning · 8:00–8:45 AM" pill={{ status: 'will_bring', label: 'Confirmed' }} tone="success" headline="Order confirmed" detail="Ramesh will bring it tomorrow morning." />
+        <RequestCard item="Baby corn" qty="250 g" vendorName="Ramesh Sabzi" when="Tomorrow morning · 8:00–8:45 AM" pill={{ status: 'cant_bring', label: 'Not possible' }} tone="error" headline="Sorry, not possible" detail="Ramesh can't get this one." />
+        <SlotTile day="Tomorrow morning" window="8:00–8:45 AM · Gate 1" cutoff="Order by 10:30 PM tonight" selected onPress={() => undefined} />
       </Section>
       <Section title="Stat tile">
         <Row>

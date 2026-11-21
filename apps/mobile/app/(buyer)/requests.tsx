@@ -1,30 +1,29 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { addDays, toIstDate } from '@sabzi/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '../../src/theme/ThemeProvider';
-import { Button, EmptyState, RequestCard, Screen, SectionLabel, Sections, SkeletonBlock, TopAppBar } from '../../src/ui';
+import { Banner, Button, EmptyState, Screen, SectionLabel, Sections, SkeletonBlock, TopAppBar } from '../../src/ui';
 import { VendorPickerSheet } from '../../src/features/engagement/VendorPickerSheet';
-import { cancelRequest, myRequests, type MyRequest } from '../../src/features/engagement/api';
+import { myRequests } from '../../src/features/engagement/api';
+import { sectionRequests } from '../../src/features/engagement/requestView';
+import { BuyerRequestCard } from '../../src/features/engagement/BuyerRequestCard';
 import { en } from '../../src/i18n/en';
 
-function dateLabel(d: string): string {
-  const today = toIstDate();
-  if (d === addDays(today, 1)) return en.eng.tomorrow;
-  if (d === today) return en.eng.today;
-  const dt = new Date(`${d}T00:00:00Z`);
-  return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-}
-
-/** B-12: my requests grouped by date; cancel open ones. */
+/** B-12 (request flow v2): one card per request — needs your reply first, then upcoming, then past. */
 export default function BuyerRequests() {
   const t = useTheme();
-  const qc = useQueryClient();
-  const q = useQuery({ queryKey: ['eng', 'my-requests'], queryFn: () => myRequests() });
+  const q = useQuery({ queryKey: ['eng', 'my-requests'], queryFn: () => myRequests(), refetchInterval: 60_000 });
   const [picker, setPicker] = useState(false);
-  const groups = new Map<string, MyRequest[]>();
-  for (const r of q.data ?? []) groups.set(r.for_date, [...(groups.get(r.for_date) ?? []), r]);
+  const s = q.data ? sectionRequests(q.data) : null;
+  const open = (id: string) => router.push({ pathname: '/buyer/requests/[id]', params: { id } });
+  const section = (label: string, rows: NonNullable<typeof q.data>, testID: string) =>
+    rows.length ? (
+      <View key={label} style={{ gap: t.spacing.stackGap }} testID={testID}>
+        <SectionLabel>{label}</SectionLabel>
+        {rows.map((r) => <BuyerRequestCard key={r.id} request={r} onPress={() => open(r.id)} />)}
+      </View>
+    ) : null;
   return (
     <Screen
       header={<TopAppBar title={en.eng.myRequests} />}
@@ -34,31 +33,16 @@ export default function BuyerRequests() {
     >
       {q.isLoading ? (
         <SkeletonBlock kind="list" count={3} />
+      ) : q.isError && !q.data ? (
+        <EmptyState illustration="list" title={en.req.loadError} body={en.errors.unknown} actionLabel={en.common.retry} onAction={() => q.refetch()} testID="requests-error" />
       ) : !q.data?.length ? (
         <EmptyState illustration="list" art="noRequests" title={en.eng.noRequestsTitle} body={en.eng.noRequestsBody} actionLabel={en.buyer.newRequest} onAction={() => setPicker(true)} testID="requests-empty" />
       ) : (
         <Sections>
-        {[...groups.entries()].map(([date, rs]) => (
-          <View key={date} style={{ gap: t.spacing.stackGap }}>
-            <SectionLabel>{dateLabel(date)}</SectionLabel>
-            {rs.map((r) => (
-              <RequestCard
-                key={r.id}
-                item={r.item_name}
-                qty={r.qty}
-                note={r.note}
-                vendorName={r.vendor_name}
-                society={r.society_name}
-                status={r.status}
-                action={
-                  r.status === 'open' ? (
-                    <Button label={en.eng.cancel} variant="tertiary" fullWidth={false} onPress={async () => { await cancelRequest(r.id); qc.invalidateQueries({ queryKey: ['eng', 'my-requests'] }); }} />
-                  ) : undefined
-                }
-              />
-            ))}
-          </View>
-        ))}
+          {q.isError ? <Banner kind="error" message={en.req.loadError} /> : null}
+          {section(en.req.sectionAction, s!.action, 'section-action')}
+          {section(en.req.sectionUpcoming, s!.upcoming, 'section-upcoming')}
+          {section(en.req.sectionPast, s!.past, 'section-past')}
         </Sections>
       )}
       <VendorPickerSheet

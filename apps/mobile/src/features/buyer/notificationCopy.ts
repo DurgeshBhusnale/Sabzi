@@ -14,7 +14,8 @@ export function notificationTarget(n: NotificationRow): { pathname: string; para
     case 'deal':
       return { pathname: '/buyer/deals' };
     case 'request_reply':
-      return { pathname: '/(buyer)/requests' };
+      // Open the very request so the buyer can confirm the price in one tap.
+      return p.request_id ? { pathname: '/buyer/requests/[id]', params: { id: p.request_id } } : { pathname: '/(buyer)/requests' };
     case 'vendor_new_requests':
       return { pathname: '/(vendor)/requests' };
     case 'vendor_new_rating':

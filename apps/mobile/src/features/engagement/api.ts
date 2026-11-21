@@ -1,4 +1,4 @@
-import type { PriceUnit, RequestLite, ReviewInput } from '@sabzi/shared';
+import type { PriceUnit, RequestSlot, RequestStatus, ReviewInput, VendorRequestRow } from '@sabzi/shared';
 import { getSupabase, type Client } from '../../lib/supabase';
 import { raise } from '../../lib/errors';
 import { newClientId } from '../../lib/ids';
@@ -41,7 +41,13 @@ export async function itemsList(c: Client = getSupabase()): Promise<Item[]> {
   return (data ?? []) as Item[];
 }
 
-export async function createRequest(p: { vendor_id: string; society_id: string; item_id?: string | null; free_text?: string | null; qty?: string | null; note?: string | null }, c: Client = getSupabase()) {
+export async function requestSlots(vendorId: string, societyId: string, c: Client = getSupabase()): Promise<RequestSlot[]> {
+  const { data, error } = await c.rpc('request_slots', { p_vendor_id: vendorId, p_society_id: societyId });
+  if (error) raise(error);
+  return (data ?? []) as unknown as RequestSlot[];
+}
+
+export async function createRequest(p: { vendor_id: string; society_id: string; item_id?: string | null; free_text?: string | null; qty?: string | null; note?: string | null; stop_id: string; for_date: string }, c: Client = getSupabase()) {
   const { error } = await c.rpc('create_request', {
     p_vendor_id: p.vendor_id,
     p_society_id: p.society_id,
@@ -49,15 +55,43 @@ export async function createRequest(p: { vendor_id: string; society_id: string; 
     p_free_text: p.free_text ?? undefined,
     p_qty: p.qty ?? undefined,
     p_note: p.note ?? undefined,
+    p_stop_id: p.stop_id,
+    p_for_date: p.for_date,
   });
   if (error) raise(error);
 }
 
-export type MyRequest = { id: string; vendor_id: string; vendor_name: string; society_name: string; item_id: string | null; item_name: string; qty: string | null; note: string | null; for_date: string; status: 'open' | 'will_bring' | 'cant_bring'; created_at: string };
+export type MyRequest = {
+  id: string;
+  vendor_id: string;
+  vendor_name: string;
+  society_name: string;
+  item_id: string | null;
+  item_name: string;
+  qty: string | null;
+  note: string | null;
+  for_date: string;
+  status: Exclude<RequestStatus, 'cancelled'>;
+  quoted_price: number | null;
+  quoted_unit: PriceUnit | null;
+  slot_start: string;
+  slot_end: string;
+  cutoff_at: string;
+  gate_name: string | null;
+  created_at: string;
+  answered_at: string | null;
+  responded_at: string | null;
+};
 export async function myRequests(c: Client = getSupabase()): Promise<MyRequest[]> {
   const { data, error } = await c.rpc('my_requests');
   if (error) raise(error);
   return (data ?? []) as unknown as MyRequest[];
+}
+
+/** Buyer answers the vendor's price: Confirm order (true) or Not now (false). */
+export async function respondToQuote(id: string, accept: boolean, c: Client = getSupabase()) {
+  const { error } = await c.rpc('respond_to_quote', { p_request_id: id, p_accept: accept });
+  if (error) raise(error);
 }
 
 export async function cancelRequest(id: string, c: Client = getSupabase()) {
@@ -78,14 +112,27 @@ export async function reportVendor(vendorId: string, reason: string, text: strin
 }
 
 // ---- vendor side
-export async function vendorRequests(c: Client = getSupabase()): Promise<(RequestLite & { for_date: string })[]> {
-  const { data, error } = await c.from('v_vendor_requests').select('id, item_id, item_name, free_text, qty, note, buyer_first_name, society_name, status, for_date');
+const VENDOR_REQUEST_COLUMNS =
+  'id, item_id, item_name, default_unit, free_text, qty, note, buyer_first_name, society_name, status, for_date, stop_id, slot_start, slot_end, gate_name, quoted_price, quoted_unit, last_price, last_unit';
+export async function vendorRequests(c: Client = getSupabase()): Promise<VendorRequestRow[]> {
+  const { data, error } = await c.from('v_vendor_requests').select(VENDOR_REQUEST_COLUMNS).order('slot_start');
   if (error) raise(error);
-  return (data ?? []) as unknown as (RequestLite & { for_date: string })[];
+  return (data ?? []) as unknown as VendorRequestRow[];
 }
 
-export async function answerRequest(key: string, status: 'will_bring' | 'cant_bring', forDate: string, c: Client = getSupabase()) {
-  const { data, error } = await c.rpc('answer_request', { p_item_key: key, p_status: status, p_for_date: forDate });
+/** Vendor answers every request for one item on one visit: accept with an approximate price, or deny. */
+export async function answerRequest(
+  p: { key: string; status: 'will_bring' | 'cant_bring'; forDate: string; stopId: string | null; price?: number | null; unit?: PriceUnit | null },
+  c: Client = getSupabase(),
+) {
+  const { data, error } = await c.rpc('answer_request', {
+    p_item_key: p.key,
+    p_status: p.status,
+    p_for_date: p.forDate,
+    p_stop_id: p.stopId ?? undefined,
+    p_price: p.price ?? undefined,
+    p_unit: p.unit ?? undefined,
+  });
   if (error) raise(error);
   return data as number;
 }
