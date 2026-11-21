@@ -1,5 +1,6 @@
 import {
   arrivalMessage,
+  channelFor,
   dealMessage,
   leavingSoonMessage,
   notComingMessage,
@@ -45,7 +46,7 @@ export type ExpoMessage = {
   title: string;
   body: string;
   sound: 'default';
-  priority: 'high' | 'normal';
+  priority: 'high';
   channelId: string;
   data: Record<string, string>;
   richContent?: { image: string };
@@ -180,8 +181,9 @@ export async function handleNotify(req: Request, deps: NotifyDeps): Promise<Resp
       title: msg.title,
       body: msg.body,
       sound: 'default',
-      priority: kind === 'arrival' || kind === 'leaving_soon' ? 'high' : 'normal',
-      channelId: kind === 'arrival' || kind === 'leaving_soon' ? 'arrivals' : 'updates',
+      // Always high: normal-priority FCM messages are held by Android Doze when the app is closed.
+      priority: 'high',
+      channelId: channelFor(kind),
       data: { ...payloadBase, notification_id: ids[i]!, type: kind, ...(r.society_id ? { society_id: r.society_id } : {}) },
       ...(photo && kind === 'arrival' ? { richContent: { image: photo } } : {}),
     });
