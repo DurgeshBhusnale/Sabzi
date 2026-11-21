@@ -219,3 +219,15 @@ Deno.test('NOT-2 timing: arrival → Expo request in under 2 s (excluding the 5 
 Deno.test('selectRecipients de-duplicates a buyer following at two societies', () => {
   assertEquals(selectRecipients('deal', [r('a', { society_id: 's1' }), r('a', { society_id: 's2' })]).length, 1);
 });
+
+Deno.test('society_added: no vendor needed; every buyer in the batch gets the in-app row and a push', async () => {
+  const ctx: Context = { society: { id: 's9', name: 'Suyash Towers' }, recipients: [r('priya'), r('arjun'), r('gone', { deleted: true })] };
+  const { d, sent, inserted } = deps(ctx, { now: () => new Date('2026-11-05T06:30:00Z') }); // noon IST
+  const res = await handleNotify(req({ kind: 'society_added', ref: 'batch1' }), d);
+  assertEquals(res.status, 200);
+  assertEquals(inserted.map((i) => i.user_id), ['priya', 'arjun']);
+  assertEquals(inserted[0]!.type, 'society_added');
+  assertEquals(sent.flat().length, 2);
+  assertEquals(sent.flat()[0]!.title, 'Suyash Towers is now on Pheri');
+  assert(!('vendor_id' in sent.flat()[0]!.data));
+});

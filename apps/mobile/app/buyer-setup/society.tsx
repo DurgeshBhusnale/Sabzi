@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Screen, Text, TopAppBar } from '../../src/ui';
@@ -12,6 +12,8 @@ import { en } from '../../src/i18n/en';
 
 /** B-01 */
 export default function PickSociety() {
+  const { after } = useLocalSearchParams<{ after?: string }>();
+  const afterRequest = after === 'request';
   const societies = useSocieties();
   const qc = useQueryClient();
   const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
@@ -37,11 +39,11 @@ export default function PickSociety() {
 
   return (
     <Screen
-      header={<TopAppBar title={en.buyer.pickTitle} onBack={router.canGoBack() ? () => router.back() : undefined} />}
+      header={<TopAppBar title={afterRequest ? en.buyer.pickAfterRequestTitle : en.buyer.pickTitle} onBack={router.canGoBack() ? () => router.back() : undefined} />}
       refreshing={societies.isRefetching}
       onRefresh={() => void societies.refetch()}
     >
-      <Text color="textSecondary">{en.buyer.pickBody}</Text>
+      <Text color="textSecondary">{afterRequest ? en.buyer.pickAfterRequestBody : en.buyer.pickBody}</Text>
       {error ? <Text color="error">{error}</Text> : null}
       <SocietyPicker
         societies={societies.data ?? []}
@@ -55,11 +57,16 @@ export default function PickSociety() {
           setBusy(s.id);
           setError(null);
           try {
+            // Owner review 2026-11-21: a society with no vendors yet is never saved to the account (it used to
+            // become the primary society). The buyer can ask for it instead and keep picking.
+            if (!(await societyServed(s.id))) {
+              router.push({ pathname: '/buyer-setup/not-served', params: { name: s.name, id: s.id } });
+              return;
+            }
             await saveSociety(s.id);
             track('society_selected');
             await qc.invalidateQueries({ queryKey: buyerKeys.mine });
-            if (await societyServed(s.id)) router.replace('/(buyer)/home');
-            else router.replace({ pathname: '/buyer-setup/not-served', params: { name: s.name, id: s.id } });
+            router.replace('/(buyer)/home');
           } catch (e) {
             setError(e instanceof AppErrorException ? e.message : en.errors.unknown);
           } finally {

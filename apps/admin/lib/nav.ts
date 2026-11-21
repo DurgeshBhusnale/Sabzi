@@ -1,12 +1,14 @@
 export type AdminLevel = 'owner' | 'field_staff';
 
 export type NavItem = { href: string; label: string; ownerOnly?: boolean; icon: NavIcon };
-export type NavIcon = 'dashboard' | 'societies' | 'vendors' | 'stops' | 'items' | 'moderation' | 'team' | 'settings';
+export type NavIcon = 'dashboard' | 'societies' | 'requests' | 'vendors' | 'stops' | 'items' | 'moderation' | 'team' | 'settings';
 
-/** Left sidebar (design brief §3): Dashboard, Societies, Vendors, Stops, Items, Moderation, Team, Settings. */
+/** Left sidebar (design brief §3, plus Society requests): Dashboard, Societies, Society requests, Vendors, Stops, Items, Moderation, Team, Settings. */
 export const NAV: NavItem[] = [
   { href: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
   { href: '/societies', icon: 'societies', label: 'Societies' },
+  /** Owner review 2026-11-21: societies buyers asked for */
+  { href: '/society-requests', icon: 'requests', label: 'Society requests' },
   { href: '/vendors', icon: 'vendors', label: 'Vendors' },
   { href: '/stops', icon: 'stops', label: 'Stops' },
   { href: '/items', icon: 'items', label: 'Items' },

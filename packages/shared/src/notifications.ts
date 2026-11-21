@@ -1,3 +1,4 @@
+import { APP_NAME } from './constants.ts';
 import { formatPriceCompact, isQuietHours } from './format.ts';
 import type { PriceUnit } from './constants.ts';
 import { slotPhrase, type MissReason } from './requests.ts';
@@ -48,6 +49,11 @@ export function notComingMessage(vendor: string, society: string): Message {
 export type ReplyStatus = 'will_bring' | 'cant_bring' | 'vendor_cancelled' | 'not_delivered';
 export type ReplyInput = { item: string; qty: string | null; status: ReplyStatus; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null; missed_reason?: MissReason | null };
 
+/** Owner review 2026-11-21: the society a buyer asked for is now on the app. */
+export function societyAddedMessage(society: string): Message {
+  return { title: `${society} is now on ${APP_NAME}`, body: 'Tap to pick your society and see which vendors come to your gate.' };
+}
+
 /** Request flow v2: the vendor accepted with a price (buyer must confirm), denied, or backed out after confirming. */
 export function requestReplyMessage(vendor: string, r: ReplyInput, now: Date = new Date()): Message {
   const who = firstName(vendor);
@@ -87,7 +93,7 @@ export function vendorRatingMessage(stars: number, society: string | null, text:
   };
 }
 
-export type NotifKind = 'arrival' | 'leaving_soon' | 'deal' | 'not_coming' | 'request_reply' | 'vendor_new_requests' | 'vendor_new_rating';
+export type NotifKind = 'arrival' | 'leaving_soon' | 'deal' | 'not_coming' | 'request_reply' | 'vendor_new_requests' | 'vendor_new_rating' | 'society_added';
 
 /**
  * NOT-3: evening deals and new-rating alerts are not pushed between 21:00 and 06:00 IST.
@@ -95,7 +101,7 @@ export type NotifKind = 'arrival' | 'leaving_soon' | 'deal' | 'not_coming' | 're
  * the same night to act on it before the slot cutoff — so they are always pushed (DECISIONS 2026-11-21).
  */
 export function pushAllowedNow(kind: NotifKind, now: Date = new Date()): boolean {
-  if (kind === 'deal' || kind === 'vendor_new_rating') return !isQuietHours(now);
+  if (kind === 'deal' || kind === 'vendor_new_rating' || kind === 'society_added') return !isQuietHours(now);
   return true;
 }
 
