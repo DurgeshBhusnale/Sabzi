@@ -14,8 +14,11 @@ export const clockText = (hhmm: string) => {
   const h = Math.floor(m / 60);
   return `${h % 12 === 0 ? 12 : h % 12}:${String(m % 60).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
 };
-/** "08:00:00" → "8:00" (time column in v4 rows) */
-const shortClock = (hhmm: string) => clockText(hhmm).replace(/ (AM|PM)$/, '');
+/** "08:00:00" → ["8:00", "AM"] (time column in v4 rows; AM/PM always shown, owner review 2026-11-21) */
+const clockParts = (hhmm: string) => {
+  const [time = '', half = ''] = clockText(hhmm).split(' ');
+  return { time, half };
+};
 
 export type HomeActions = {
   openVendor: (id: string) => void;
@@ -59,7 +62,10 @@ function VendorTimeRow({ v, last, onOpen, onFollow, muted }: { v: HomeVendor; la
       accessibilityLabel={`${v.display_name}, ${statusLabel(v.status, { gateName: v.gate_name, windowStart: v.window_start, windowEnd: v.window_end, since: v.status_at })}`}
       left={
         <View style={[styles.row, { gap: t.spacing.sm }]}>
-          <Text variant="price" style={{ width: t.layout.minTouch }}>{shortClock(v.window_start)}</Text>
+          <View style={{ width: t.layout.minTouch }} testID={`home-time-${v.vendor_id}`}>
+            <Text variant="price">{clockParts(v.window_start).time}</Text>
+            <Text variant="caption" color="textSecondary">{clockParts(v.window_start).half}</Text>
+          </View>
           <Avatar name={v.display_name} uri={publicUrl('vendor-photos', v.photo_path)} size={40} />
         </View>
       }
@@ -125,8 +131,11 @@ export function HomeView({
   now = new Date(),
   updatedAt,
   actions,
+  tomorrow,
 }: {
   vendors: HomeVendor[] | undefined;
+  /** Vendors whose stop runs tomorrow (buyer_home_tomorrow); optional so an older server still works. */
+  tomorrow?: HomeVendor[];
   loading: boolean;
   now?: Date;
   /** UX-08: when the data was fetched (react-query dataUpdatedAt) */
@@ -146,7 +155,7 @@ export function HomeView({
     );
   }
 
-  const s = homeSections(vendors, now);
+  const s = homeSections(vendors, now, tomorrow);
 
   if (s.empty) {
     // UX-09: the standard empty-state block on a plain ground
@@ -205,7 +214,9 @@ export function HomeView({
           ) : (
             <Card testID="nobody-at-gate">
               <Text variant="body" color="textSecondary">
-                {s.nextExpected ? en.buyer.nobodyAtGate(firstName(s.nextExpected), clockText(s.nextExpected.window_start)) : en.buyer.nobodyAtGateNoNext}
+                {s.nextExpected
+                  ? (s.nextIsTomorrow ? en.buyer.nobodyAtGateTomorrow : en.buyer.nobodyAtGate)(firstName(s.nextExpected), clockText(s.nextExpected.window_start))
+                  : en.buyer.nobodyAtGateNoNext}
               </Text>
             </Card>
           )}
@@ -214,6 +225,16 @@ export function HomeView({
             <Section title={en.buyer.comingToday} meta={en.buyer.vendorCount(s.comingToday.length)}>
               <View>
                 {s.comingToday.map((v, i, a) => (
+                  <VendorTimeRow key={v.vendor_id} v={v} last={i === a.length - 1} {...rowProps(v)} />
+                ))}
+              </View>
+            </Section>
+          ) : null}
+
+          {s.comingTomorrow.length ? (
+            <Section title={en.buyer.comingTomorrow} meta={en.buyer.vendorCount(s.comingTomorrow.length)} testID="coming-tomorrow">
+              <View>
+                {s.comingTomorrow.map((v, i, a) => (
                   <VendorTimeRow key={v.vendor_id} v={v} last={i === a.length - 1} {...rowProps(v)} />
                 ))}
               </View>

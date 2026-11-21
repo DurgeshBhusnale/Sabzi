@@ -7,6 +7,7 @@ export const buyerKeys = {
   societies: ['buyer', 'societies'] as const,
   mine: ['buyer', 'my-societies'] as const,
   home: (id: string | null | undefined) => ['buyer', 'home', id] as const,
+  homeTomorrow: (id: string | null | undefined) => ['buyer', 'home', id, 'tomorrow'] as const,
   vendor: (id: string, soc: string | null | undefined) => ['buyer', 'vendor', id, soc] as const,
   following: ['buyer', 'following'] as const,
   notifications: ['buyer', 'notifications'] as const,
@@ -20,6 +21,8 @@ export const useSocieties = () =>
 export const useMySocieties = () => useQuery({ queryKey: buyerKeys.mine, queryFn: () => api.mySocieties() });
 export const useBuyerHome = (societyId: string | null | undefined) =>
   useQuery({ queryKey: buyerKeys.home(societyId), queryFn: () => api.buyerHome(societyId!), enabled: !!societyId, refetchInterval: 120_000 });
+export const useBuyerHomeTomorrow = (societyId: string | null | undefined) =>
+  useQuery({ queryKey: buyerKeys.homeTomorrow(societyId), queryFn: () => api.buyerHomeTomorrow(societyId!), enabled: !!societyId, staleTime: 10 * 60_000, retry: 1 });
 export const useVendorPage = (vendorId: string, societyId: string | null | undefined) =>
   useQuery({ queryKey: buyerKeys.vendor(vendorId, societyId), queryFn: () => api.vendorPage(vendorId, societyId ?? null) });
 export const useFollowing = () => useQuery({ queryKey: buyerKeys.following, queryFn: () => api.myFollowing() });

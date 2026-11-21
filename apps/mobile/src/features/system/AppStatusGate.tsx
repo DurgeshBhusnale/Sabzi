@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { useState, type ReactNode } from 'react';
 import { Linking, View } from 'react-native';
@@ -17,6 +18,7 @@ async function loadSettings(): Promise<Record<string, unknown>> {
 export function AppStatusGate({ children, version = Constants.expoConfig?.version ?? '0.0.0', load = loadSettings }: { children: ReactNode; version?: string; load?: () => Promise<Record<string, unknown>> }) {
   const q = useQuery({ queryKey: ['app-settings'], queryFn: load, staleTime: 15 * 60_000, retry: 0 });
   const [dismissed, setDismissed] = useState(false);
+  const insets = useSafeAreaInsets();
   const status = q.data ? appStatus(version, q.data) : { kind: 'ok' as const };
   const url = updateUrl(q.data);
   if (status.kind === 'force_update') return <X11ForceUpdate url={url} />;
@@ -24,7 +26,7 @@ export function AppStatusGate({ children, version = Constants.expoConfig?.versio
   return (
     <View style={{ flex: 1 }}>
       {status.kind === 'optional_update' && !dismissed ? (
-        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 88, zIndex: 50 }}>
+        <View style={{ position: 'absolute', left: 16, right: 16, bottom: 88 + insets.bottom, zIndex: 50 }}>
           <Banner kind="info" testID="x12" message={en.system.optionalUpdate} actionLabel={en.system.update} onAction={() => { setDismissed(true); Linking.openURL(url); }} />
         </View>
       ) : null}

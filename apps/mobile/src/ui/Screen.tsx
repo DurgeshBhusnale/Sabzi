@@ -1,9 +1,16 @@
-import { RefreshControl, ScrollView, View, type StyleProp, type ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAvoidingView, RefreshControl, ScrollView, View, type StyleProp, type ViewStyle } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
+import { useKeyboardVisible } from './useKeyboardVisible';
 import { useTheme } from '../theme/ThemeProvider';
 import { ForestHero, SheetBody } from './Layout';
+
+/**
+ * False inside the tab layouts: their tab bar already sits above the Android navigation bar,
+ * so a screen there must not add the bottom inset again.
+ */
+export const BottomInsetContext = createContext(true);
 
 /**
  * Screen frame: background, safe area, optional scroll + pull to refresh, 24 dp side gutter.
@@ -35,6 +42,11 @@ export function Screen({
   testID?: string;
 }) {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
+  const keyboard = useKeyboardVisible();
+  // Edge-to-edge Android draws under the system navigation bar: keep bottom buttons and the last
+  // scroll row above it (owner review 2026-11-21). With the keyboard open the inset is not needed.
+  const bottomInset = useContext(BottomInsetContext) && !keyboard ? insets.bottom : 0;
   const forest = tone === 'forest';
   const pad = padded ? { paddingHorizontal: t.spacing.screen, paddingTop: t.spacing.xxs, gap: t.spacing.md } : null;
   const refresh = onRefresh ? (
@@ -55,10 +67,13 @@ export function Screen({
     <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: forest ? t.colors.forest : t.colors.bg }} testID={testID}>
       <StatusBar style={forest || t.scheme === 'dark' ? 'light' : 'dark'} />
       {header}
+      {/* Edge-to-edge Android no longer resizes the window for the keyboard: pad it ourselves so the
+          focused input and the footer stay visible above the keyboard (owner review 2026-11-21). */}
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       {scroll ? (
         <ScrollView
           style={forest ? { backgroundColor: t.colors.forest } : null}
-          contentContainerStyle={forest ? { flexGrow: 1 } : [pad, { paddingBottom: t.spacing.huge * 2 }, contentStyle]}
+          contentContainerStyle={forest ? { flexGrow: 1, paddingBottom: footer ? 0 : bottomInset } : [pad, { paddingBottom: t.spacing.huge * 2 + (footer ? 0 : bottomInset) }, contentStyle]}
           keyboardShouldPersistTaps="handled"
           refreshControl={refresh}
         >
@@ -67,13 +82,14 @@ export function Screen({
       ) : forest ? (
         <View style={{ flex: 1 }}>{body}</View>
       ) : (
-        <View style={[{ flex: 1 }, pad, contentStyle]}>{children}</View>
+        <View style={[{ flex: 1 }, pad, { paddingBottom: footer ? 0 : bottomInset }, contentStyle]}>{children}</View>
       )}
       {footer ? (
-        <View style={{ paddingHorizontal: t.spacing.screen, paddingTop: t.spacing.sm, paddingBottom: t.spacing.md, backgroundColor: t.colors.bg, borderTopWidth: 1, borderTopColor: t.colors.border, gap: t.spacing.xs }}>
+        <View testID="screen-footer" style={{ paddingHorizontal: t.spacing.screen, paddingTop: t.spacing.sm, paddingBottom: t.spacing.md + bottomInset, backgroundColor: t.colors.bg, borderTopWidth: 1, borderTopColor: t.colors.border, gap: t.spacing.xs }}>
           {footer}
         </View>
       ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

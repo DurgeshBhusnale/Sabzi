@@ -8,7 +8,6 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { makeQueryClient } from '../src/lib/queryClient';
 import { fontAssets } from '../src/theme/fonts';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider';
-import { Splash } from '../src/features/system/Splash';
 import { NotificationsProvider } from '../src/features/notifications/NotificationsProvider';
 import { OfflineProvider } from '../src/lib/offline/OfflineProvider';
 import { AppStatusGate } from '../src/features/system/AppStatusGate';
@@ -51,10 +50,12 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 function Root() {
   const t = useTheme();
   const [loaded] = useFonts(fontAssets);
+  // Keep the native launch screen until the fonts are ready, so the Pheri wordmark is never
+  // drawn (and measured) with a fallback font, which clipped it to "Pher" on some phones.
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => undefined);
-  }, []);
-  if (!loaded) return <Splash />;
+    if (loaded) SplashScreen.hideAsync().catch(() => undefined);
+  }, [loaded]);
+  if (!loaded) return null;
   return (
     <>
       <StatusBar style={t.scheme === 'dark' ? 'light' : 'dark'} />
