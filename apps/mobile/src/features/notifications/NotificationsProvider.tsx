@@ -21,8 +21,11 @@ export async function ensureAndroidChannels(): Promise<void> {
   if (Platform.OS !== 'android') return;
   // eslint-disable-next-line import/namespace -- enum exists at runtime and in types
   await Notifications.setNotificationChannelAsync('arrivals', { name: 'Vendor arrivals', importance: Notifications.AndroidImportance.HIGH, sound: 'default' });
+  // Android never lets an app raise a channel's importance after creation, so the old DEFAULT 'updates'
+  // channel is replaced by a new HIGH 'alerts' channel (heads-up even when the app is closed).
   // eslint-disable-next-line import/namespace
-  await Notifications.setNotificationChannelAsync('updates', { name: 'Deals and replies', importance: Notifications.AndroidImportance.DEFAULT });
+  await Notifications.setNotificationChannelAsync('alerts', { name: 'Request replies and deals', importance: Notifications.AndroidImportance.HIGH, sound: 'default' });
+  await Notifications.deleteNotificationChannelAsync('updates').catch(() => undefined);
 }
 
 

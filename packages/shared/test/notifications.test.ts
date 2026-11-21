@@ -5,6 +5,7 @@ import {
   leavingSoonMessage,
   notComingMessage,
   pushAllowedNow,
+  channelFor,
   requestReplyMessage,
   vendorRatingMessage,
   vendorRequestsMessage,
@@ -69,10 +70,20 @@ describe('push copy matches design brief §9.1', () => {
 describe('quiet hours (NOT-3)', () => {
   const night = new Date('2026-11-05T16:30:00Z'); // 22:00 IST
   const day = new Date('2026-11-05T06:30:00Z'); // 12:00 IST
-  it('blocks deals and request replies at night', () => {
+  it('blocks deals and rating alerts at night', () => {
     expect(pushAllowedNow('deal', night)).toBe(false);
-    expect(pushAllowedNow('request_reply', night)).toBe(false);
+    expect(pushAllowedNow('vendor_new_rating', night)).toBe(false);
     expect(pushAllowedNow('deal', day)).toBe(true);
+  });
+  it('always allows request-flow messages (transactional)', () => {
+    expect(pushAllowedNow('request_reply', night)).toBe(true);
+    expect(pushAllowedNow('vendor_new_requests', night)).toBe(true);
+  });
+  it('routes every kind to a high-importance channel', () => {
+    expect(channelFor('arrival')).toBe('arrivals');
+    expect(channelFor('leaving_soon')).toBe('arrivals');
+    expect(channelFor('request_reply')).toBe('alerts');
+    expect(channelFor('deal')).toBe('alerts');
   });
   it('always allows arrival alerts', () => {
     expect(pushAllowedNow('arrival', night)).toBe(true);
