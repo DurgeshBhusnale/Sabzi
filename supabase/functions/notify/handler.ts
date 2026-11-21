@@ -12,7 +12,7 @@ import {
   type MsgItem,
   type NotifKind,
 } from '@sabzi/shared/notifications.ts';
-import { LIMITS, REVIEW_TAG_LABELS, type ReviewTag } from '@sabzi/shared/constants.ts';
+import { LIMITS, REVIEW_TAG_LABELS, type PriceUnit, type ReviewTag } from '@sabzi/shared/constants.ts';
 import { json, safeEqual, type Env } from '../_shared/http.ts';
 
 export type Recipient = {
@@ -31,7 +31,7 @@ type Menu = { stock_photo_path: string | null; items: MsgItem[] } | null;
 export type Context = {
   event?: { id: string; type: 'arrived' | 'leaving_soon' | 'not_going'; created_at: string };
   deal?: { id: string };
-  request?: { id: string; status: 'will_bring' | 'cant_bring'; qty: string | null; item: string };
+  request?: { id: string; status: 'will_bring' | 'cant_bring' | 'vendor_cancelled'; qty: string | null; item: string; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null };
   review?: { id: string; stars: number; tags: string[]; text: string | null; society: string | null };
   vendor: { id: string; display_name: string; verified: boolean };
   gate?: { id: string; name: string };
@@ -95,7 +95,7 @@ export function selectRecipients(kind: NotifKind, recipients: Recipient[]): Reci
   });
 }
 
-export function buildMessage(kind: NotifKind, c: Context): Message {
+export function buildMessage(kind: NotifKind, c: Context, now: Date = new Date()): Message {
   const vendor = c.vendor.display_name;
   const items = c.menu?.items ?? [];
   switch (kind) {
@@ -108,7 +108,7 @@ export function buildMessage(kind: NotifKind, c: Context): Message {
     case 'deal':
       return dealMessage(vendor, items);
     case 'request_reply':
-      return requestReplyMessage(vendor, c.request!.item, c.request!.qty, c.request!.status === 'will_bring');
+      return requestReplyMessage(vendor, c.request!, now);
     case 'vendor_new_requests':
       return vendorRequestsMessage(c.groups ?? []);
     case 'vendor_new_rating':
@@ -158,7 +158,7 @@ export async function handleNotify(req: Request, deps: NotifyDeps): Promise<Resp
   const recipients = selectRecipients(kind, ctx.recipients);
   if (recipients.length === 0) return json({ sent: 0, recipients: 0 });
 
-  const msg = buildMessage(kind, ctx);
+  const msg = buildMessage(kind, ctx, deps.now());
   const payloadBase: Record<string, string> = { title: msg.title, body: msg.body, vendor_id: ctx.vendor.id };
   if (ctx.society) payloadBase.society_id = ctx.society.id;
   if (ctx.event) payloadBase.event_id = ctx.event.id;

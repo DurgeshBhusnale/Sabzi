@@ -16,6 +16,7 @@ export * from './PriceStepper';
 export * from './QrCard';
 export * from './RatingStars';
 export * from './RequestCard';
+export * from './SlotTile';
 export * from './ReviewCard';
 export * from './Screen';
 export * from './SegmentedControl';

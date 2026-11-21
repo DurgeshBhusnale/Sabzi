@@ -53,6 +53,7 @@ describe('tapping a notification opens the right screen', () => {
   it('deal → deals sheet, reply → requests, vendor kinds → vendor screens', () => {
     expect(notificationTarget(n('deal')).pathname).toBe('/buyer/deals');
     expect(notificationTarget(n('request_reply')).pathname).toBe('/(buyer)/requests');
+    expect(notificationTarget({ ...n('request_reply'), payload: { request_id: 'q1' } })).toEqual({ pathname: '/buyer/requests/[id]', params: { id: 'q1' } });
     expect(notificationTarget(n('vendor_new_requests')).pathname).toBe('/(vendor)/requests');
     expect(notificationTarget(n('vendor_new_rating')).pathname).toBe('/vendor/reviews');
   });

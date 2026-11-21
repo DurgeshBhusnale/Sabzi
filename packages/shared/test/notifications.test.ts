@@ -49,13 +49,25 @@ describe('push copy matches design brief §9.1', () => {
   it('not coming', () => {
     expect(notComingMessage('Ramesh Sabzi', 'Green Park Residency')).toEqual({ title: "Ramesh isn't coming to Green Park today", body: "We'll tell you when he's back" });
   });
-  it('request reply', () => {
-    expect(requestReplyMessage('Ramesh Sabzi', 'Drumsticks', '500 g', true)).toEqual({ title: 'Ramesh will bring drumsticks tomorrow', body: 'Your request for 500 g' });
-    expect(requestReplyMessage('Ramesh Sabzi', 'Drumsticks', null, false).title).toBe("Ramesh can't bring drumsticks tomorrow");
+  it('request reply: accepted with a price, denied, backed out', () => {
+    const now = new Date('2026-11-21T14:00:00Z'); // 19:30 IST
+    const slot = '2026-11-22T02:30:00Z'; // 08:00 IST tomorrow
+    expect(requestReplyMessage('Ramesh Sabzi', { item: 'Drumsticks', qty: '500 g', status: 'will_bring', price: 40, unit: 'kg', slot_start: slot }, now)).toEqual({
+      title: 'Ramesh accepted your request for drumsticks',
+      body: 'About ₹40/kg for tomorrow morning. Tap to confirm your order.',
+    });
+    expect(requestReplyMessage('Ramesh Sabzi', { item: 'Drumsticks', qty: '500 g', status: 'cant_bring', slot_start: slot }, now)).toEqual({
+      title: "Sorry, Ramesh can't bring drumsticks",
+      body: "Your request for 500 g for tomorrow morning wasn't accepted.",
+    });
+    expect(requestReplyMessage('Ramesh Sabzi', { item: 'Drumsticks', qty: null, status: 'vendor_cancelled', slot_start: '2026-11-21T13:00:00Z' }, new Date('2026-11-21T06:00:00Z'))).toEqual({
+      title: "Sorry, Ramesh can't bring drumsticks after all",
+      body: 'Your order for this evening is cancelled.',
+    });
   });
   it('vendor: new requests', () => {
     expect(vendorRequestsMessage([{ name: 'Broccoli', count: 2 }, { name: 'Drumsticks', count: 3 }, { name: 'Baby corn', count: 1 }])).toEqual({
-      title: '6 requests for tomorrow',
+      title: '6 requests need your reply',
       body: 'Drumsticks ×3, Broccoli ×2, Baby corn ×1',
     });
   });

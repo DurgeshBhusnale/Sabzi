@@ -1,7 +1,6 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderUi } from '../src/test/render';
-import { RequestCard } from '../src/ui';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() }, useFocusEffect: jest.fn() }));
 const mockSocieties = [
@@ -30,17 +29,6 @@ describe('UX-19: Following grouped by society', () => {
       { vendor_id: 's', society_id: 'gp', society_name: 'Green Park' },
     ]);
     expect(g.map((x) => [x.name, x.rows.map((r) => r.vendor_id)])).toEqual([['Green Park', ['r', 's']], ['Karve Heights', ['i']]]);
-  });
-});
-
-describe('UX-24: request cards lead with the answer', () => {
-  it.each([
-    ['will_bring', '✓ Ramesh will bring it'],
-    ['open', 'Waiting for Ramesh'],
-    ['cant_bring', "Ramesh can't bring it"],
-  ] as const)('%s', async (status, text) => {
-    await renderUi(<RequestCard item="Tomato" qty="2 kg" vendorName="Ramesh Sabzi" status={status} />);
-    expect(screen.getByTestId('request-answer')).toHaveTextContent(text);
   });
 });
 

@@ -1,5 +1,6 @@
 import { formatPriceCompact, isQuietHours } from './format.ts';
 import type { PriceUnit } from './constants.ts';
+import { slotPhrase } from './requests.ts';
 
 /** Push copy from DESIGN_BRIEF §9.1. Shared by edge functions (Deno) and the app (in-app list). */
 export type Message = { title: string; body: string };
@@ -44,18 +45,29 @@ export function notComingMessage(vendor: string, society: string): Message {
   return { title: `${firstName(vendor)} isn't coming to ${shortSociety(society)} today`, body: "We'll tell you when he's back" };
 }
 
-export function requestReplyMessage(vendor: string, item: string, qty: string | null, willBring: boolean): Message {
-  return {
-    title: willBring ? `${firstName(vendor)} will bring ${lower(item)} tomorrow` : `${firstName(vendor)} can't bring ${lower(item)} tomorrow`,
-    body: qty ? `Your request for ${qty}` : 'Your request for tomorrow',
-  };
+export type ReplyStatus = 'will_bring' | 'cant_bring' | 'vendor_cancelled';
+export type ReplyInput = { item: string; qty: string | null; status: ReplyStatus; price?: number | null; unit?: PriceUnit | null; slot_start?: string | null };
+
+/** Request flow v2: the vendor accepted with a price (buyer must confirm), denied, or backed out after confirming. */
+export function requestReplyMessage(vendor: string, r: ReplyInput, now: Date = new Date()): Message {
+  const who = firstName(vendor);
+  const item = lower(r.item);
+  const when = r.slot_start ? slotPhrase(r.slot_start, now) : 'tomorrow';
+  if (r.status === 'will_bring') {
+    const price = r.price != null ? `About ${formatPriceCompact(Number(r.price), r.unit ?? 'kg')}` : 'He can bring it';
+    return { title: `${who} accepted your request for ${item}`, body: `${price} for ${when}. Tap to confirm your order.` };
+  }
+  if (r.status === 'vendor_cancelled') {
+    return { title: `Sorry, ${who} can't bring ${item} after all`, body: `Your order for ${when} is cancelled.` };
+  }
+  return { title: `Sorry, ${who} can't bring ${item}`, body: `Your request${r.qty ? ` for ${r.qty}` : ''} for ${when} wasn't accepted.` };
 }
 
 export function vendorRequestsMessage(groups: { name: string; count: number }[]): Message {
   const total = groups.reduce((n, g) => n + g.count, 0);
   const sorted = [...groups].sort((a, b) => b.count - a.count);
   return {
-    title: `${total} ${total === 1 ? 'request' : 'requests'} for tomorrow`,
+    title: `${total} ${total === 1 ? 'request needs' : 'requests need'} your reply`,
     body: sorted.slice(0, 3).map((g) => `${plainItem(g.name)} ×${g.count}`).join(', ') + (sorted.length > 3 ? ` + ${sorted.length - 3} more` : ''),
   };
 }
